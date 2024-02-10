@@ -163,7 +163,7 @@ describe('Post\'s', () => {
 
     describe('voting', () => {
         it('should fail to upvote post if group does not have upvote permission', async () => {
-            await privileges.categories.rescind(['groups:posts:upvote', 'groups:posts:downvote'], cid, 'registered-users');
+            await privileges.categories.rescind(['groups:posts:upvote', 'groups:posts:downvote', 'groups:posts:react'], cid, 'registered-users');
             let err;
             try {
                 await apiPosts.upvote({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' });
@@ -177,7 +177,7 @@ describe('Post\'s', () => {
                 err = _err;
             }
             assert.equal(err.message, '[[error:no-privileges]]');
-            await privileges.categories.give(['groups:posts:upvote', 'groups:posts:downvote'], cid, 'registered-users');
+            await privileges.categories.give(['groups:posts:upvote', 'groups:posts:downvote', 'groups:posts:react'], cid, 'registered-users');
         });
 
         it('should upvote a post', async () => {

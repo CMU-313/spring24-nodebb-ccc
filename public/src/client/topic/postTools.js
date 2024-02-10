@@ -120,6 +120,10 @@ define('forum/topic/postTools', [
             return votes.toggleVote($(this), '.upvoted', 1);
         });
 
+        postContainer.on('click', '[component="post/react"]', function () {
+            return votes.toggleVote($(this), '.upvoted', 1);
+        });
+
         postContainer.on('click', '[component="post/downvote"]', function () {
             return votes.toggleVote($(this), '.downvoted', -1);
         });

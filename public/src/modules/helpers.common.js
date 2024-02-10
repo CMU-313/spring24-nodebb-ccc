@@ -156,7 +156,7 @@ module.exports = function (utils, Benchpress, relative_path) {
             }
         }
         return states.map(function (priv) {
-            const guestDisabled = ['groups:moderate', 'groups:posts:upvote', 'groups:posts:downvote', 'groups:local:login', 'groups:group:create'];
+            const guestDisabled = ['groups:moderate', 'groups:posts:upvote', 'groups:posts:downvote', 'groups:local:login', 'groups:group:create', 'groups:group:react'];
             const spidersEnabled = ['groups:find', 'groups:read', 'groups:topics:read', 'groups:view:users', 'groups:view:tags', 'groups:view:groups'];
             const globalModDisabled = ['groups:moderate'];
             const disabled =
