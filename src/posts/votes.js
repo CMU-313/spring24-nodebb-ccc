@@ -37,8 +37,8 @@ module.exports = function (Posts) {
         if (meta.config['reputation:disabled']) {
             throw new Error('[[error:reputation-system-disabled]]');
         }
-        const canUpvote = await privileges.posts.can('posts:react', pid, uid);
-        if (!canUpvote) {
+        const canReact = await privileges.posts.can('posts:react', pid, uid);
+        if (!canReact) {
             throw new Error('[[error:no-privileges]]');
         }
 
