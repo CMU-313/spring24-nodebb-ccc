@@ -85,7 +85,7 @@
 
         <!-- IF !reputation:disabled -->
         <span class="votes">
-            <a component="post/react" href="#" class="<!-- IF posts.upvoted -->upvoted<!-- ENDIF posts.upvoted -->">
+            <a component="post/upvote" href="#" class="<!-- IF posts.upvoted -->upvoted<!-- ENDIF posts.upvoted -->">
                 <i class="fa fa-chevron-up"></i>
             </a>
 
@@ -99,8 +99,8 @@
         </span>
         <!-- ENDIF !reputation:disabled -->
 
-        <span class="votes">
-            <a component="post/react" href="#" class="<!-- IF posts.upvoted -->upvoted<!-- ENDIF posts.upvoted -->">
+        <span class="reactions">
+            <a component="post/react" href="#">
                 <i class="fa fa-chevron-up"></i>
             </a>
         </span>
