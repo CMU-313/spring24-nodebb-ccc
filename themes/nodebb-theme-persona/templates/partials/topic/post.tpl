@@ -101,8 +101,17 @@
 
         <span class="reactions">
             <a component="post/react" href="#">
-                <i class="fa fa-chevron-up"></i>
+                <i class="fa fa-smile"></i>
             </a>
+
+            <span component="post/vote-count" data-votes="{posts.votes}">{posts.votes}</span>
+
+            <a component="post/react" href="#">
+                <i class="fa fa-sad-tear"></i>
+            </a>
+            
+            <span component="post/vote-count" data-votes="{posts.votes}">{posts.votes}</span>
+
         </span>
 
         <!-- IMPORT partials/topic/post-menu.tpl -->
