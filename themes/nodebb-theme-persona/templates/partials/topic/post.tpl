@@ -85,7 +85,7 @@
 
         <!-- IF !reputation:disabled -->
         <span class="votes">
-            <a component="post/upvote" href="#" class="<!-- IF posts.upvoted -->upvoted<!-- ENDIF posts.upvoted -->">
+            <a component="post/react" href="#" class="<!-- IF posts.upvoted -->upvoted<!-- ENDIF posts.upvoted -->">
                 <i class="fa fa-chevron-up"></i>
             </a>
 
@@ -98,6 +98,12 @@
             <!-- ENDIF !downvote:disabled -->
         </span>
         <!-- ENDIF !reputation:disabled -->
+
+        <span class="votes">
+            <a component="post/react" href="#" class="<!-- IF posts.upvoted -->upvoted<!-- ENDIF posts.upvoted -->">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+        </span>
 
         <!-- IMPORT partials/topic/post-menu.tpl -->
     </small>
