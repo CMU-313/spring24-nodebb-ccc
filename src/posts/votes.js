@@ -33,7 +33,7 @@ module.exports = function (Posts) {
         }
     };
 
-    Posts.react = async function (pid, uid) {
+    Posts.happyreact = async function (pid, uid) {
         if (meta.config['reputation:disabled']) {
             throw new Error('[[error:reputation-system-disabled]]');
         }
@@ -48,7 +48,28 @@ module.exports = function (Posts) {
         putVoteInProgress(pid, uid);
 
       try {
-          return await toggleVote('upvote', pid, uid);
+          return await toggleVote('happy_emoji', pid, uid);
+      } finally {
+          clearVoteProgress(pid, uid);
+      }
+    };
+
+    Posts.sadreact = async function (pid, uid) {
+        if (meta.config['reputation:disabled']) {
+            throw new Error('[[error:reputation-system-disabled]]');
+        }
+        const canReact = await privileges.posts.can('posts:react', pid, uid);
+        if (!canReact) {
+            throw new Error('[[error:no-privileges]]');
+        }
+
+        if (voteInProgress(pid, uid)) {
+            throw new Error('[[error:already-voting-for-this-post]]');
+        }
+        putVoteInProgress(pid, uid);
+
+      try {
+          return await toggleVote('sad_emoji', pid, uid);
       } finally {
           clearVoteProgress(pid, uid);
       }
