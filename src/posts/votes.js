@@ -37,11 +37,45 @@ module.exports = function (Posts) {
     };
 
     Posts.happyreact = async function (pid, uid) {
-        Posts.happy_vote += 1;
+        if (meta.config['reputation:disabled']) {
+            throw new Error('[[error:reputation-system-disabled]]');
+        }
+        const canUpvote = await privileges.posts.can('posts:react', pid, uid);
+        if (!canUpvote) {
+            throw new Error('[[error:no-privileges]]');
+        }
+
+        if (voteInProgress(pid, uid)) {
+            throw new Error('[[error:already-voting-for-this-post]]');
+        }
+        putVoteInProgress(pid, uid);    
+
+        try {
+            return await toggleVote('upvote', pid, uid);
+        } finally {
+            clearVoteProgress(pid, uid);
+        }
     };
 
     Posts.sadreact = async function (pid, uid) {
-        Posts.sad_vote += 1;
+        if (meta.config['reputation:disabled']) {
+            throw new Error('[[error:reputation-system-disabled]]');
+        }
+        const canUpvote = await privileges.posts.can('posts:react', pid, uid);
+        if (!canUpvote) {
+            throw new Error('[[error:no-privileges]]');
+        }
+
+        if (voteInProgress(pid, uid)) {
+            throw new Error('[[error:already-voting-for-this-post]]');
+        }
+        putVoteInProgress(pid, uid);    
+
+        try {
+            return await toggleVote('upvote', pid, uid);
+        } finally {
+            clearVoteProgress(pid, uid);
+        }
     };
 
     Posts.downvote = async function (pid, uid) {
@@ -136,10 +170,11 @@ module.exports = function (Posts) {
     }
 
     async function toggleVoteEmoji(type, pid, uid) {
-        // const voteStatus = await Posts.hasVoted(pid, uid);
-        // await unvote(pid, uid, type, voteStatus);
-        // return await vote(type, false, pid, uid, voteStatus);
-        return 5;
+        const voteStatus = await Posts.hasVoted(pid, uid);
+
+        //the vote functions should later be changed to react
+        await unvote(pid, uid, type, voteStatus);
+        return await vote(type, false, pid, uid, voteStatus);
     }
 
     async function unvote(pid, uid, type, voteStatus) {
