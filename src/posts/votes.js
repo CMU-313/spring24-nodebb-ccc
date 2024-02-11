@@ -34,6 +34,13 @@ module.exports = function (Posts) {
     };
 
     Posts.happyreact = async function (pid, uid) {
+        //Signature: (int,int) -> any 
+        if(!Number.isInteger(pid)) {
+            throw new Error("the variable pid is not an integer should be")
+        }
+        if(!Number.isInteger(uid)) {
+            throw new Error("the variable uid is not an integer should be")
+        }
         if (meta.config['reputation:disabled']) {
             throw new Error('[[error:reputation-system-disabled]]');
         }
@@ -55,6 +62,13 @@ module.exports = function (Posts) {
     };
 
     Posts.sadreact = async function (pid, uid) {
+        //Signature: (int,int) -> any 
+        if(!Number.isInteger(pid)) {
+            throw new Error("the variable pid is not an integer should be")
+        }
+        if(!Number.isInteger(uid)) {
+            throw new Error("the variable uid is not an integer should be")
+        }
         if (meta.config['reputation:disabled']) {
             throw new Error('[[error:reputation-system-disabled]]');
         }

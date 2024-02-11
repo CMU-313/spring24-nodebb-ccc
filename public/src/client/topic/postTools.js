@@ -121,7 +121,11 @@ define('forum/topic/postTools', [
         });
 
         postContainer.on('click', '[component="post/react"]', function () {
-            return votes.toggleVote($(this), '.upvoted', 1);
+            // return votes.toggleVote($(this), '.upvoted', 1);
+            //Signature: (str,str,function:any) -> any 
+            const result = votes.toggleVote($(this), '.upvoted', 1);
+            assert (typeof result !== 'object' || result === null);
+            return result;
         });
 
         postContainer.on('click', '[component="post/downvote"]', function () {
