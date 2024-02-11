@@ -120,19 +120,27 @@ define('forum/topic/postTools', [
             return votes.toggleVote($(this), '.upvoted', 1);
         });
 
-        postContainer.on('click', '[component="post/react"]', function () {
-            // return votes.toggleVote($(this), '.upvoted', 1);
-            //Signature: (str,str,function:any) -> any 
-            const result = votes.toggleVote($(this), '.upvoted', 1);
-            assert (typeof result !== 'object' || result === null);
-            return result;
-        });
-
         postContainer.on('click', '[component="post/downvote"]', function () {
             return votes.toggleVote($(this), '.downvoted', -1);
         });
 
         postContainer.on('click', '[component="post/vote-count"]', function () {
+            votes.showVotes(getData($(this), 'data-pid'));
+        });
+
+        postContainer.on('click', '[component="post/happyemoji_vote"]', function () {
+            result = votes.toggleVoteEmoji($(this), '.upvoted', 1);
+            assert (typeof result !== 'object' || result === null);
+            return result;   //add another not .upvoted
+        });
+
+        postContainer.on('click', '[component="post/sademoji_vote"]', function () {
+            result = votes.toggleVoteEmoji($(this), '.downvoted', -1); //
+            assert (typeof result !== 'object' || result === null);
+            return result;
+        });
+
+        postContainer.on('click', '[component="post/emoji-count"]', function () {
             votes.showVotes(getData($(this), 'data-pid'));
         });
 
