@@ -11,6 +11,9 @@ const translator = require('../translator');
 
 module.exports = function (Posts) {
     const votesInProgress = {};
+    //saving this locally while we don't know how to connect to the DB
+    const happy_vote = 5;
+    const sad_vote = 7;
 
     Posts.upvote = async function (pid, uid) {
         if (meta.config['reputation:disabled']) {
@@ -24,7 +27,49 @@ module.exports = function (Posts) {
         if (voteInProgress(pid, uid)) {
             throw new Error('[[error:already-voting-for-this-post]]');
         }
-        putVoteInProgress(pid, uid);
+        putVoteInProgress(pid, uid);    
+
+        try {
+            return await toggleVote('upvote', pid, uid);
+        } finally {
+            clearVoteProgress(pid, uid);
+        }
+    };
+
+    Posts.happyreact = async function (pid, uid) {
+        if (meta.config['reputation:disabled']) {
+            throw new Error('[[error:reputation-system-disabled]]');
+        }
+        const canUpvote = await privileges.posts.can('posts:react', pid, uid);
+        if (!canUpvote) {
+            throw new Error('[[error:no-privileges]]');
+        }
+
+        if (voteInProgress(pid, uid)) {
+            throw new Error('[[error:already-voting-for-this-post]]');
+        }
+        putVoteInProgress(pid, uid);    
+
+        try {
+            return await toggleVote('upvote', pid, uid);
+        } finally {
+            clearVoteProgress(pid, uid);
+        }
+    };
+
+    Posts.sadreact = async function (pid, uid) {
+        if (meta.config['reputation:disabled']) {
+            throw new Error('[[error:reputation-system-disabled]]');
+        }
+        const canUpvote = await privileges.posts.can('posts:react', pid, uid);
+        if (!canUpvote) {
+            throw new Error('[[error:no-privileges]]');
+        }
+
+        if (voteInProgress(pid, uid)) {
+            throw new Error('[[error:already-voting-for-this-post]]');
+        }
+        putVoteInProgress(pid, uid);    
 
         try {
             return await toggleVote('upvote', pid, uid);
@@ -77,7 +122,9 @@ module.exports = function (Posts) {
             return { upvoted: false, downvoted: false };
         }
         const hasVoted = await db.isMemberOfSets([`pid:${pid}:upvote`, `pid:${pid}:downvote`], uid);
-        return { upvoted: hasVoted[0], downvoted: hasVoted[1] };
+        //this is where we would read from DB for new types of votes
+        // return { upvoted: hasVoted[0], downvoted: hasVoted[1], happyvoted: happy_vote, sadvoted, sad_vote };
+        return { upvoted: hasVoted[0], downvoted: hasVoted[1]};
     };
 
     Posts.getVoteStatusByPostIDs = async function (pids, uid) {
@@ -118,6 +165,14 @@ module.exports = function (Posts) {
 
     async function toggleVote(type, pid, uid) {
         const voteStatus = await Posts.hasVoted(pid, uid);
+        await unvote(pid, uid, type, voteStatus);
+        return await vote(type, false, pid, uid, voteStatus);
+    }
+
+    async function toggleVoteEmoji(type, pid, uid) {
+        const voteStatus = await Posts.hasVoted(pid, uid);
+
+        //the vote functions should later be changed to react
         await unvote(pid, uid, type, voteStatus);
         return await vote(type, false, pid, uid, voteStatus);
     }

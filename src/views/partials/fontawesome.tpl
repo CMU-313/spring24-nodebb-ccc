@@ -790,6 +790,7 @@
         <i class="fa fa-youtube"></i>
         <i class="fa fa-youtube-play"></i>
         <i class="fa fa-youtube-square"></i>
+        <i class="fa fa-face-sad-tear"></i>
 
     </div>
     <p class="help-block text-center">
