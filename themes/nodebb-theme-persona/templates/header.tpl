@@ -6,6 +6,18 @@
     <link rel="stylesheet" type="text/css" href="{relative_path}/assets/client{{{if bootswatchSkin}}}-{bootswatchSkin}{{{end}}}.css?{config.cache-buster}" />
     {{{each linkTags}}}{function.buildLinkTag}{{{end}}}
 
+    <style>
+        body {
+            background-color: white;
+            color: black;
+        }
+ 
+        .dark-mode {
+            background-color: #303030;
+            color: #888888;
+        }
+    </style>
+
     <script>
         var config = JSON.parse('{{configJSON}}');
         var app = {
@@ -38,3 +50,13 @@
         <div class="container" id="content">
         <!-- IMPORT partials/noscript/warning.tpl -->
         <!-- IMPORT partials/noscript/message.tpl -->
+    
+    <div>
+        <button onclick="darkMode()">Darkmode</button>
+    </div>
+    <script>
+        function darkMode() {
+            var element = document.body;
+            element.classList.toggle("dark-mode");
+        }
+    </script>
