@@ -51,7 +51,7 @@ module.exports = function (Posts) {
         putVoteInProgress(pid, uid);    
 
         try {
-            return await toggleVote('upvote', pid, uid);
+            return await toggleVoteEmoji('upvote', pid, uid);
         } finally {
             clearVoteProgress(pid, uid);
         }
@@ -72,7 +72,7 @@ module.exports = function (Posts) {
         putVoteInProgress(pid, uid);    
 
         try {
-            return await toggleVote('upvote', pid, uid);
+            return await toggleVoteEmoji('upvote', pid, uid);
         } finally {
             clearVoteProgress(pid, uid);
         }
@@ -164,17 +164,24 @@ module.exports = function (Posts) {
     }
 
     async function toggleVote(type, pid, uid) {
+        console.log("toggling vote");
+        console.log(`${type}, ${pid}, ${uid}`);
         const voteStatus = await Posts.hasVoted(pid, uid);
+        console.log(voteStatus)
         await unvote(pid, uid, type, voteStatus);
-        return await vote(type, false, pid, uid, voteStatus);
+        const res = await vote(type, false, pid, uid, voteStatus);
+        console.log(res);
+        return res;
     }
 
     async function toggleVoteEmoji(type, pid, uid) {
+        console.log("toggling emoji");
         const voteStatus = await Posts.hasVoted(pid, uid);
-
-        //the vote functions should later be changed to react
+        console.log(voteStatus)
         await unvote(pid, uid, type, voteStatus);
-        return await vote(type, false, pid, uid, voteStatus);
+        const res = await vote(type, false, pid, uid, voteStatus);
+        console.log(res);
+        return res;
     }
 
     async function unvote(pid, uid, type, voteStatus) {
@@ -242,9 +249,12 @@ module.exports = function (Posts) {
         }
 
         const postData = await Posts.getPostFields(pid, ['pid', 'uid', 'tid']);
+        console.log(postData);
         const newReputation = await user.incrementUserReputationBy(postData.uid, type === 'upvote' ? 1 : -1);
 
         await adjustPostVotes(postData, uid, type, unvote);
+        console.log("new postdata");
+        console.log(postData);
 
         await fireVoteHook(postData, uid, type, unvote, voteStatus);
 

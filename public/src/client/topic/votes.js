@@ -79,6 +79,32 @@ define('forum/topic/votes', [
         return false;
     };
 
+    Votes.toggleVoteEmoji = function (button, className, delta) {
+        const post = button.closest('[data-pid]');
+        const currentState = post.find(className).length;
+
+        const method = currentState ? 'del' : 'put';
+        const pid = post.attr('data-pid');
+        api[method](`/posts/${pid}/vote`, {
+            delta: delta,
+        }, function (err) {
+            if (err) {
+                if (!app.user.uid) {
+                    ajaxify.go('login');
+                    return;
+                }
+                return alerts.error(err);
+            }
+            hooks.fire('action:post.toggleVote', {
+                pid: pid,
+                delta: delta,
+                unvote: method === 'del',
+            });
+        });
+
+        return false;
+    };
+
     Votes.showVotes = function (pid) {
         socket.emit('posts.getVoters', { pid: pid, cid: ajaxify.data.cid }, function (err, data) {
             if (err) {
