@@ -98,8 +98,8 @@
             <!-- ENDIF !downvote:disabled -->
         </span>
         <!-- ENDIF !reputation:disabled -->
-
-        <span class="reactions">
+        <br>
+        <span class="reactions" style="float: right">
             <a component="post/happyemoji_vote" href="#">
                 <i class="fa fa-smile"></i>
             </a>
