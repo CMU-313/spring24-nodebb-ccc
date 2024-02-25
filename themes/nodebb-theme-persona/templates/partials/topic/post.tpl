@@ -100,17 +100,11 @@
         <!-- ENDIF !reputation:disabled -->
 
         <span class="reactions">
-            <a component="post/happyemoji_vote" href="#">
+            <a component="post/react" href="#">
                 <i class="fa fa-smile"></i>
             </a>
 
-            <span component="post/happyemoji_vote" data-votes="{posts.votes}">{posts.votes}</span>
-
-            <a component="post/sademoji_vote" href="#">
-                <i class="fa fa-sad-tear"></i>
-            </a>
-            
-            <span component="post/sademoji_vote" data-votes="{posts.votes}">{posts.votes}</span>
+            <span component="post/reactions" data-votes="{posts.reactions}">{posts.reactions}</span>
 
         </span>
 

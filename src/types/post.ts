@@ -12,6 +12,7 @@ export type PostObject = {
   upvotes: number;
   downvotes: number;
   votes: number;
+  reactions: number;
   timestampISO: string;
   user: UserObjectSlim;
   topic: TopicObject;
