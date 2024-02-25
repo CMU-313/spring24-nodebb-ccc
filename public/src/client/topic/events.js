@@ -44,7 +44,7 @@ define('forum/topic/events', [
         'posts.downvote': togglePostVote,
         'posts.unvote': togglePostVote,
 
-        'posts.react': togglePostReact,
+        'posts.react': togglePostReaction,
 
         'event:new_notification': onNewNotification,
         'event:new_post': posts.onNewPost,
@@ -233,11 +233,11 @@ define('forum/topic/events', [
         }).toggleClass('downvoted', data.downvote);
     }
 
-    function togglePostReact(data) {
+    function togglePostReaction(data) {
       const post = $('[data-pid="' + data.post.pid + '"');
-      post.find('[component="post/react"]').filter(function (index, el) {
+      post.find('[component="post/reaction-text"]').filter(function (index, el) {
         return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
-      }).toggleClass('reacted', data.react);
+      }).toggleClass('reactions', data.reactions);
     }
 
     function onNewNotification(data) {

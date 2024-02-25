@@ -31,7 +31,7 @@ module.exports = function (Posts) {
             pid: pid,
             uid: uid,
             owner: postData.uid,
-            current: 'reacted',
+            current: 'reactions',
         });
 
 

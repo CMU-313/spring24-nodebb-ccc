@@ -104,7 +104,7 @@
                 <i class="fa fa-smile"></i>
             </a>
 
-            <span component="post/reactions" data-votes="{posts.reactions}">{posts.reactions}</span>
+            <span component="post/reaction-count" data-votes="{posts.reactions}">{posts.reactions}</span>
 
         </span>
 
