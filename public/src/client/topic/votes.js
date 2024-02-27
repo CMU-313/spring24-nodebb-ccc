@@ -82,7 +82,7 @@ define('forum/topic/votes', [
     Votes.toggleVoteEmoji = function (button, className, delta) {
         const post = button.closest('[data-pid]');
         const currentState = post.find(className).length;
-
+t
         const method = currentState ? 'del' : 'put';
         const pid = post.attr('data-pid');
         api[method](`/posts/${pid}/vote`, {

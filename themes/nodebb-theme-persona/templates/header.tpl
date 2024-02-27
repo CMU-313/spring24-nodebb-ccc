@@ -45,13 +45,7 @@
         <nav class="navbar navbar-default navbar-fixed-top header" id="header-menu" component="navbar">
             <div class="container">
                 <!-- IMPORT partials/menu.tpl -->
-            </div>
-        </nav>
-        <div class="container" id="content">
-        <!-- IMPORT partials/noscript/warning.tpl -->
-        <!-- IMPORT partials/noscript/message.tpl -->
-    
-    <div>
+                    <div>
         <button onclick="darkMode()">Darkmode</button>
     </div>
     <script>
@@ -60,3 +54,9 @@
             element.classList.toggle("dark-mode");
         }
     </script>
+            </div>
+        </nav>
+        <div class="container" id="content">
+        <!-- IMPORT partials/noscript/warning.tpl -->
+        <!-- IMPORT partials/noscript/message.tpl -->
+    
