@@ -128,6 +128,10 @@ define('forum/topic/postTools', [
             votes.showVotes(getData($(this), 'data-pid'));
         });
 
+        postContainer.on('click', '[component="post/react"]', function () {
+          return reactToPost(getData($(this), 'data-pid'));
+        });
+
         postContainer.on('click', '[component="post/happyemoji_vote"]', function () {
             result = votes.toggleVote($(this), '.upvoted', 1);
             assert (typeof result !== 'object' || result === null);
@@ -379,6 +383,18 @@ define('forum/topic/postTools', [
             hooks.fire(`action:post.${type}`, { pid: pid });
         });
         return false;
+    }
+
+    function reactToPost(pid) {
+      const method = 'put';
+
+      api[method](`/posts/${pid}/react`, undefined, function(err) {
+        if (err) {
+          return alerts.error(err);
+        }
+        hooks.fire(`action:post.react`, {pid: pid});
+      });
+      return false;
     }
 
     function getData(button, data) {

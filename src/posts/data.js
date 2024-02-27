@@ -6,7 +6,7 @@ const utils = require('../utils');
 
 const intFields = [
     'uid', 'pid', 'tid', 'deleted', 'timestamp',
-    'upvotes', 'downvotes', 'deleterUid', 'edited',
+    'upvotes', 'downvotes', 'reactions', 'deleterUid', 'edited',
     'replies', 'bookmarks',
 ];
 //fields inside DB

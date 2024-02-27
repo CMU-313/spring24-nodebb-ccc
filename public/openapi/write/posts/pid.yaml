@@ -44,6 +44,8 @@ get:
                     type: number
                   downvotes:
                     type: number
+                  reactions:
+                    type: number
                   deleterUid:
                     type: number
                   edited:
@@ -63,6 +65,8 @@ get:
                   upvoted:
                     type: boolean
                   downvoted:
+                    type: boolean
+                  reacted:
                     type: boolean
 put:
   tags:
@@ -95,7 +99,7 @@ put:
           required:
             - content
   responses:
-    '200':
+    "200":
       description: Post successfully edited
       content:
         application/json:
