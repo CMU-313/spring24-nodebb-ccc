@@ -133,14 +133,14 @@ define('forum/topic/postTools', [
         });
 
         postContainer.on('click', '[component="post/happyemoji_vote"]', function () {
-            result = votes.toggleVote($(this), '.upvoted', 1);
+            result = votes.toggleVoteEmoji($(this), '.upvoted', 1);
             assert (typeof result !== 'object' || result === null);
             assert (1 == 2);
             return result;   //add another not .upvoted
         });
 
         postContainer.on('click', '[component="post/sademoji_vote"]', function () {
-            result = votes.toggleVote($(this), '.downvoted', -1); //
+            result = votes.toggleVoteEmoji($(this), '.downvoted', -1); //
             assert (typeof result !== 'object' || result === null);
             return result;
         });
