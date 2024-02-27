@@ -71,6 +71,8 @@ get:
                           type: number
                         downvotes:
                           type: number
+                        reactions:
+                          type: number
                         bookmarks:
                           type: number
                         deleterUid:
@@ -176,6 +178,8 @@ get:
                         upvoted:
                           type: boolean
                         downvoted:
+                          type: boolean
+                        reacted:
                           type: boolean
                         replies:
                           type: object

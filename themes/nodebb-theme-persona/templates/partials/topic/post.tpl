@@ -98,19 +98,13 @@
             <!-- ENDIF !downvote:disabled -->
         </span>
         <!-- ENDIF !reputation:disabled -->
-        <br>
-        <span class="reactions" style="float: right">
-            <a component="post/happyemoji_vote" href="#">
+
+        <span class="reactions">
+            <a component="post/react" href="#">
                 <i class="fa fa-smile"></i>
             </a>
 
-            <span component="post/happyemoji_vote" data-votes="{posts.votes}">{posts.votes}</span>
-
-            <a component="post/sademoji_vote" href="#">
-                <i class="fa fa-sad-tear"></i>
-            </a>
-            
-            <span component="post/sademoji_vote" data-votes="{posts.votes}">{posts.votes}</span>
+            <span component="post/reaction-count" data-votes="{posts.reactions}">{posts.reactions}</span>
 
         </span>
 

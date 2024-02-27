@@ -71,6 +71,12 @@ Posts.unvote = async (req, res) => {
     helpers.formatApiResponse(200, res);
 };
 
+Posts.react = async (req, res) => {
+    const data = await mock(req);
+    await api.posts.react(req, data);
+    helpers.formatApiResponse(200, res);
+};
+
 Posts.bookmark = async (req, res) => {
     const data = await mock(req);
     await api.posts.bookmark(req, data);
