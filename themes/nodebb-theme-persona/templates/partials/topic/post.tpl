@@ -98,9 +98,9 @@
             <!-- ENDIF !downvote:disabled -->
         </span>
         <!-- ENDIF !reputation:disabled -->
-
+        </br>
         <span class="reactions">
-            <a component="post/react" href="#">
+            <a component="post/react" href="#" class="<!-- IF posts.reactions -->reactions<!-- ENDIF posts.reactions -->">
                 <i class="fa fa-smile"></i>
             </a>
 

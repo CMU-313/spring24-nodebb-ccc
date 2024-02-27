@@ -132,23 +132,6 @@ define('forum/topic/postTools', [
           return reactToPost(getData($(this), 'data-pid'));
         });
 
-        postContainer.on('click', '[component="post/happyemoji_vote"]', function () {
-            result = votes.toggleVoteEmoji($(this), '.upvoted', 1);
-            assert (typeof result !== 'object' || result === null);
-            assert (1 == 2);
-            return result;   //add another not .upvoted
-        });
-
-        postContainer.on('click', '[component="post/sademoji_vote"]', function () {
-            result = votes.toggleVoteEmoji($(this), '.downvoted', -1); //
-            assert (typeof result !== 'object' || result === null);
-            return result;
-        });
-
-        postContainer.on('click', '[component="post/emoji-count"]', function () {
-            votes.showVotes(getData($(this), 'data-pid'));
-        });
-
         postContainer.on('click', '[component="post/flag"]', function () {
             const pid = getData($(this), 'data-pid');
             require(['flags'], function (flags) {
