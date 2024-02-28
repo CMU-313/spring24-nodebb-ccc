@@ -132,16 +132,6 @@ module.exports = function (Posts) {
         return res;
     }
 
-    async function toggleVoteEmoji(type, pid, uid) {
-        console.log("toggling emoji");
-        const voteStatus = await Posts.hasVoted(pid, uid);
-        console.log(voteStatus)
-        await unvote(pid, uid, type, voteStatus);
-        const res = await vote(type, false, pid, uid, voteStatus);
-        console.log(res);
-        return res;
-    }
-
     async function unvote(pid, uid, type, voteStatus) {
         const owner = await Posts.getPostField(pid, 'uid');
         if (parseInt(uid, 10) === parseInt(owner, 10)) {
