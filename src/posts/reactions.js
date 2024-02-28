@@ -5,14 +5,62 @@ const plugins = require('../plugins');
 
 module.exports = function (Posts) {
     Posts.react = async function (pid, uid) {
+        if (isNaN(pid)){
+            //Checking that PID is an integer
+            throw new Error("pid should be an int")
+        }
+        if (pid==null){
+            //Checking that PID should not be null
+            throw new Error("pid should not be null")
+        }
+        if (isNaN(uid)){
+            //Checking that UID is an integer
+            throw new Error("uid should be an int")
+        }
+        if (uid==null){
+            //Checking that UID should not be null
+            throw new Error("uid should not be null")
+        }
         return await toggleReaction('bookmark', pid, uid);
     };
 
     Posts.unreact = async function (pid, uid) {
+        if (isNaN(pid)){
+            //Checking that PID is an integer
+            throw new Error("pid should be an int")
+        }
+        if (pid==null){
+            //Checking that PID should not be null
+            throw new Error("pid should not be null")
+        }
+        if (isNaN(uid)){
+            //Checking that UID is an integer
+            throw new Error("uid should be an int")
+        }
+        if (uid==null){
+            //Checking that UID should not be null
+            throw new Error("uid should not be null")
+        }
         return await toggleReaction('unbookmark', pid, uid);
     };
 
     async function toggleReaction(type, pid, uid) {
+        if (isNaN(pid)){
+            //Checking that PID is an integer
+            throw new Error("pid should be an int")
+        }
+        if (pid==null){
+            //Checking that PID should not be null
+            throw new Error("pid should not be null")
+        }
+        if (isNaN(uid)){
+            //Checking that UID is an integer
+            throw new Error("uid should be an int")
+        }
+        if (uid==null){
+            //Checking that UID should not be null
+            throw new Error("uid should not be null")
+        }
         if (parseInt(uid, 10) <= 0) {
             throw new Error('[[error:not-logged-in]]');
         }
