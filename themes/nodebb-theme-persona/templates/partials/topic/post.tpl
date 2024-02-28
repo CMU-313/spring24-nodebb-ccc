@@ -99,7 +99,8 @@
         </span>
         <!-- ENDIF !reputation:disabled -->
 
-        <span class="reactions">
+        <br>
+        <span class="reactions" style="float: right">
             <a component="post/react" href="#">
                 <i class="fa fa-smile"></i>
             </a>
