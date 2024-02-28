@@ -11,7 +11,7 @@ const translator = require('../translator');
 
 module.exports = function (Posts) {
     const votesInProgress = {};
-    //saving this locally while we don't know how to connect to the DB
+    // saving this locally while we don't know how to connect to the DB
     const happy_vote = 5;
     const sad_vote = 7;
 
@@ -27,7 +27,7 @@ module.exports = function (Posts) {
         if (voteInProgress(pid, uid)) {
             throw new Error('[[error:already-voting-for-this-post]]');
         }
-        putVoteInProgress(pid, uid);    
+        putVoteInProgress(pid, uid);
 
         try {
             return await toggleVote('upvote', pid, uid);
@@ -80,9 +80,9 @@ module.exports = function (Posts) {
             return { upvoted: false, downvoted: false };
         }
         const hasVoted = await db.isMemberOfSets([`pid:${pid}:upvote`, `pid:${pid}:downvote`], uid);
-        //this is where we would read from DB for new types of votes
+        // this is where we would read from DB for new types of votes
         // return { upvoted: hasVoted[0], downvoted: hasVoted[1], happyvoted: happy_vote, sadvoted, sad_vote };
-        return { upvoted: hasVoted[0], downvoted: hasVoted[1]};
+        return { upvoted: hasVoted[0], downvoted: hasVoted[1] };
     };
 
     Posts.getVoteStatusByPostIDs = async function (pids, uid) {
@@ -122,10 +122,10 @@ module.exports = function (Posts) {
     }
 
     async function toggleVote(type, pid, uid) {
-        console.log("toggling vote");
+        console.log('toggling vote');
         console.log(`${type}, ${pid}, ${uid}`);
         const voteStatus = await Posts.hasVoted(pid, uid);
-        console.log(voteStatus)
+        console.log(voteStatus);
         await unvote(pid, uid, type, voteStatus);
         const res = await vote(type, false, pid, uid, voteStatus);
         console.log(res);
@@ -201,7 +201,7 @@ module.exports = function (Posts) {
         const newReputation = await user.incrementUserReputationBy(postData.uid, type === 'upvote' ? 1 : -1);
 
         await adjustPostVotes(postData, uid, type, unvote);
-        console.log("new postdata");
+        console.log('new postdata');
         console.log(postData);
 
         await fireVoteHook(postData, uid, type, unvote, voteStatus);

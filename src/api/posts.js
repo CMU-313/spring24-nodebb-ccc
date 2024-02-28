@@ -278,7 +278,7 @@ postsAPI.react = async function (caller, data) {
         // Checking parameters null and data should be valid
         throw new Error('Caller and data must not be null');
     }
-  return await apiHelpers.postCommand(caller, 'react', 'unreact', '', data);
+    return await apiHelpers.postCommand(caller, 'react', 'unreact', '', data);
 };
 
 async function diffsPrivilegeCheck(pid, uid) {
