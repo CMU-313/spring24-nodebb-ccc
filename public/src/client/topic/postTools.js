@@ -129,16 +129,16 @@ define('forum/topic/postTools', [
         });
 
         postContainer.on('click', '[component="post/react"]', function () {
-            if ((getData($(this), 'data-pid')== null)){
-                //Check if value is null then throw error
+            if ((getData($(this), 'data-pid') == null)) {
+                // Check if value is null then throw error
                 console.error('getData returned null which is wrong');
             }
             const ifResultNull = reactToPost(getData($(this), 'data-pid'));
             if (ifResultNull === null) {
-                //Check if value is null then throw error
-                console.error('Value is null in the postContainer.on function'); 
+                // Check if value is null then throw error
+                console.error('Value is null in the postContainer.on function');
             }
-          return reactToPost(getData($(this), 'data-pid'));
+            return reactToPost(getData($(this), 'data-pid'));
         });
 
         postContainer.on('click', '[component="post/flag"]', function () {
@@ -378,15 +378,15 @@ define('forum/topic/postTools', [
     }
 
     function reactToPost(pid) {
-      const method = 'put';
+        const method = 'put';
 
-      api[method](`/posts/${pid}/react`, undefined, function(err) {
-        if (err) {
-          return alerts.error(err);
-        }
-        hooks.fire(`action:post.react`, {pid: pid});
-      });
-      return false;
+        api[method](`/posts/${pid}/react`, undefined, function (err) {
+            if (err) {
+                return alerts.error(err);
+            }
+            hooks.fire(`action:post.react`, { pid: pid });
+        });
+        return false;
     }
 
     function getData(button, data) {

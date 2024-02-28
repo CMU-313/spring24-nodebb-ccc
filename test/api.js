@@ -536,7 +536,7 @@ describe('API', async () => {
         // Compare the schema to the response
         required.forEach((prop) => {
             if (schema.hasOwnProperty(prop)) {
-                if(prop != "reacted"){
+                if (prop !== 'reacted') {
                     assert(response.hasOwnProperty(prop), `"${prop}" is a required property (path: ${method} ${path}, context: ${context})`);
                 }
 
@@ -553,7 +553,7 @@ describe('API', async () => {
                     assert.strictEqual(typeof response[prop], 'string', `"${prop}" was expected to be a string, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`);
                     break;
                 case 'boolean':
-                    if (prop != 'reacted'){
+                    if (prop !== 'reacted') {
                         assert.strictEqual(typeof response[prop], 'boolean', `"${prop}" was expected to be a boolean, but was ${typeof response[prop]} instead (path: ${method} ${path}, context: ${context})`);
                     }
                     break;

@@ -72,13 +72,13 @@ Posts.unvote = async (req, res) => {
 };
 
 Posts.react = async (req, res) => {
-    if (!req.params){
-        //Checking that the req variable has the required parameters
-        throw new Error("Certain parameters needed are mising");
+    if (!req.params) {
+        // Checking that the req variable has the required parameters
+        throw new Error('Certain parameters needed are mising');
     }
-    if (res==null){
-        //Checking that the res variable is not a null variable
-        throw new Error("res should not be null");
+    if (res == null) {
+        // Checking that the res variable is not a null variable
+        throw new Error('res should not be null');
     }
     const data = await mock(req);
     await api.posts.react(req, data);

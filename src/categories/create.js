@@ -63,7 +63,7 @@ module.exports = function (Categories) {
             'groups:posts:upvote',
             'groups:posts:downvote',
             'groups:topics:delete',
-            'groups:posts:react'
+            'groups:posts:react',
         ];
         const modPrivileges = defaultPrivileges.concat([
             'groups:topics:schedule',

@@ -9,7 +9,7 @@ const intFields = [
     'upvotes', 'downvotes', 'reactions', 'deleterUid', 'edited',
     'replies', 'bookmarks',
 ];
-//fields inside DB
+// fields inside DB
 
 module.exports = function (Posts) {
     Posts.getPostsFields = async function (pids, fields) {
