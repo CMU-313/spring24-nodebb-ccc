@@ -26,6 +26,7 @@ module.exports = function (Posts) {
         console.log('setting post fields!');
         console.log(`postData: ${postData}`)
         await Posts.setPostField(pid, 'reactions', postData.reactions + 1);
+        postData.reactions = postData.reactions + 1;
 
         plugins.hooks.fire(`action:post.react`, {
             pid: pid,
