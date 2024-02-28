@@ -161,6 +161,24 @@ describe('Post\'s', () => {
         });
     });
 
+    describe('reacting', () => {
+        it('should fail to react to post if not logged in', async() => {
+            // await privileges.categories.rescind(['groups:posts:upvote', 'groups:posts:downvote', 'groups:posts:react'], cid, 'registered-users');
+            let err;
+            try {
+                await apiPosts.react({ uid: -1 }, { pid: postData.pid, room_id: 'topic_1' });
+            } catch (_err) {
+                err = _err;
+            }
+            assert.equal(err.message, '[[error:not-logged-in]]');
+        });
+        it('should allow for reaction if logged in', async() => {
+            const result = await apiPosts.react({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' });
+            console.log(result);
+            assert.equal(result.post.reactions, 1);
+        });
+    });
+
     describe('voting', () => {
         it('should fail to upvote post if group does not have upvote permission', async () => {
             await privileges.categories.rescind(['groups:posts:upvote', 'groups:posts:downvote', 'groups:posts:react'], cid, 'registered-users');
