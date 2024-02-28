@@ -274,6 +274,10 @@ postsAPI.unbookmark = async function (caller, data) {
 };
 
 postsAPI.react = async function (caller, data) {
+    if (caller === null || data === null) {
+        // Checking parameters null and data should be valid
+        throw new Error('Caller and data must not be null');
+    }
   return await apiHelpers.postCommand(caller, 'react', 'unreact', '', data);
 };
 

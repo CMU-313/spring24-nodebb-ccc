@@ -235,7 +235,17 @@ define('forum/topic/events', [
 
     function togglePostReaction(data) {
       const post = $('[data-pid="' + data.post.pid + '"');
+      if (post.length < 1) {
+        // Handling error if Length of Post is less than 1
+        throw new Error('Post not found in togglePostReaction Function');
+    }
       post.find('[component="post/reaction-text"]').filter(function (index, el) {
+        const pidParse1 = parseInt($(el).closest('[data-pid]').attr('data-pid'), 10);
+        const dataPidParse1 = parseInt(data.post.pid, 10);
+        if (isNaN(pidParse1) || isNaN(dataPidParse1)) {
+            // Checking if ParsedPids can be integers
+            throw new Error('Cannot be parsed into integers');
+        }
         return parseInt($(el).closest('[data-pid]').attr('data-pid'), 10) === parseInt(data.post.pid, 10);
       }).toggleClass('reactions', data.reactions);
     }
