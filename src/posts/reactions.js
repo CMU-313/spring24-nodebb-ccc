@@ -14,8 +14,8 @@ module.exports = function (Posts) {
             throw new Error('pid should not be null');
         }
         if (isNaN(uid)) {
-            //Checking that UID is an integer
-            throw new Error("uid should be an int")
+            // Checking that UID is an integer
+            throw new Error('uid should be an int');
         }
         if (uid == null) {
             // Checking that UID should not be null
@@ -70,11 +70,10 @@ module.exports = function (Posts) {
         const [postData] = await Promise.all([
             Posts.getPostFields(pid, ['pid', 'uid', 'reactions']),
         ]);
-        
         console.log('setting post fields!');
-        console.log(`postData: ${postData}`)
+        console.log(`postData: ${postData}`);
         await Posts.setPostField(pid, 'reactions', postData.reactions + 1);
-        postData.reactions = postData.reactions + 1;
+        postData.reactions += 1; // Was postData.reactions + 1
 
         plugins.hooks.fire(`action:post.react`, {
             pid: pid,

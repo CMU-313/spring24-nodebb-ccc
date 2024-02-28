@@ -12,8 +12,8 @@ const translator = require('../translator');
 module.exports = function (Posts) {
     const votesInProgress = {};
     // saving this locally while we don't know how to connect to the DB
-    const happy_vote = 5;
-    const sad_vote = 7;
+    // const happy_vote = 5;
+    // const sad_vote = 7;
 
     Posts.upvote = async function (pid, uid) {
         if (meta.config['reputation:disabled']) {

@@ -76,7 +76,7 @@ Posts.react = async (req, res) => {
         // Checking that the req variable has the required parameters
         throw new Error('Certain parameters needed are mising');
     }
-    if (res == null){
+    if (res == null) {
         // Checking that the res variable is not a null variable
         throw new Error('res should not be null');
     }

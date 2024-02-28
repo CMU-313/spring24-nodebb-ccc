@@ -163,7 +163,7 @@ describe('Post\'s', () => {
 
     describe('reacting', () => {
         it('should fail to react to post if not logged in', async () => {
-            // await privileges.categories.rescind(['groups:posts:upvote', 
+            // await privileges.categories.rescind(['groups:posts:upvote',
             // 'groups:posts:downvote', 'groups:posts:react'], cid, 'registered-users');
             let err;
             try {

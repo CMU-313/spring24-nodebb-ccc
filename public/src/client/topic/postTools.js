@@ -129,14 +129,14 @@ define('forum/topic/postTools', [
         });
 
         postContainer.on('click', '[component="post/react"]', function () {
-            if ((getData($(this), 'data-pid') == null) ) {
+            if ((getData($(this), 'data-pid') == null)) {
                 // Check if value is null then throw error
                 console.error('getData returned null which is wrong');
             }
             const ifResultNull = reactToPost(getData($(this), 'data-pid'));
             if (ifResultNull === null) {
                 // Check if value is null then throw error
-                console.error('Value is null in the postContainer.on function'); 
+                console.error('Value is null in the postContainer.on function');
             }
             return reactToPost(getData($(this), 'data-pid'));
         });
