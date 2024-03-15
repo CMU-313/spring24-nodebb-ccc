@@ -1,5 +1,5 @@
-import http from 'k6/http';
-import { sleep } from 'k6';
+import http from "k6/http";
+import { sleep } from "k6";
 
 // export const options = {
 //     vus: 1,
@@ -26,15 +26,15 @@ import { sleep } from 'k6';
 
 export const options = {
     //spike testing
-    stages : [
-        { duration: '1m', target: 10000 }, //ramp up
-        { duration: '30s', target: 0 }, //ramp-down to 0
-        { duration: '1m', target: 10000 }, //ramp up
-        { duration: '30s', target: 0 } //ramp-down to 0
+    stages: [
+        { duration: "1m", target: 10000 }, //ramp up
+        { duration: "30s", target: 0 }, //ramp-down to 0
+        { duration: "1m", target: 10000 }, //ramp up
+        { duration: "30s", target: 0 }, //ramp-down to 0
     ],
 };
 
 export default () => {
-    http.get('http://localhost:4567/topic/1/welcome-to-your-nodebb');
+    http.get("http://localhost:4567/topic/1/welcome-to-your-nodebb");
     sleep(1);
-}
+};
