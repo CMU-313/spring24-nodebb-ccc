@@ -1,0 +1,2 @@
+retire.js v5.0.0-beta.1
+Loading from cache: https://raw.githubusercontent.com/RetireJS/retire.js/master/repository/jsrepository-v2.json
