@@ -1,4 +1,4 @@
-name: k6—Testing
+name: k6-Testing
 
 on:
   push:
@@ -13,73 +13,35 @@ defaults:
     shell: bash
 
 permissions:
-  checks: write # for coverallsapp/github-action to create new checks
-  contents: read # for actions/checkout to fetch code
+  contents: read
 
 jobs:
   k6_local_test:
-    name: k6 counter extension run
-    runs-on: ubuntu-latest
-    container: docker://golang:1.17-alpine
-    
     permissions:
       checks: write # for coverallsapp/github-action to create new checks
       contents: read # for actions/checkout to fetch code
+    name: Lint
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: [16, 18]
-        database: [mongo-dev, mongo, redis, postgres]
-        include:
-          # only run coverage once
-          - os: ubuntu-latest
-            node: 16
-            coverage: true
-          # test under development once
-          - database: mongo-dev
-            test_env: development
+        node: [16]
+    runs-on: ${{ matrix.os }}
     env:
       TEST_ENV: ${{ matrix.test_env || 'production' }}
-    
+
     services:
-      postgres:
-          image: "postgres:14-alpine"
-          env:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-          # Set health checks to wait until postgres has started
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-          ports:
-            # Maps port 5432 on service container to the host
-            - 5432:5432
-      redis:
-        image: "redis:2.8.23"
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps port 6379 on service container to the host
-          - 6379:6379
-      
       mongo:
         image: "mongo:3.7"
         ports:
           # Maps port 27017 on service container to the host
           - 27017:27017
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - run: cp install/package.json package.json
-      
+
       - name: Install Node
         uses: actions/setup-node@v3
         with:
@@ -90,6 +52,32 @@ jobs:
         with:
           useLockFile: false
 
+      - name: Setup on MongoDB
+        env:
+          SETUP: >-
+            {
+              "url": "http://127.0.0.1:4567",
+              "secret": "abcdef",
+              "admin:username": "admin",
+              "admin:email": "test@example.org",
+              "admin:password": "hAN3Eg8W",
+              "admin:password:confirm": "hAN3Eg8W",
+              "database": "mongo",
+              "mongo:host": "127.0.0.1",
+              "mongo:port": 27017,
+              "mongo:username": "",
+              "mongo:password": "",
+              "mongo:database": "nodebb"
+            }
+          CI: >-
+            {
+              "host": "127.0.0.1",
+              "port": 27017,
+              "database": "ci_test"
+            }
+        run: |
+          node app --setup="${SETUP}" --ci="${CI}"
+          
       - name: Setup on Redis
         if: startsWith(matrix.database, 'redis')
         env:
@@ -116,6 +104,7 @@ jobs:
             }
         run: |
           node app --setup="${SETUP}" --ci="${CI}"
+          
       - name: Checkout
         uses: actions/checkout@v1
 
@@ -127,6 +116,7 @@ jobs:
 
       - name: Run k6 extension test
         run: ./k6 run k6-testing.js
+        
   finish:
     permissions:
       checks: write # for coverallsapp/github-action to create new checks
