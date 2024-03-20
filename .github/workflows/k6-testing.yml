@@ -104,10 +104,14 @@ jobs:
             }
         run: |
           node app --setup="${SETUP}" --ci="${CI}"
-          
+        
+      - name: Run local k6 test
+        uses: k6io/action@v0.1
+        with:
+         filename: k6-testing.js 
+         
       - name: Checkout
         uses: actions/checkout@v1
-
       #- name: Install xk6
       #  run: go install go.k6.io/xk6/cmd/xk6@latest
 
@@ -117,10 +121,6 @@ jobs:
       #- name: Run k6 extension test
       #  run: ./k6 run k6-testing.js
       # set up k6
-      - name: Run local k6 test
-        uses: k6io/action@v0.1
-        with:
-         filename: k6-testing.js 
          
   finish:
     permissions:
