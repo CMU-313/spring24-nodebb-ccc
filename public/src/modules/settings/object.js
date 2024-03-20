@@ -13,24 +13,14 @@ define('settings/object', function () {
      @param separator The separator to use.
      @param insertCb The callback to insert the elements.
      */
-    function addObjectPropertyElement(
-        field,
-        key,
-        attributes,
-        prop,
-        value,
-        separator,
-        insertCb,
-    ) {
+    function addObjectPropertyElement(field, key, attributes, prop, value, separator, insertCb) {
         const prepend = attributes['data-prepend'];
         const append = attributes['data-append'];
         delete attributes['data-prepend'];
         delete attributes['data-append'];
         attributes = helper.deepClone(attributes);
         const type = attributes['data-type'] || attributes.type || 'text';
-        const element = $(
-            helper.createElementOfType(type, attributes.tagName, attributes),
-        );
+        const element = $(helper.createElementOfType(type, attributes.tagName, attributes));
         element.attr('data-parent', '_' + key);
         element.attr('data-prop', prop);
         delete attributes['data-type'];
@@ -69,8 +59,7 @@ define('settings/object', function () {
             return helper.createElement(tagName || 'div');
         },
         set: function (element, value) {
-            const properties =
-                element.data('attributes') || element.data('properties');
+            const properties = element.data('attributes') || element.data('properties');
             const key = element.data('key') || element.data('parent');
             let separator = element.data('split') || ', ';
             let propertyIndex;
@@ -94,27 +83,13 @@ define('settings/object', function () {
                         if (typeof attributes !== 'object') {
                             attributes = {};
                         }
-                        propertyName =
-                            attributes['data-prop'] ||
-                            attributes['data-property'] ||
-                            propertyIndex;
-                        if (
-                            value[propertyName] === undefined &&
-                            attributes['data-new'] !== undefined
-                        ) {
+                        propertyName = attributes['data-prop'] || attributes['data-property'] || propertyIndex;
+                        if (value[propertyName] === undefined && attributes['data-new'] !== undefined) {
                             value[propertyName] = attributes['data-new'];
                         }
-                        addObjectPropertyElement(
-                            element,
-                            key,
-                            attributes,
-                            propertyName,
-                            value[propertyName],
-                            separator.clone(),
-                            function (el) {
-                                element.append(el);
-                            },
-                        );
+                        addObjectPropertyElement(element, key, attributes, propertyName, value[propertyName], separator.clone(), function (el) {
+                            element.append(el);
+                        });
                     }
                 }
             }
@@ -128,10 +103,7 @@ define('settings/object', function () {
                 const val = helper.readValue(property);
                 const prop = property.data('prop');
                 const empty = helper.isTrue(property.data('empty'));
-                if (
-                    empty ||
-                    (val !== undefined && (val == null || val.length !== 0))
-                ) {
+                if (empty || (val !== undefined && (val == null || val.length !== 0))) {
                     value[prop] = val;
                     return val;
                 }

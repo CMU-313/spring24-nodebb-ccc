@@ -30,7 +30,7 @@ navigation.get = async function (uid) {
                 return true;
             }
             return await groups.isMemberOfAny(uid, navItem.groups);
-        }),
+        })
     );
     return data.filter((navItem, i) => pass[i]);
 };

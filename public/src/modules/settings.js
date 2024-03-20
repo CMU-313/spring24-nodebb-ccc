@@ -16,8 +16,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
     function getHook(type, name) {
         if (typeof type !== 'string') {
             type = $(type);
-            type =
-                type.data('type') || type.attr('type') || type.prop('tagName');
+            type = type.data('type') || type.attr('type') || type.prop('tagName');
         }
         const plugin = Settings.plugins[type.toLowerCase()];
         if (plugin == null) {
@@ -156,18 +155,14 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
             if (split != null) {
                 empty = helper.isTrue(element.data('empty')); // default empty-value is false for arrays
                 value = element.val();
-                const array =
-                    (value != null && value.split(split || ',')) || [];
+                const array = (value != null && value.split(split || ',')) || [];
                 return helper.cleanArray(array, trim, empty);
             }
             value = element.val();
             if (trim && value != null && typeof value.trim === 'function') {
                 value = value.trim();
             }
-            if (
-                empty ||
-                (value !== undefined && (value == null || value.length !== 0))
-            ) {
+            if (empty || (value !== undefined && (value == null || value.length !== 0))) {
                 return value;
             }
         },
@@ -185,9 +180,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                 return hook.call(Settings, element, value, trim);
             }
             if (value instanceof Array) {
-                value = value.join(
-                    element.data('split') || (trim ? ', ' : ','),
-                );
+                value = value.join(element.data('split') || (trim ? ', ' : ','));
             }
             if (trim && value && typeof value.trim === 'function') {
                 value = value.trim();
@@ -295,11 +288,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
          @param callback The callback to call when done.
          */
         persistSettings: function (hash, settings, notify, callback) {
-            if (
-                settings != null &&
-                settings._ != null &&
-                typeof settings._ !== 'string'
-            ) {
+            if (settings != null && settings._ != null && typeof settings._ !== 'string') {
                 settings = helper.deepClone(settings);
                 settings._ = JSON.stringify(settings._);
             }
@@ -322,8 +311,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                             alerts.alert({
                                 title: '[[admin/admin:changes-saved]]',
                                 type: 'success',
-                                message:
-                                    '[[admin/admin:changes-saved-message]]',
+                                message: '[[admin/admin:changes-saved-message]]',
                                 timeout: 2500,
                             });
                         }
@@ -331,7 +319,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                     if (typeof callback === 'function') {
                         callback(err);
                     }
-                },
+                }
             );
         },
         /**
@@ -427,7 +415,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                             }
                         });
                     }
-                },
+                }
             );
         },
         /**
@@ -470,10 +458,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
             if (notSaved.length) {
                 alerts.alert({
                     title: 'Attributes Not Saved',
-                    message:
-                        "'" +
-                        notSaved.join(', ') +
-                        "' could not be saved. Please contact the plugin-author!",
+                    message: "'" + notSaved.join(', ') + "' could not be saved. Please contact the plugin-author!",
                     type: 'danger',
                     timeout: 5000,
                 });
@@ -522,24 +507,15 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                     $(formEl)
                         .find('input[type="checkbox"]')
                         .each(function () {
-                            $(this)
-                                .parents('.mdl-switch')
-                                .toggleClass(
-                                    'is-checked',
-                                    $(this).is(':checked'),
-                                );
+                            $(this).parents('.mdl-switch').toggleClass('is-checked', $(this).is(':checked'));
                         });
                     hooks.fire('action:admin.settingsLoaded');
 
                     // Handle unsaved changes
-                    $(formEl).on(
-                        'change',
-                        'input, select, textarea',
-                        function () {
-                            app.flags = app.flags || {};
-                            app.flags._unsaved = true;
-                        },
-                    );
+                    $(formEl).on('change', 'input, select, textarea', function () {
+                        app.flags = app.flags || {};
+                        app.flags._unsaved = true;
+                    });
 
                     const saveEl = document.getElementById('save');
                     if (saveEl) {
@@ -552,7 +528,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                     }
 
                     callback(null, values);
-                },
+                }
             );
         },
         save: function (hash, formEl, callback) {
@@ -571,11 +547,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                     const list = formEl.find('[data-sorted-list]');
                     if (list.length) {
                         list.each((idx, item) => {
-                            getHook(item, 'set').call(
-                                Settings,
-                                $(item),
-                                values,
-                            );
+                            getHook(item, 'set').call(Settings, $(item), values);
                         });
                     }
                 });
@@ -610,7 +582,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
                                 timeout: 2500,
                             });
                         }
-                    },
+                    }
                 );
             }
         },
@@ -639,16 +611,7 @@ define('settings', ['hooks', 'alerts'], function (hooks, alerts) {
     };
 
     helper.registerReadyJobs(1);
-    require([
-        'settings/checkbox',
-        'settings/number',
-        'settings/textarea',
-        'settings/select',
-        'settings/array',
-        'settings/key',
-        'settings/object',
-        'settings/sorted-list',
-    ], function () {
+    require(['settings/checkbox', 'settings/number', 'settings/textarea', 'settings/select', 'settings/array', 'settings/key', 'settings/object', 'settings/sorted-list'], function () {
         for (let i = 0; i < arguments.length; i += 1) {
             Settings.registerPlugin(arguments[i]);
         }

@@ -37,10 +37,7 @@ Email.test = async function (socket, data) {
             await userEmail.sendValidationEmail(socket.uid, {
                 force: 1,
                 template: data.template,
-                subject:
-                    data.template === 'welcome'
-                        ? `[[email:welcome-to, ${meta.config.title || meta.config.browserTitle || 'NodeBB'}]]`
-                        : undefined,
+                subject: data.template === 'welcome' ? `[[email:welcome-to, ${meta.config.title || meta.config.browserTitle || 'NodeBB'}]]` : undefined,
             });
             break;
 
@@ -55,10 +52,7 @@ Email.test = async function (socket, data) {
             });
             await emailer.send('notification', socket.uid, {
                 path: notification.path,
-                subject: utils.stripHTMLTags(
-                    notification.subject ||
-                        '[[notifications:new_notification]]',
-                ),
+                subject: utils.stripHTMLTags(notification.subject || '[[notifications:new_notification]]'),
                 intro: utils.stripHTMLTags(notification.bodyShort),
                 body: notification.bodyLong || '',
                 notification,

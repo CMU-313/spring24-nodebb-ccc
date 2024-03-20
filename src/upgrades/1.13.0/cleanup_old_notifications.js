@@ -19,12 +19,12 @@ module.exports = {
                     db.sortedSetsRemoveRangeByScore(
                         uids.map(uid => `uid:${uid}:notifications:unread`),
                         '-inf',
-                        cutoffTime,
+                        cutoffTime
                     ),
                     db.sortedSetsRemoveRangeByScore(
                         uids.map(uid => `uid:${uid}:notifications:read`),
                         '-inf',
-                        cutoffTime,
+                        cutoffTime
                     ),
                 ]);
                 const userData = await user.getUsersData(uids);
@@ -34,29 +34,12 @@ module.exports = {
                             return;
                         }
                         const fields = [];
-                        [
-                            'picture',
-                            'fullname',
-                            'location',
-                            'birthday',
-                            'website',
-                            'signature',
-                            'uploadedpicture',
-                        ].forEach(field => {
+                        ['picture', 'fullname', 'location', 'birthday', 'website', 'signature', 'uploadedpicture'].forEach(field => {
                             if (user[field] === '') {
                                 fields.push(field);
                             }
                         });
-                        [
-                            'profileviews',
-                            'reputation',
-                            'postcount',
-                            'topiccount',
-                            'lastposttime',
-                            'banned',
-                            'followerCount',
-                            'followingCount',
-                        ].forEach(field => {
+                        ['profileviews', 'reputation', 'postcount', 'topiccount', 'lastposttime', 'banned', 'followerCount', 'followingCount'].forEach(field => {
                             if (user[field] === 0) {
                                 fields.push(field);
                             }
@@ -68,18 +51,15 @@ module.exports = {
                             fields.push('icon:bgColor');
                         }
                         if (fields.length) {
-                            await db.deleteObjectFields(
-                                `user:${user.uid}`,
-                                fields,
-                            );
+                            await db.deleteObjectFields(`user:${user.uid}`, fields);
                         }
-                    }),
+                    })
                 );
             },
             {
                 batch: 500,
                 progress: progress,
-            },
+            }
         );
     },
 };

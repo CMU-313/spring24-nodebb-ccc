@@ -42,9 +42,7 @@ module.exports = function (module) {
             return;
         }
         if (Array.isArray(args[1])) {
-            console.warn(
-                '[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)',
-            );
+            console.warn('[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)');
             // conver old format to new format for backwards compatibility
             data = args[0].map((key, i) => [key, args[1][i]]);
         }
@@ -94,9 +92,7 @@ module.exports = function (module) {
         const cachedData = {};
         cache.getUnCachedKeys([key], cachedData);
         if (cachedData[key]) {
-            return cachedData[key].hasOwnProperty(field)
-                ? cachedData[key][field]
-                : null;
+            return cachedData[key].hasOwnProperty(field) ? cachedData[key][field] : null;
         }
         return await module.client.hget(key, String(field));
     };
@@ -140,9 +136,7 @@ module.exports = function (module) {
         });
 
         if (!Array.isArray(fields) || !fields.length) {
-            return keys.map(key =>
-                cachedData[key] ? { ...cachedData[key] } : null,
-            );
+            return keys.map(key => (cachedData[key] ? { ...cachedData[key] } : null));
         }
         return keys.map(key => {
             const item = cachedData[key] || {};
@@ -175,12 +169,7 @@ module.exports = function (module) {
     };
 
     module.deleteObjectField = async function (key, field) {
-        if (
-            key === undefined ||
-            key === null ||
-            field === undefined ||
-            field === null
-        ) {
+        if (key === undefined || key === null || field === undefined || field === null) {
             return;
         }
         await module.client.hdel(key, field);
@@ -188,12 +177,7 @@ module.exports = function (module) {
     };
 
     module.deleteObjectFields = async function (key, fields) {
-        if (
-            !key ||
-            (Array.isArray(key) && !key.length) ||
-            !Array.isArray(fields) ||
-            !fields.length
-        ) {
+        if (!key || (Array.isArray(key) && !key.length) || !Array.isArray(fields) || !fields.length) {
             return;
         }
         fields = fields.filter(Boolean);
@@ -233,9 +217,7 @@ module.exports = function (module) {
             result = await module.client.hincrby(key, field, value);
         }
         cache.del(key);
-        return Array.isArray(result)
-            ? result.map(value => parseInt(value, 10))
-            : parseInt(result, 10);
+        return Array.isArray(result) ? result.map(value => parseInt(value, 10)) : parseInt(result, 10);
     };
 
     module.incrObjectFieldByBulk = async function (data) {

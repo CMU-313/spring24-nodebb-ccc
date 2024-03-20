@@ -13,11 +13,7 @@ const json2csvAsync = require('json2csv').parseAsync;
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 // Alternate configuration file support
-const configFile = path.resolve(
-    __dirname,
-    '../../../',
-    nconf.any(['config', 'CONFIG']) || 'config.json',
-);
+const configFile = path.resolve(__dirname, '../../../', nconf.any(['config', 'CONFIG']) || 'config.json');
 const prestart = require('../../prestart');
 
 prestart.loadConfig(configFile);
@@ -31,11 +27,7 @@ process.on('message', async msg => {
         await db.init();
 
         const targetUid = msg.uid;
-        const filePath = path.join(
-            __dirname,
-            '../../../build/export',
-            `${targetUid}_posts.csv`,
-        );
+        const filePath = path.join(__dirname, '../../../build/export', `${targetUid}_posts.csv`);
 
         const posts = require('../../posts');
 
@@ -56,7 +48,7 @@ process.on('message', async msg => {
             {
                 batch: 500,
                 interval: 1000,
-            },
+            }
         );
 
         const fields = payload.length ? Object.keys(payload[0]) : [];

@@ -14,21 +14,14 @@ const primaryDB = require(`./${databaseName}`);
 
 primaryDB.parseIntFields = function (data, intFields, requestedFields) {
     intFields.forEach(field => {
-        if (
-            !requestedFields ||
-            !requestedFields.length ||
-            requestedFields.includes(field)
-        ) {
+        if (!requestedFields || !requestedFields.length || requestedFields.includes(field)) {
             data[field] = parseInt(data[field], 10) || 0;
         }
     });
 };
 
 primaryDB.initSessionStore = async function () {
-    const sessionStoreConfig =
-        nconf.get('session_store') ||
-        nconf.get('redis') ||
-        nconf.get(databaseName);
+    const sessionStoreConfig = nconf.get('session_store') || nconf.get('redis') || nconf.get(databaseName);
     let sessionStoreDB = primaryDB;
 
     if (nconf.get('session_store')) {
@@ -38,8 +31,7 @@ primaryDB.initSessionStore = async function () {
         sessionStoreDB = require('./redis');
     }
 
-    primaryDB.sessionStore =
-        await sessionStoreDB.createSessionStore(sessionStoreConfig);
+    primaryDB.sessionStore = await sessionStoreDB.createSessionStore(sessionStoreConfig);
 };
 
 module.exports = primaryDB;

@@ -94,18 +94,12 @@ async function getNodeInfo() {
         },
     };
 
-    data.process.memoryUsage.humanReadable = (
-        data.process.memoryUsage.rss /
-        (1024 * 1024 * 1024)
-    ).toFixed(3);
+    data.process.memoryUsage.humanReadable = (data.process.memoryUsage.rss / (1024 * 1024 * 1024)).toFixed(3);
     data.process.uptimeHumanReadable = humanReadableUptime(data.process.uptime);
     data.os.freemem = (data.os.freemem / (1024 * 1024 * 1024)).toFixed(2);
     data.os.totalmem = (data.os.totalmem / (1024 * 1024 * 1024)).toFixed(2);
     data.os.usedmem = (data.os.totalmem - data.os.freemem).toFixed(2);
-    const [stats, gitInfo] = await Promise.all([
-        rooms.getLocalStats(),
-        getGitInfo(),
-    ]);
+    const [stats, gitInfo] = await Promise.all([rooms.getLocalStats(), getGitInfo()]);
     data.git = gitInfo;
     data.stats = stats;
     return data;
@@ -113,10 +107,7 @@ async function getNodeInfo() {
 
 function getCpuUsage() {
     const newUsage = process.cpuUsage();
-    const diff =
-        newUsage.user +
-        newUsage.system -
-        (previousUsage.user + previousUsage.system);
+    const diff = newUsage.user + newUsage.system - (previousUsage.user + previousUsage.system);
     const now = Date.now();
     const result = (diff / ((now - usageStartDate) * 1000)) * 100;
     previousUsage = newUsage;
@@ -145,9 +136,6 @@ async function getGitInfo() {
         });
     }
     const getAsync = require('util').promisify(get);
-    const [hash, branch] = await Promise.all([
-        getAsync('git rev-parse HEAD'),
-        getAsync('git rev-parse --abbrev-ref HEAD'),
-    ]);
+    const [hash, branch] = await Promise.all([getAsync('git rev-parse HEAD'), getAsync('git rev-parse --abbrev-ref HEAD')]);
     return { hash: hash, hashShort: hash.slice(0, 6), branch: branch };
 }

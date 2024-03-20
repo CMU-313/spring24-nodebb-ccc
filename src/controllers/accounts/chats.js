@@ -64,8 +64,5 @@ chatsController.redirectToChat = async function (req, res, next) {
         return next();
     }
     const roomid = parseInt(req.params.roomid, 10);
-    helpers.redirect(
-        res,
-        `/user/${userslug}/chats${roomid ? `/${roomid}` : ''}`,
-    );
+    helpers.redirect(res, `/user/${userslug}/chats${roomid ? `/${roomid}` : ''}`);
 };

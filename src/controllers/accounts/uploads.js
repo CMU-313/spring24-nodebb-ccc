@@ -13,11 +13,7 @@ const accountHelpers = require('./helpers');
 const uploadsController = module.exports;
 
 uploadsController.get = async function (req, res, next) {
-    const userData = await accountHelpers.getUserDataByUserSlug(
-        req.params.userslug,
-        req.uid,
-        req.query,
-    );
+    const userData = await accountHelpers.getUserDataByUserSlug(req.params.userslug, req.uid, req.query);
     if (!userData) {
         return next();
     }
@@ -26,10 +22,7 @@ uploadsController.get = async function (req, res, next) {
     const itemsPerPage = 25;
     const start = (page - 1) * itemsPerPage;
     const stop = start + itemsPerPage - 1;
-    const [itemCount, uploadNames] = await Promise.all([
-        db.sortedSetCard(`uid:${userData.uid}:uploads`),
-        db.getSortedSetRevRange(`uid:${userData.uid}:uploads`, start, stop),
-    ]);
+    const [itemCount, uploadNames] = await Promise.all([db.sortedSetCard(`uid:${userData.uid}:uploads`), db.getSortedSetRevRange(`uid:${userData.uid}:uploads`, start, stop)]);
 
     userData.uploads = uploadNames.map(uploadName => ({
         name: uploadName,
@@ -39,9 +32,6 @@ uploadsController.get = async function (req, res, next) {
     userData.pagination = pagination.create(page, pageCount, req.query);
     userData.privateUploads = meta.config.privateUploads === 1;
     userData.title = `[[pages:account/uploads, ${userData.username}]]`;
-    userData.breadcrumbs = helpers.buildBreadcrumbs([
-        { text: userData.username, url: `/user/${userData.userslug}` },
-        { text: '[[global:uploads]]' },
-    ]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: '[[global:uploads]]' }]);
     res.render('account/uploads', userData);
 };

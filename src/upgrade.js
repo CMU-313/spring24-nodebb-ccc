@@ -67,10 +67,7 @@ Upgrade.appendPluginScripts = async function (files) {
         const configPath = path.join(paths.nodeModules, plugin, 'plugin.json');
         try {
             const pluginConfig = require(configPath);
-            if (
-                pluginConfig.hasOwnProperty('upgrades') &&
-                Array.isArray(pluginConfig.upgrades)
-            ) {
+            if (pluginConfig.hasOwnProperty('upgrades') && Array.isArray(pluginConfig.upgrades)) {
                 pluginConfig.upgrades.forEach(script => {
                     files.push(path.join(path.dirname(configPath), script));
                 });
@@ -88,9 +85,7 @@ Upgrade.check = async function () {
     // Throw 'schema-out-of-date' if not all upgrade scripts have run
     const files = await Upgrade.getAll();
     const executed = await db.getSortedSetRange('schemaLog', 0, -1);
-    const remainder = files.filter(
-        name => !executed.includes(path.basename(name, '.js')),
-    );
+    const remainder = files.filter(name => !executed.includes(path.basename(name, '.js')));
     if (remainder.length > 0) {
         throw new Error('schema-out-of-date');
     }
@@ -99,10 +94,7 @@ Upgrade.check = async function () {
 Upgrade.run = async function () {
     console.log('\nParsing upgrade scripts... ');
 
-    const [completed, available] = await Promise.all([
-        db.getSortedSetRange('schemaLog', 0, -1),
-        Upgrade.getAll(),
-    ]);
+    const [completed, available] = await Promise.all([db.getSortedSetRange('schemaLog', 0, -1), Upgrade.getAll()]);
 
     let skipped = 0;
     const queue = available.filter(cur => {
@@ -120,20 +112,13 @@ Upgrade.runParticular = async function (names) {
     console.log('\nParsing upgrade scripts... ');
     const files = await file.walk(path.join(__dirname, './upgrades'));
     await Upgrade.appendPluginScripts(files);
-    const upgrades = files.filter(file =>
-        names.includes(path.basename(file, '.js')),
-    );
+    const upgrades = files.filter(file => names.includes(path.basename(file, '.js')));
     await Upgrade.process(upgrades, 0);
 };
 
 Upgrade.process = async function (files, skipCount) {
-    console.log(
-        `${chalk.green('OK')} | ${chalk.cyan(`${files.length} script(s) found`)}${skipCount > 0 ? chalk.cyan(`, ${skipCount} skipped`) : ''}`,
-    );
-    const [schemaDate, schemaLogCount] = await Promise.all([
-        db.get('schemaDate'),
-        db.sortedSetCard('schemaLog'),
-    ]);
+    console.log(`${chalk.green('OK')} | ${chalk.cyan(`${files.length} script(s) found`)}${skipCount > 0 ? chalk.cyan(`, ${skipCount} skipped`) : ''}`);
+    const [schemaDate, schemaLogCount] = await Promise.all([db.get('schemaDate'), db.sortedSetCard('schemaLog')]);
 
     for (const file of files) {
         /* eslint-disable no-await-in-loop */
@@ -149,32 +134,19 @@ Upgrade.process = async function (files, skipCount) {
             date: date,
         };
 
-        process.stdout.write(
-            `${chalk.white('  → ') + chalk.gray(`[${[date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()].join('/')}] `) + scriptExport.name}...`,
-        );
+        process.stdout.write(`${chalk.white('  → ') + chalk.gray(`[${[date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()].join('/')}] `) + scriptExport.name}...`);
 
         // For backwards compatibility, cross-reference with schemaDate (if found). If a script's date is older, skip it
-        if (
-            (!schemaDate && !schemaLogCount) ||
-            (scriptExport.timestamp <= schemaDate &&
-                semver.lt(version, '1.5.0'))
-        ) {
+        if ((!schemaDate && !schemaLogCount) || (scriptExport.timestamp <= schemaDate && semver.lt(version, '1.5.0'))) {
             process.stdout.write(chalk.grey(' skipped\n'));
 
-            await db.sortedSetAdd(
-                'schemaLog',
-                Date.now(),
-                path.basename(file, '.js'),
-            );
+            await db.sortedSetAdd('schemaLog', Date.now(), path.basename(file, '.js'));
             // eslint-disable-next-line no-continue
             continue;
         }
 
         // Promisify method if necessary
-        if (
-            scriptExport.method.constructor &&
-            scriptExport.method.constructor.name !== 'AsyncFunction'
-        ) {
+        if (scriptExport.method.constructor && scriptExport.method.constructor.name !== 'AsyncFunction') {
             scriptExport.method = util.promisify(scriptExport.method);
         }
 
@@ -192,11 +164,7 @@ Upgrade.process = async function (files, skipCount) {
         process.stdout.write(chalk.green(` OK (${upgradeDuration} seconds)\n`));
 
         // Record success in schemaLog
-        await db.sortedSetAdd(
-            'schemaLog',
-            Date.now(),
-            path.basename(file, '.js'),
-        );
+        await db.sortedSetAdd('schemaLog', Date.now(), path.basename(file, '.js'));
     }
 
     console.log(chalk.green('Schema update complete!\n'));
@@ -224,9 +192,7 @@ Upgrade.incrementProgress = function (value) {
         }
 
         readline.cursorTo(process.stdout, 0);
-        process.stdout.write(
-            `    [${filled ? new Array(filled).join('#') : ''}${new Array(unfilled).join(' ')}] (${this.current}/${this.total || '??'}) ${percentage} `,
-        );
+        process.stdout.write(`    [${filled ? new Array(filled).join('#') : ''}${new Array(unfilled).join(' ')}] (${this.current}/${this.total || '??'}) ${percentage} `);
     }
 };
 

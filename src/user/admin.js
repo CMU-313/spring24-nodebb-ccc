@@ -44,7 +44,7 @@ module.exports = function (User) {
                     return memo;
                 }, '');
             },
-            {},
+            {}
         );
 
         return csvContent;
@@ -53,35 +53,21 @@ module.exports = function (User) {
     User.exportUsersCSV = async function () {
         winston.verbose('[user/exportUsersCSV] Exporting User CSV data');
 
-        const { fields, showIps } = await plugins.hooks.fire(
-            'filter:user.csvFields',
-            {
-                fields: ['email', 'username', 'uid'],
-                showIps: true,
-            },
-        );
-        const fd = await fs.promises.open(
-            path.join(baseDir, 'build/export', 'users.csv'),
-            'w',
-        );
-        fs.promises.appendFile(
-            fd,
-            `${fields.join(',')}${showIps ? ',ip' : ''}\n`,
-        );
+        const { fields, showIps } = await plugins.hooks.fire('filter:user.csvFields', {
+            fields: ['email', 'username', 'uid'],
+            showIps: true,
+        });
+        const fd = await fs.promises.open(path.join(baseDir, 'build/export', 'users.csv'), 'w');
+        fs.promises.appendFile(fd, `${fields.join(',')}${showIps ? ',ip' : ''}\n`);
         await batch.processSortedSet(
             'users:joindate',
             async uids => {
-                const usersData = await User.getUsersFields(
-                    uids,
-                    fields.slice(),
-                );
+                const usersData = await User.getUsersFields(uids, fields.slice());
                 let userIPs = '';
                 let ips = [];
 
                 if (showIps) {
-                    ips = await db.getSortedSetsMembers(
-                        uids.map(uid => `uid:${uid}:ip`),
-                    );
+                    ips = await db.getSortedSetsMembers(uids.map(uid => `uid:${uid}:ip`));
                 }
 
                 let line = '';
@@ -100,7 +86,7 @@ module.exports = function (User) {
             {
                 batch: 5000,
                 interval: 250,
-            },
+            }
         );
         await fd.close();
     };

@@ -21,7 +21,7 @@ module.exports = {
             {
                 batch: 100,
                 progress: progress,
-            },
+            }
         );
     },
 };

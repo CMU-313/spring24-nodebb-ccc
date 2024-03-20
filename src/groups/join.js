@@ -23,18 +23,10 @@ module.exports = function (Groups) {
             throw new Error('[[error:invalid-uid]]');
         }
 
-        const [isMembers, exists, isAdmin] = await Promise.all([
-            Groups.isMemberOfGroups(uid, groupNames),
-            Groups.exists(groupNames),
-            user.isAdministrator(uid),
-        ]);
+        const [isMembers, exists, isAdmin] = await Promise.all([Groups.isMemberOfGroups(uid, groupNames), Groups.exists(groupNames), user.isAdministrator(uid)]);
 
-        const groupsToCreate = groupNames.filter(
-            (groupName, index) => groupName && !exists[index],
-        );
-        const groupsToJoin = groupNames.filter(
-            (groupName, index) => !isMembers[index],
-        );
+        const groupsToCreate = groupNames.filter((groupName, index) => groupName && !exists[index]);
+        const groupsToJoin = groupNames.filter((groupName, index) => !isMembers[index]);
 
         if (!groupsToJoin.length) {
             return;
@@ -45,19 +37,19 @@ module.exports = function (Groups) {
             db.sortedSetsAdd(
                 groupsToJoin.map(groupName => `group:${groupName}:members`),
                 Date.now(),
-                uid,
+                uid
             ),
             db.incrObjectField(
                 groupsToJoin.map(groupName => `group:${groupName}`),
-                'memberCount',
+                'memberCount'
             ),
         ];
         if (isAdmin) {
             promises.push(
                 db.setsAdd(
                     groupsToJoin.map(groupName => `group:${groupName}:owners`),
-                    uid,
-                ),
+                    uid
+                )
             );
         }
 
@@ -66,20 +58,14 @@ module.exports = function (Groups) {
         Groups.clearCache(uid, groupsToJoin);
         cache.del(groupsToJoin.map(name => `group:${name}:members`));
 
-        const groupData = await Groups.getGroupsFields(groupsToJoin, [
-            'name',
-            'hidden',
-            'memberCount',
-        ]);
-        const visibleGroups = groupData.filter(
-            groupData => groupData && !groupData.hidden,
-        );
+        const groupData = await Groups.getGroupsFields(groupsToJoin, ['name', 'hidden', 'memberCount']);
+        const visibleGroups = groupData.filter(groupData => groupData && !groupData.hidden);
 
         if (visibleGroups.length) {
             await db.sortedSetAdd(
                 'groups:visible:memberCount',
                 visibleGroups.map(groupData => groupData.memberCount),
-                visibleGroups.map(groupData => groupData.name),
+                visibleGroups.map(groupData => groupData.name)
             );
         }
 
@@ -105,9 +91,7 @@ module.exports = function (Groups) {
                 });
             } catch (err) {
                 if (err && err.message !== '[[error:group-already-exists]]') {
-                    winston.error(
-                        `[groups.join] Could not create new hidden group (${groupName})\n${err.stack}`,
-                    );
+                    winston.error(`[groups.join] Could not create new hidden group (${groupName})\n${err.stack}`);
                     throw err;
                 }
             }
@@ -115,25 +99,13 @@ module.exports = function (Groups) {
     }
 
     async function setGroupTitleIfNotSet(groupNames, uid) {
-        const ignore = [
-            'registered-users',
-            'verified-users',
-            'unverified-users',
-            Groups.BANNED_USERS,
-        ];
-        groupNames = groupNames.filter(
-            groupName =>
-                !ignore.includes(groupName) &&
-                !Groups.isPrivilegeGroup(groupName),
-        );
+        const ignore = ['registered-users', 'verified-users', 'unverified-users', Groups.BANNED_USERS];
+        groupNames = groupNames.filter(groupName => !ignore.includes(groupName) && !Groups.isPrivilegeGroup(groupName));
         if (!groupNames.length) {
             return;
         }
 
-        const currentTitle = await db.getObjectField(
-            `user:${uid}`,
-            'groupTitle',
-        );
+        const currentTitle = await db.getObjectField(`user:${uid}`, 'groupTitle');
         if (currentTitle || currentTitle === '') {
             return;
         }

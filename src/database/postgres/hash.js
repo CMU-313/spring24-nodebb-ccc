@@ -50,9 +50,7 @@ module.exports = function (module) {
             return;
         }
         if (Array.isArray(args[1])) {
-            console.warn(
-                '[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)',
-            );
+            console.warn('[deprecated] db.setObjectBulk(keys, data) usage is deprecated, please use db.setObjectBulk(data)');
             // conver old format to new format for backwards compatibility
             data = args[0].map((key, i) => [key, args[1][i]]);
         }
@@ -293,9 +291,7 @@ SELECT (h."data" ? $2::TEXT AND h."data"->>$2::TEXT IS NOT NULL) b
         if (!data) {
             return fields.map(() => false);
         }
-        return fields.map(
-            field => data.hasOwnProperty(field) && data[field] !== null,
-        );
+        return fields.map(field => data.hasOwnProperty(field) && data[field] !== null);
     };
 
     module.deleteObjectField = async function (key, field) {
@@ -303,12 +299,7 @@ SELECT (h."data" ? $2::TEXT AND h."data"->>$2::TEXT IS NOT NULL) b
     };
 
     module.deleteObjectFields = async function (key, fields) {
-        if (
-            !key ||
-            (Array.isArray(key) && !key.length) ||
-            !Array.isArray(fields) ||
-            !fields.length
-        ) {
+        if (!key || (Array.isArray(key) && !key.length) || !Array.isArray(fields) || !fields.length) {
             return;
         }
 
@@ -380,11 +371,9 @@ ON CONFLICT ("_key")
 DO UPDATE SET "data" = jsonb_set("legacy_hash"."data", ARRAY[$2::TEXT], to_jsonb(COALESCE(("legacy_hash"."data"->>$2::TEXT)::NUMERIC, 0) + $3::NUMERIC))
 RETURNING ("data"->>$2::TEXT)::NUMERIC v`,
                           values: [key, field, value],
-                      },
+                      }
             );
-            return Array.isArray(key)
-                ? res.rows.map(r => parseFloat(r.v))
-                : parseFloat(res.rows[0].v);
+            return Array.isArray(key) ? res.rows.map(r => parseFloat(r.v)) : parseFloat(res.rows[0].v);
         });
     };
 
@@ -399,7 +388,7 @@ RETURNING ("data"->>$2::TEXT)::NUMERIC v`,
                     // eslint-disable-next-line no-await-in-loop
                     await module.incrObjectFieldBy(item[0], field, value);
                 }
-            }),
+            })
         );
     };
 };

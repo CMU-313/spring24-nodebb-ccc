@@ -69,11 +69,7 @@ DO UPDATE SET "score" = EXCLUDED."score"`,
             return;
         }
         const isArrayOfScores = Array.isArray(scores);
-        if (
-            (!isArrayOfScores && !utils.isNumber(scores)) ||
-            (isArrayOfScores &&
-                scores.map(s => utils.isNumber(s)).includes(false))
-        ) {
+        if ((!isArrayOfScores && !utils.isNumber(scores)) || (isArrayOfScores && scores.map(s => utils.isNumber(s)).includes(false))) {
             throw new Error(`[[error:invalid-score, ${scores}]]`);
         }
 
@@ -82,9 +78,7 @@ DO UPDATE SET "score" = EXCLUDED."score"`,
         }
 
         value = helpers.valueToString(value);
-        scores = isArrayOfScores
-            ? scores.map(score => parseFloat(score))
-            : parseFloat(scores);
+        scores = isArrayOfScores ? scores.map(score => parseFloat(score)) : parseFloat(scores);
 
         await module.transaction(async client => {
             await helpers.ensureLegacyObjectsType(client, keys, 'zset');

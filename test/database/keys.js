@@ -131,10 +131,10 @@ describe('Key methods', () => {
                             assert.equal(results.key1exists, false);
                             assert.equal(results.key2exists, false);
                             done();
-                        },
+                        }
                     );
                 });
-            },
+            }
         );
     });
 
@@ -157,18 +157,10 @@ describe('Key methods', () => {
                     async.parallel(
                         {
                             key1exists: function (next) {
-                                db.isSortedSetMember(
-                                    'deletezset',
-                                    'value1',
-                                    next,
-                                );
+                                db.isSortedSetMember('deletezset', 'value1', next);
                             },
                             key2exists: function (next) {
-                                db.isSortedSetMember(
-                                    'deletezset',
-                                    'value2',
-                                    next,
-                                );
+                                db.isSortedSetMember('deletezset', 'value2', next);
                             },
                         },
                         (err, results) => {
@@ -176,10 +168,10 @@ describe('Key methods', () => {
                             assert.equal(results.key1exists, false);
                             assert.equal(results.key2exists, false);
                             done();
-                        },
+                        }
                     );
                 });
-            },
+            }
         );
     });
 
@@ -254,34 +246,21 @@ describe('Key methods', () => {
         });
 
         it('should rename multiple keys', done => {
-            db.sortedSetAdd(
-                'zsettorename',
-                [1, 2, 3],
-                ['value1', 'value2', 'value3'],
-                err => {
+            db.sortedSetAdd('zsettorename', [1, 2, 3], ['value1', 'value2', 'value3'], err => {
+                assert.ifError(err);
+                db.rename('zsettorename', 'newzsetname', err => {
                     assert.ifError(err);
-                    db.rename('zsettorename', 'newzsetname', err => {
+                    db.exists('zsettorename', (err, exists) => {
                         assert.ifError(err);
-                        db.exists('zsettorename', (err, exists) => {
+                        assert(!exists);
+                        db.getSortedSetRange('newzsetname', 0, -1, (err, values) => {
                             assert.ifError(err);
-                            assert(!exists);
-                            db.getSortedSetRange(
-                                'newzsetname',
-                                0,
-                                -1,
-                                (err, values) => {
-                                    assert.ifError(err);
-                                    assert.deepEqual(
-                                        ['value1', 'value2', 'value3'],
-                                        values,
-                                    );
-                                    done();
-                                },
-                            );
+                            assert.deepEqual(['value1', 'value2', 'value3'], values);
+                            done();
                         });
                     });
-                },
-            );
+                });
+            });
         });
 
         it('should not error if old key does not exist', done => {
@@ -365,10 +344,7 @@ describe('Key methods', () => {
                 assert.ifError(err);
                 db.ttl('testKey', (err, ttl) => {
                     assert.ifError(err);
-                    assert.equal(
-                        Math.round(86400 / 1000),
-                        Math.round(ttl / 1000),
-                    );
+                    assert.equal(Math.round(86400 / 1000), Math.round(ttl / 1000));
                     done();
                 });
             });
@@ -379,10 +355,7 @@ describe('Key methods', () => {
                 assert.ifError(err);
                 db.pttl('testKey', (err, pttl) => {
                     assert.ifError(err);
-                    assert.equal(
-                        Math.round(86400000 / 1000000),
-                        Math.round(pttl / 1000000),
-                    );
+                    assert.equal(Math.round(86400000 / 1000000), Math.round(pttl / 1000000));
                     done();
                 });
             });

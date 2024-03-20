@@ -1,11 +1,6 @@
 'use strict';
 
-define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
-    translator,
-    storage,
-    hooks,
-    alerts,
-) {
+define('search', ['translator', 'storage', 'hooks', 'alerts'], function (translator, storage, hooks, alerts) {
     const Search = {
         current: {},
     };
@@ -93,10 +88,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
             return;
         }
 
-        const searchOptions = Object.assign(
-            { in: config.searchDefaultInQuick || 'titles' },
-            options.searchOptions,
-        );
+        const searchOptions = Object.assign({ in: config.searchDefaultInQuick || 'titles' }, options.searchOptions);
         const quickSearchResults = options.searchElements.resultEl;
         const inputEl = options.searchElements.inputEl;
         let oldValue = inputEl.val();
@@ -104,18 +96,12 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
 
         function updateCategoryFilterName() {
             if (ajaxify.data.template.category && ajaxify.data.cid) {
-                translator.translate(
-                    '[[search:search-in-category, ' + ajaxify.data.name + ']]',
-                    function (translated) {
-                        const name = $('<div></div>').html(translated).text();
-                        filterCategoryEl.find('.name').text(name);
-                    },
-                );
+                translator.translate('[[search:search-in-category, ' + ajaxify.data.name + ']]', function (translated) {
+                    const name = $('<div></div>').html(translated).text();
+                    filterCategoryEl.find('.name').text(name);
+                });
             }
-            filterCategoryEl.toggleClass(
-                'hidden',
-                !(ajaxify.data.template.category && ajaxify.data.cid),
-            );
+            filterCategoryEl.toggleClass('hidden', !(ajaxify.data.template.category && ajaxify.data.cid));
         }
 
         function doSearch() {
@@ -124,35 +110,20 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
             updateCategoryFilterName();
 
             if (ajaxify.data.template.category && ajaxify.data.cid) {
-                if (
-                    filterCategoryEl
-                        .find('input[type="checkbox"]')
-                        .is(':checked')
-                ) {
+                if (filterCategoryEl.find('input[type="checkbox"]').is(':checked')) {
                     options.searchOptions.categories = [ajaxify.data.cid];
                     options.searchOptions.searchChildren = true;
                 }
             }
 
-            quickSearchResults
-                .removeClass('hidden')
-                .find('.quick-search-results-container')
-                .html('');
+            quickSearchResults.removeClass('hidden').find('.quick-search-results-container').html('');
             quickSearchResults.find('.loading-indicator').removeClass('hidden');
             hooks.fire('action:search.quick.start', options);
             options.searchOptions.searchOnly = 1;
             Search.api(options.searchOptions, function (data) {
-                quickSearchResults
-                    .find('.loading-indicator')
-                    .addClass('hidden');
-                if (
-                    !data.posts ||
-                    (options.hideOnNoMatches && !data.posts.length)
-                ) {
-                    return quickSearchResults
-                        .addClass('hidden')
-                        .find('.quick-search-results-container')
-                        .html('');
+                quickSearchResults.find('.loading-indicator').addClass('hidden');
+                if (!data.posts || (options.hideOnNoMatches && !data.posts.length)) {
+                    return quickSearchResults.addClass('hidden').find('.quick-search-results-container').html('');
                 }
                 data.posts.forEach(function (p) {
                     const text = $('<div>' + p.content + '</div>').text();
@@ -160,52 +131,31 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
                         .val()
                         .toLowerCase()
                         .replace(/^in:topic-\d+/, '');
-                    const start = Math.max(
-                        0,
-                        text.toLowerCase().indexOf(query) - 40,
-                    );
-                    p.snippet = utils.escapeHTML(
-                        (start > 0 ? '...' : '') +
-                            text.slice(start, start + 80) +
-                            (text.length - start > 80 ? '...' : ''),
-                    );
+                    const start = Math.max(0, text.toLowerCase().indexOf(query) - 40);
+                    p.snippet = utils.escapeHTML((start > 0 ? '...' : '') + text.slice(start, start + 80) + (text.length - start > 80 ? '...' : ''));
                 });
-                app.parseAndTranslate(
-                    'partials/quick-search-results',
-                    data,
-                    function (html) {
-                        if (html.length) {
-                            html.find('.timeago').timeago();
-                        }
-                        quickSearchResults
-                            .toggleClass(
-                                'hidden',
-                                !html.length || !inputEl.is(':focus'),
-                            )
-                            .find('.quick-search-results-container')
-                            .html(html.length ? html : '');
-                        const highlightEls = quickSearchResults.find(
-                            '.quick-search-results .quick-search-title, .quick-search-results .snippet',
-                        );
-                        Search.highlightMatches(
-                            options.searchOptions.term,
-                            highlightEls,
-                        );
-                        hooks.fire('action:search.quick.complete', {
-                            data: data,
-                            options: options,
-                        });
-                    },
-                );
+                app.parseAndTranslate('partials/quick-search-results', data, function (html) {
+                    if (html.length) {
+                        html.find('.timeago').timeago();
+                    }
+                    quickSearchResults
+                        .toggleClass('hidden', !html.length || !inputEl.is(':focus'))
+                        .find('.quick-search-results-container')
+                        .html(html.length ? html : '');
+                    const highlightEls = quickSearchResults.find('.quick-search-results .quick-search-title, .quick-search-results .snippet');
+                    Search.highlightMatches(options.searchOptions.term, highlightEls);
+                    hooks.fire('action:search.quick.complete', {
+                        data: data,
+                        options: options,
+                    });
+                });
             });
         }
 
-        quickSearchResults
-            .find('.filter-category input[type="checkbox"]')
-            .on('change', function () {
-                inputEl.focus();
-                doSearch();
-            });
+        quickSearchResults.find('.filter-category input[type="checkbox"]').on('change', function () {
+            inputEl.focus();
+            doSearch();
+        });
 
         inputEl.off('keyup').on(
             'keyup',
@@ -223,7 +173,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
                     return quickSearchResults.addClass('hidden');
                 }
                 doSearch();
-            }, 500),
+            }, 500)
         );
 
         let mousedownOnResults = false;
@@ -234,11 +184,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
             mousedownOnResults = true;
         });
         inputEl.on('blur', function () {
-            if (
-                !inputEl.is(':focus') &&
-                !mousedownOnResults &&
-                !quickSearchResults.hasClass('hidden')
-            ) {
+            if (!inputEl.is(':focus') && !mousedownOnResults && !quickSearchResults.hasClass('hidden')) {
                 quickSearchResults.addClass('hidden');
             }
         });
@@ -254,11 +200,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
             mousedownOnResults = false;
             const query = inputEl.val();
             oldValue = query;
-            if (
-                query &&
-                quickSearchResults.find('#quick-search-results').children()
-                    .length
-            ) {
+            if (query && quickSearchResults.find('#quick-search-results').children().length) {
                 updateCategoryFilterName();
                 if (ajaxified) {
                     doSearch();
@@ -266,10 +208,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
                 } else {
                     quickSearchResults.removeClass('hidden');
                 }
-                inputEl[0].setSelectionRange(
-                    query.startsWith('in:topic') ? query.indexOf(' ') + 1 : 0,
-                    query.length,
-                );
+                inputEl[0].setSelectionRange(query.startsWith('in:topic') ? query.indexOf(' ') + 1 : 0, query.length);
             }
         });
 
@@ -291,11 +230,9 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
     };
 
     Search.api = function (data, callback) {
-        const apiURL =
-            config.relative_path + '/api/search?' + createQueryString(data);
+        const apiURL = config.relative_path + '/api/search?' + createQueryString(data);
         data.searchOnly = undefined;
-        const searchURL =
-            config.relative_path + '/search?' + createQueryString(data);
+        const searchURL = config.relative_path + '/search?' + createQueryString(data);
         $.get(apiURL, function (result) {
             result.url = searchURL;
             callback(result);
@@ -321,13 +258,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
             query.matchWords = data.matchWords;
         }
 
-        if (
-            postedBy &&
-            postedBy.length &&
-            (searchIn === 'posts' ||
-                searchIn === 'titles' ||
-                searchIn === 'titlesposts')
-        ) {
+        if (postedBy && postedBy.length && (searchIn === 'posts' || searchIn === 'titles' || searchIn === 'titlesposts')) {
             query.by = postedBy;
         }
 
@@ -385,9 +316,7 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
         if (!searchQuery || !els.length) {
             return;
         }
-        searchQuery = utils.escapeHTML(
-            searchQuery.replace(/^"/, '').replace(/"$/, '').trim(),
-        );
+        searchQuery = utils.escapeHTML(searchQuery.replace(/^"/, '').replace(/"$/, '').trim());
         const regexStr = searchQuery
             .split(' ')
             .map(function (word) {
@@ -408,21 +337,19 @@ define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
             result.html(
                 result.html().replace(regex, function (match, p1) {
                     return '<strong class="search-match">' + p1 + '</strong>';
-                }),
+                })
             );
 
             nested.forEach(function (nestedEl, i) {
                 result.html(
                     result.html().replace('<!-- ' + i + ' -->', function () {
                         return nestedEl.html();
-                    }),
+                    })
                 );
             });
         });
 
-        $('.search-result-text')
-            .find('img:not(.not-responsive)')
-            .addClass('img-responsive');
+        $('.search-result-text').find('img:not(.not-responsive)').addClass('img-responsive');
     };
 
     return Search;

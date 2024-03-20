@@ -1,10 +1,6 @@
 'use strict';
 
-define('forum/topic/move', ['categorySelector', 'alerts', 'hooks'], function (
-    categorySelector,
-    alerts,
-    hooks,
-) {
+define('forum/topic/move', ['categorySelector', 'alerts', 'hooks'], function (categorySelector, alerts, hooks) {
     const Move = {};
     let modal;
     let selectedCategory;
@@ -19,36 +15,27 @@ define('forum/topic/move', ['categorySelector', 'alerts', 'hooks'], function (
     };
 
     function showModal() {
-        app.parseAndTranslate(
-            'partials/move_thread_modal',
-            {},
-            function (html) {
-                modal = html;
-                modal.on('hidden.bs.modal', function () {
-                    modal.remove();
-                });
+        app.parseAndTranslate('partials/move_thread_modal', {}, function (html) {
+            modal = html;
+            modal.on('hidden.bs.modal', function () {
+                modal.remove();
+            });
 
-                modal.find('#move-confirm').addClass('hide');
+            modal.find('#move-confirm').addClass('hide');
 
-                if (Move.moveAll || (Move.tids && Move.tids.length > 1)) {
-                    modal
-                        .find('.modal-header h3')
-                        .translateText('[[topic:move_topics]]');
-                }
+            if (Move.moveAll || (Move.tids && Move.tids.length > 1)) {
+                modal.find('.modal-header h3').translateText('[[topic:move_topics]]');
+            }
 
-                categorySelector.init(
-                    modal.find('[component="category-selector"]'),
-                    {
-                        onSelect: onCategorySelected,
-                        privilege: 'moderate',
-                    },
-                );
+            categorySelector.init(modal.find('[component="category-selector"]'), {
+                onSelect: onCategorySelected,
+                privilege: 'moderate',
+            });
 
-                modal.find('#move_thread_commit').on('click', onCommitClicked);
+            modal.find('#move_thread_commit').on('click', onCommitClicked);
 
-                modal.modal('show');
-            },
-        );
+            modal.modal('show');
+        });
     }
 
     function onCategorySelected(category) {
@@ -59,26 +46,15 @@ define('forum/topic/move', ['categorySelector', 'alerts', 'hooks'], function (
     function onCommitClicked() {
         const commitEl = modal.find('#move_thread_commit');
 
-        if (
-            !commitEl.prop('disabled') &&
-            selectedCategory &&
-            selectedCategory.cid
-        ) {
+        if (!commitEl.prop('disabled') && selectedCategory && selectedCategory.cid) {
             commitEl.prop('disabled', true);
 
             modal.modal('hide');
-            let message =
-                '[[topic:topic_move_success, ' + selectedCategory.name + ']]';
+            let message = '[[topic:topic_move_success, ' + selectedCategory.name + ']]';
             if (Move.tids && Move.tids.length > 1) {
-                message =
-                    '[[topic:topic_move_multiple_success, ' +
-                    selectedCategory.name +
-                    ']]';
+                message = '[[topic:topic_move_multiple_success, ' + selectedCategory.name + ']]';
             } else if (!Move.tids) {
-                message =
-                    '[[topic:topic_move_all_success, ' +
-                    selectedCategory.name +
-                    ']]';
+                message = '[[topic:topic_move_all_success, ' + selectedCategory.name + ']]';
             }
             const data = {
                 tids: Move.tids ? Move.tids.slice() : null,
@@ -88,9 +64,7 @@ define('forum/topic/move', ['categorySelector', 'alerts', 'hooks'], function (
             };
             if (config.undoTimeout > 0) {
                 return alerts.alert({
-                    alert_id:
-                        'tids_move_' +
-                        (Move.tids ? Move.tids.join('-') : 'all'),
+                    alert_id: 'tids_move_' + (Move.tids ? Move.tids.join('-') : 'all'),
                     title: '[[topic:thread_tools.move]]',
                     message: message,
                     type: 'success',
@@ -112,19 +86,15 @@ define('forum/topic/move', ['categorySelector', 'alerts', 'hooks'], function (
     function moveTopics(data) {
         hooks.fire('action:topic.move', data);
 
-        socket.emit(
-            !data.tids ? 'topics.moveAll' : 'topics.move',
-            data,
-            function (err) {
-                if (err) {
-                    return alerts.error(err);
-                }
+        socket.emit(!data.tids ? 'topics.moveAll' : 'topics.move', data, function (err) {
+            if (err) {
+                return alerts.error(err);
+            }
 
-                if (typeof data.onComplete === 'function') {
-                    data.onComplete();
-                }
-            },
-        );
+            if (typeof data.onComplete === 'function') {
+                data.onComplete();
+            }
+        });
     }
 
     return Move;

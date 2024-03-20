@@ -16,11 +16,7 @@ followController.getFollowers = async function (req, res, next) {
 };
 
 async function getFollow(tpl, name, req, res, next) {
-    const userData = await accountHelpers.getUserDataByUserSlug(
-        req.params.userslug,
-        req.uid,
-        req.query,
-    );
+    const userData = await accountHelpers.getUserDataByUserSlug(req.params.userslug, req.uid, req.query);
     if (!userData) {
         return next();
     }
@@ -35,15 +31,11 @@ async function getFollow(tpl, name, req, res, next) {
     const method = name === 'following' ? 'getFollowing' : 'getFollowers';
     userData.users = await user[method](userData.uid, start, stop);
 
-    const count =
-        name === 'following' ? userData.followingCount : userData.followerCount;
+    const count = name === 'following' ? userData.followingCount : userData.followerCount;
     const pageCount = Math.ceil(count / resultsPerPage);
     userData.pagination = pagination.create(page, pageCount);
 
-    userData.breadcrumbs = helpers.buildBreadcrumbs([
-        { text: userData.username, url: `/user/${userData.userslug}` },
-        { text: `[[user:${name}]]` },
-    ]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: `[[user:${name}]]` }]);
 
     res.render(tpl, userData);
 }

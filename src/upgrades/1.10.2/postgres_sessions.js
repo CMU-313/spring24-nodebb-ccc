@@ -38,7 +38,7 @@ ANALYZE "session";
 COMMIT;`,
             err => {
                 callback(err);
-            },
+            }
         );
     },
 };

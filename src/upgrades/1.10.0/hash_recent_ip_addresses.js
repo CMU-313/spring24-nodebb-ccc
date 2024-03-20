@@ -31,34 +31,19 @@ module.exports = {
                             .update(set.value + nconf.get('secret'))
                             .digest('hex');
 
-                        async.series(
-                            [
-                                async.apply(
-                                    db.sortedSetAdd,
-                                    'ip:recent',
-                                    set.score,
-                                    hash,
-                                ),
-                                async.apply(
-                                    db.sortedSetRemove,
-                                    'ip:recent',
-                                    set.value,
-                                ),
-                            ],
-                            err => {
-                                progress.incr();
-                                next(err);
-                            },
-                        );
+                        async.series([async.apply(db.sortedSetAdd, 'ip:recent', set.score, hash), async.apply(db.sortedSetRemove, 'ip:recent', set.value)], err => {
+                            progress.incr();
+                            next(err);
+                        });
                     },
-                    next,
+                    next
                 );
             },
             {
                 withScores: 1,
                 progress: this.progress,
             },
-            callback,
+            callback
         );
     },
 };

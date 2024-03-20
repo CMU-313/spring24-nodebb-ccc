@@ -61,10 +61,7 @@ module.exports = function (SocketTopics) {
         const now = Date.now();
         await Promise.all(
             tids.map(async tid => {
-                const topicData = await topics.getTopicFields(tid, [
-                    'tid',
-                    'cid',
-                ]);
+                const topicData = await topics.getTopicFields(tid, ['tid', 'cid']);
                 if (!topicData.tid) {
                     throw new Error('[[error:no-topic]]');
                 }
@@ -74,13 +71,9 @@ module.exports = function (SocketTopics) {
                 }
                 await topics.markAsUnreadForAll(tid);
                 await topics.updateRecent(tid, now);
-                await db.sortedSetAdd(
-                    `cid:${topicData.cid}:tids:lastposttime`,
-                    now,
-                    tid,
-                );
+                await db.sortedSetAdd(`cid:${topicData.cid}:tids:lastposttime`, now, tid);
                 await topics.setTopicField(tid, 'lastposttime', now);
-            }),
+            })
         );
         topics.pushUnreadCount(socket.uid);
     };

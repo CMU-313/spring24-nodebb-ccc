@@ -13,7 +13,7 @@ module.exports = function (Categories) {
         const pids = await db.getSortedSetRevRange(
             cids.map(cid => `cid:${cid}:pids`),
             0,
-            24,
+            24
         );
         const postData = await posts.getPostsFields(pids, ['uid']);
         return _.uniq(postData.map(post => post.uid).filter(uid => uid));

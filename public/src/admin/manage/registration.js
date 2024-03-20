@@ -1,9 +1,6 @@
 'use strict';
 
-define('admin/manage/registration', ['bootbox', 'alerts'], function (
-    bootbox,
-    alerts,
-) {
+define('admin/manage/registration', ['bootbox', 'alerts'], function (bootbox, alerts) {
     const Registration = {};
 
     Registration.init = function () {
@@ -11,10 +8,7 @@ define('admin/manage/registration', ['bootbox', 'alerts'], function (
             const parent = $(this).parents('[data-username]');
             const action = $(this).attr('data-action');
             const username = parent.attr('data-username');
-            const method =
-                action === 'accept'
-                    ? 'user.acceptRegistration'
-                    : 'user.rejectRegistration';
+            const method = action === 'accept' ? 'user.acceptRegistration' : 'user.rejectRegistration';
 
             socket.emit(method, { username: username }, function (err) {
                 if (err) {
@@ -26,9 +20,7 @@ define('admin/manage/registration', ['bootbox', 'alerts'], function (
         });
 
         $('.invites-list').on('click', '[data-action]', function () {
-            const parent = $(this).parents(
-                '[data-invitation-mail][data-invited-by]',
-            );
+            const parent = $(this).parents('[data-invitation-mail][data-invited-by]');
             const email = parent.attr('data-invitation-mail');
             const invitedBy = parent.attr('data-invited-by');
             const action = $(this).attr('data-action');
@@ -38,32 +30,22 @@ define('admin/manage/registration', ['bootbox', 'alerts'], function (
                 const nextRow = parent.next();
                 const thisRowinvitedBy = parent.find('.invited-by');
                 const nextRowInvitedBy = nextRow.find('.invited-by');
-                if (
-                    nextRowInvitedBy.html() !== undefined &&
-                    nextRowInvitedBy.html().length < 2
-                ) {
+                if (nextRowInvitedBy.html() !== undefined && nextRowInvitedBy.html().length < 2) {
                     nextRowInvitedBy.html(thisRowinvitedBy.html());
                 }
                 parent.remove();
             };
             if (action === 'delete') {
-                bootbox.confirm(
-                    '[[admin/manage/registration:invitations.confirm-delete]]',
-                    function (confirm) {
-                        if (confirm) {
-                            socket.emit(
-                                method,
-                                { email: email, invitedBy: invitedBy },
-                                function (err) {
-                                    if (err) {
-                                        return alerts.error(err);
-                                    }
-                                    removeRow();
-                                },
-                            );
-                        }
-                    },
-                );
+                bootbox.confirm('[[admin/manage/registration:invitations.confirm-delete]]', function (confirm) {
+                    if (confirm) {
+                        socket.emit(method, { email: email, invitedBy: invitedBy }, function (err) {
+                            if (err) {
+                                return alerts.error(err);
+                            }
+                            removeRow();
+                        });
+                    }
+                });
             }
             return false;
         });

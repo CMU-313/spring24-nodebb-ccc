@@ -19,11 +19,7 @@ module.exports = {
         async.parallel(
             [
                 function (cb) {
-                    const keys = [
-                        'chat-incoming',
-                        'chat-outgoing',
-                        'notification',
-                    ];
+                    const keys = ['chat-incoming', 'chat-outgoing', 'notification'];
 
                     db.getObject('settings:sounds', (err, settings) => {
                         if (err || !settings) {
@@ -31,10 +27,7 @@ module.exports = {
                         }
 
                         keys.forEach(key => {
-                            if (
-                                settings[key] &&
-                                !settings[key].includes(' | ')
-                            ) {
+                            if (settings[key] && !settings[key].includes(' | ')) {
                                 settings[key] = map[settings[key]] || '';
                             }
                         });
@@ -43,11 +36,7 @@ module.exports = {
                     });
                 },
                 function (cb) {
-                    const keys = [
-                        'notificationSound',
-                        'incomingChatSound',
-                        'outgoingChatSound',
-                    ];
+                    const keys = ['notificationSound', 'incomingChatSound', 'outgoingChatSound'];
 
                     batch.processSortedSet(
                         'users:joindate',
@@ -55,48 +44,32 @@ module.exports = {
                             async.each(
                                 ids,
                                 (uid, next) => {
-                                    db.getObject(
-                                        `user:${uid}:settings`,
-                                        (err, settings) => {
-                                            if (err || !settings) {
-                                                return next(err);
+                                    db.getObject(`user:${uid}:settings`, (err, settings) => {
+                                        if (err || !settings) {
+                                            return next(err);
+                                        }
+                                        const newSettings = {};
+                                        keys.forEach(key => {
+                                            if (settings[key] && !settings[key].includes(' | ')) {
+                                                newSettings[key] = map[settings[key]] || '';
                                             }
-                                            const newSettings = {};
-                                            keys.forEach(key => {
-                                                if (
-                                                    settings[key] &&
-                                                    !settings[key].includes(
-                                                        ' | ',
-                                                    )
-                                                ) {
-                                                    newSettings[key] =
-                                                        map[settings[key]] ||
-                                                        '';
-                                                }
-                                            });
+                                        });
 
-                                            if (
-                                                Object.keys(newSettings).length
-                                            ) {
-                                                db.setObject(
-                                                    `user:${uid}:settings`,
-                                                    newSettings,
-                                                    next,
-                                                );
-                                            } else {
-                                                setImmediate(next);
-                                            }
-                                        },
-                                    );
+                                        if (Object.keys(newSettings).length) {
+                                            db.setObject(`user:${uid}:settings`, newSettings, next);
+                                        } else {
+                                            setImmediate(next);
+                                        }
+                                    });
                                 },
-                                next,
+                                next
                             );
                         },
-                        cb,
+                        cb
                     );
                 },
             ],
-            callback,
+            callback
         );
     },
 };

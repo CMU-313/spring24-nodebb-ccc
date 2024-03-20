@@ -8,24 +8,7 @@ const utils = require('../utils');
 const translator = require('../translator');
 const plugins = require('../plugins');
 
-const intFields = [
-    'tid',
-    'cid',
-    'uid',
-    'mainPid',
-    'postcount',
-    'viewcount',
-    'postercount',
-    'deleted',
-    'locked',
-    'pinned',
-    'pinExpiry',
-    'timestamp',
-    'upvotes',
-    'downvotes',
-    'lastposttime',
-    'deleterUid',
-];
+const intFields = ['tid', 'cid', 'uid', 'mainPid', 'postcount', 'viewcount', 'postercount', 'deleted', 'locked', 'pinned', 'pinExpiry', 'timestamp', 'upvotes', 'downvotes', 'lastposttime', 'deleterUid'];
 
 module.exports = function (Topics) {
     Topics.getTopicsFields = async function (tids, fields) {
@@ -94,9 +77,7 @@ module.exports = function (Topics) {
 function escapeTitle(topicData) {
     if (topicData) {
         if (topicData.title) {
-            topicData.title = translator.escape(
-                validator.escape(topicData.title),
-            );
+            topicData.title = translator.escape(validator.escape(topicData.title));
         }
         if (topicData.titleRaw) {
             topicData.titleRaw = translator.escape(topicData.titleRaw);

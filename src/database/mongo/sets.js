@@ -26,7 +26,7 @@ module.exports = function (module) {
             },
             {
                 upsert: true,
-            },
+            }
         );
     };
 
@@ -41,9 +41,7 @@ module.exports = function (module) {
 
         value = value.map(v => helpers.valueToString(v));
 
-        const bulk = module.client
-            .collection('objects')
-            .initializeUnorderedBulkOp();
+        const bulk = module.client.collection('objects').initializeUnorderedBulkOp();
 
         for (let i = 0; i < keys.length; i += 1) {
             bulk.find({ _key: keys[i] })
@@ -79,7 +77,7 @@ module.exports = function (module) {
             },
             {
                 $pullAll: { members: value },
-            },
+            }
         );
     };
 
@@ -95,7 +93,7 @@ module.exports = function (module) {
             },
             {
                 $pull: { members: value },
-            },
+            }
         );
     };
 
@@ -112,7 +110,7 @@ module.exports = function (module) {
             },
             {
                 projection: { _id: 0, members: 0 },
-            },
+            }
         );
         return item !== null && item !== undefined;
     };
@@ -129,11 +127,9 @@ module.exports = function (module) {
             },
             {
                 projection: { _id: 0, _key: 0 },
-            },
+            }
         );
-        const membersSet = new Set(
-            result && Array.isArray(result.members) ? result.members : [],
-        );
+        const membersSet = new Set(result && Array.isArray(result.members) ? result.members : []);
         return values.map(v => membersSet.has(v));
     };
 
@@ -152,7 +148,7 @@ module.exports = function (module) {
                 },
                 {
                     projection: { _id: 0, members: 0 },
-                },
+                }
             )
             .toArray();
 
@@ -175,7 +171,7 @@ module.exports = function (module) {
             },
             {
                 projection: { _id: 0, _key: 0 },
-            },
+            }
         );
         return data ? data.members : [];
     };
@@ -192,7 +188,7 @@ module.exports = function (module) {
                 },
                 {
                     projection: { _id: 0 },
-                },
+                }
             )
             .toArray();
 
@@ -210,10 +206,7 @@ module.exports = function (module) {
         }
         const data = await module.client
             .collection('objects')
-            .aggregate([
-                { $match: { _key: key } },
-                { $project: { _id: 0, count: { $size: '$members' } } },
-            ])
+            .aggregate([{ $match: { _key: key } }, { $project: { _id: 0, count: { $size: '$members' } } }])
             .toArray();
         return Array.isArray(data) && data.length ? data[0].count : 0;
     };
@@ -221,19 +214,14 @@ module.exports = function (module) {
     module.setsCount = async function (keys) {
         const data = await module.client
             .collection('objects')
-            .aggregate([
-                { $match: { _key: { $in: keys } } },
-                { $project: { _id: 0, _key: 1, count: { $size: '$members' } } },
-            ])
+            .aggregate([{ $match: { _key: { $in: keys } } }, { $project: { _id: 0, _key: 1, count: { $size: '$members' } } }])
             .toArray();
         const map = _.keyBy(data, '_key');
         return keys.map(key => (map.hasOwnProperty(key) ? map[key].count : 0));
     };
 
     module.setRemoveRandom = async function (key) {
-        const data = await module.client
-            .collection('objects')
-            .findOne({ _key: key });
+        const data = await module.client.collection('objects').findOne({ _key: key });
         if (!data) {
             return;
         }

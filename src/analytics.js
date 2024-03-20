@@ -52,7 +52,7 @@ Analytics.init = async function () {
             }
         },
         null,
-        true,
+        true
     );
 
     if (runJobs) {
@@ -141,9 +141,7 @@ Analytics.writeData = async function () {
     // Build list of metrics that were updated
     let metrics = ['pageviews', 'pageviews:month'];
     metrics.forEach(metric => {
-        const toAdd = ['registered', 'guest', 'bot'].map(
-            type => `${metric}:${type}`,
-        );
+        const toAdd = ['registered', 'guest', 'bot'].map(type => `${metric}:${type}`);
         metrics = [...metrics, ...toAdd];
     });
     metrics.push('uniquevisitors');
@@ -153,78 +151,36 @@ Analytics.writeData = async function () {
     month.setHours(0, 0, 0, 0);
 
     if (total.pageViews > 0) {
-        incrByBulk.push([
-            'analytics:pageviews',
-            total.pageViews,
-            today.getTime(),
-        ]);
-        incrByBulk.push([
-            'analytics:pageviews:month',
-            total.pageViews,
-            month.getTime(),
-        ]);
+        incrByBulk.push(['analytics:pageviews', total.pageViews, today.getTime()]);
+        incrByBulk.push(['analytics:pageviews:month', total.pageViews, month.getTime()]);
         total.pageViews = 0;
     }
 
     if (total.pageViewsRegistered > 0) {
-        incrByBulk.push([
-            'analytics:pageviews:registered',
-            total.pageViewsRegistered,
-            today.getTime(),
-        ]);
-        incrByBulk.push([
-            'analytics:pageviews:month:registered',
-            total.pageViewsRegistered,
-            month.getTime(),
-        ]);
+        incrByBulk.push(['analytics:pageviews:registered', total.pageViewsRegistered, today.getTime()]);
+        incrByBulk.push(['analytics:pageviews:month:registered', total.pageViewsRegistered, month.getTime()]);
         total.pageViewsRegistered = 0;
     }
 
     if (total.pageViewsGuest > 0) {
-        incrByBulk.push([
-            'analytics:pageviews:guest',
-            total.pageViewsGuest,
-            today.getTime(),
-        ]);
-        incrByBulk.push([
-            'analytics:pageviews:month:guest',
-            total.pageViewsGuest,
-            month.getTime(),
-        ]);
+        incrByBulk.push(['analytics:pageviews:guest', total.pageViewsGuest, today.getTime()]);
+        incrByBulk.push(['analytics:pageviews:month:guest', total.pageViewsGuest, month.getTime()]);
         total.pageViewsGuest = 0;
     }
 
     if (total.pageViewsBot > 0) {
-        incrByBulk.push([
-            'analytics:pageviews:bot',
-            total.pageViewsBot,
-            today.getTime(),
-        ]);
-        incrByBulk.push([
-            'analytics:pageviews:month:bot',
-            total.pageViewsBot,
-            month.getTime(),
-        ]);
+        incrByBulk.push(['analytics:pageviews:bot', total.pageViewsBot, today.getTime()]);
+        incrByBulk.push(['analytics:pageviews:month:bot', total.pageViewsBot, month.getTime()]);
         total.pageViewsBot = 0;
     }
 
     if (total.uniquevisitors > 0) {
-        incrByBulk.push([
-            'analytics:uniquevisitors',
-            total.uniquevisitors,
-            today.getTime(),
-        ]);
+        incrByBulk.push(['analytics:uniquevisitors', total.uniquevisitors, today.getTime()]);
         total.uniquevisitors = 0;
     }
 
     if (total.uniqueIPCount > 0) {
-        dbQueue.push(
-            db.incrObjectFieldBy(
-                'global',
-                'uniqueIPCount',
-                total.uniqueIPCount,
-            ),
-        );
+        dbQueue.push(db.incrObjectFieldBy('global', 'uniqueIPCount', total.uniqueIPCount));
         total.uniqueIPCount = 0;
     }
 
@@ -243,16 +199,14 @@ Analytics.writeData = async function () {
         db.sortedSetAdd(
             'analyticsKeys',
             metrics.map(() => +Date.now()),
-            metrics,
-        ),
+            metrics
+        )
     );
 
     try {
         await Promise.all(dbQueue);
     } catch (err) {
-        winston.error(
-            `[analytics] Encountered error while writing analytics to data store\n${err.stack}`,
-        );
+        winston.error(`[analytics] Encountered error while writing analytics to data store\n${err.stack}`);
     }
 };
 
@@ -302,11 +256,7 @@ Analytics.getDailyStatsForSet = async function (set, day, numDays) {
 
     while (numDays > 0) {
         /* eslint-disable no-await-in-loop */
-        const dayData = await Analytics.getHourlyStatsForSet(
-            set,
-            day.getTime() - 1000 * 60 * 60 * 24 * (numDays - 1),
-            24,
-        );
+        const dayData = await Analytics.getHourlyStatsForSet(set, day.getTime() - 1000 * 60 * 60 * 24 * (numDays - 1), 24);
         daysArr.push(dayData.reduce((cur, next) => cur + next));
         numDays -= 1;
     }
@@ -321,10 +271,7 @@ Analytics.getSummary = async function () {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const [seven, thirty] = await Promise.all([
-        Analytics.getDailyStatsForSet('analytics:pageviews', today, 7),
-        Analytics.getDailyStatsForSet('analytics:pageviews', today, 30),
-    ]);
+    const [seven, thirty] = await Promise.all([Analytics.getDailyStatsForSet('analytics:pageviews', today, 7), Analytics.getDailyStatsForSet('analytics:pageviews', today, 30)]);
 
     return {
         seven: seven.reduce((sum, cur) => sum + cur, 0),
@@ -334,56 +281,24 @@ Analytics.getSummary = async function () {
 
 Analytics.getCategoryAnalytics = async function (cid) {
     return await utils.promiseParallel({
-        'pageviews:hourly': Analytics.getHourlyStatsForSet(
-            `analytics:pageviews:byCid:${cid}`,
-            Date.now(),
-            24,
-        ),
-        'pageviews:daily': Analytics.getDailyStatsForSet(
-            `analytics:pageviews:byCid:${cid}`,
-            Date.now(),
-            30,
-        ),
-        'topics:daily': Analytics.getDailyStatsForSet(
-            `analytics:topics:byCid:${cid}`,
-            Date.now(),
-            7,
-        ),
-        'posts:daily': Analytics.getDailyStatsForSet(
-            `analytics:posts:byCid:${cid}`,
-            Date.now(),
-            7,
-        ),
+        'pageviews:hourly': Analytics.getHourlyStatsForSet(`analytics:pageviews:byCid:${cid}`, Date.now(), 24),
+        'pageviews:daily': Analytics.getDailyStatsForSet(`analytics:pageviews:byCid:${cid}`, Date.now(), 30),
+        'topics:daily': Analytics.getDailyStatsForSet(`analytics:topics:byCid:${cid}`, Date.now(), 7),
+        'posts:daily': Analytics.getDailyStatsForSet(`analytics:posts:byCid:${cid}`, Date.now(), 7),
     });
 };
 
 Analytics.getErrorAnalytics = async function () {
     return await utils.promiseParallel({
-        'not-found': Analytics.getDailyStatsForSet(
-            'analytics:errors:404',
-            Date.now(),
-            7,
-        ),
-        toobusy: Analytics.getDailyStatsForSet(
-            'analytics:errors:503',
-            Date.now(),
-            7,
-        ),
+        'not-found': Analytics.getDailyStatsForSet('analytics:errors:404', Date.now(), 7),
+        toobusy: Analytics.getDailyStatsForSet('analytics:errors:503', Date.now(), 7),
     });
 };
 
 Analytics.getBlacklistAnalytics = async function () {
     return await utils.promiseParallel({
-        daily: Analytics.getDailyStatsForSet(
-            'analytics:blacklist',
-            Date.now(),
-            7,
-        ),
-        hourly: Analytics.getHourlyStatsForSet(
-            'analytics:blacklist',
-            Date.now(),
-            24,
-        ),
+        daily: Analytics.getDailyStatsForSet('analytics:blacklist', Date.now(), 7),
+        hourly: Analytics.getHourlyStatsForSet('analytics:blacklist', Date.now(), 24),
     });
 };
 

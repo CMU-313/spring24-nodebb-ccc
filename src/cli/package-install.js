@@ -22,9 +22,7 @@ pkgInstall.updatePackageFile = () => {
     let oldPackageContents;
 
     try {
-        oldPackageContents = JSON.parse(
-            fs.readFileSync(paths.currentPackage, 'utf8'),
-        );
+        oldPackageContents = JSON.parse(fs.readFileSync(paths.currentPackage, 'utf8'));
     } catch (e) {
         if (e.code !== 'ENOENT') {
             throw e;
@@ -36,18 +34,14 @@ pkgInstall.updatePackageFile = () => {
     }
 
     const _ = require('lodash');
-    const defaultPackageContents = JSON.parse(
-        fs.readFileSync(paths.installPackage, 'utf8'),
-    );
+    const defaultPackageContents = JSON.parse(fs.readFileSync(paths.installPackage, 'utf8'));
 
     let dependencies = {};
-    Object.entries(oldPackageContents.dependencies || {}).forEach(
-        ([dep, version]) => {
-            if (pluginNamePattern.test(dep)) {
-                dependencies[dep] = version;
-            }
-        },
-    );
+    Object.entries(oldPackageContents.dependencies || {}).forEach(([dep, version]) => {
+        if (pluginNamePattern.test(dep)) {
+            dependencies[dep] = version;
+        }
+    });
 
     const { devDependencies } = defaultPackageContents;
 
@@ -62,10 +56,7 @@ pkgInstall.updatePackageFile = () => {
         dependencies,
         devDependencies,
     };
-    fs.writeFileSync(
-        paths.currentPackage,
-        JSON.stringify(packageContents, null, 4),
-    );
+    fs.writeFileSync(paths.currentPackage, JSON.stringify(packageContents, null, 4));
 };
 
 pkgInstall.supportedPackageManager = ['npm', 'cnpm', 'pnpm', 'yarn'];
@@ -75,38 +66,22 @@ pkgInstall.getPackageManager = () => {
         const packageContents = require(paths.currentPackage);
         // This regex technically allows invalid values:
         // cnpm isn't supported by corepack and it doesn't enforce a version string being present
-        const pmRegex = new RegExp(
-            `^(?<packageManager>${pkgInstall.supportedPackageManager.join('|')})@?[\\d\\w\\.\\-]*$`,
-        );
-        const packageManager = packageContents.packageManager
-            ? packageContents.packageManager.match(pmRegex)
-            : false;
+        const pmRegex = new RegExp(`^(?<packageManager>${pkgInstall.supportedPackageManager.join('|')})@?[\\d\\w\\.\\-]*$`);
+        const packageManager = packageContents.packageManager ? packageContents.packageManager.match(pmRegex) : false;
         if (packageManager) {
             return packageManager.groups.packageManager;
         }
-        fs.accessSync(
-            path.join(paths.nodeModules, 'nconf/package.json'),
-            fs.constants.R_OK,
-        );
+        fs.accessSync(path.join(paths.nodeModules, 'nconf/package.json'), fs.constants.R_OK);
         const nconf = require('nconf');
         if (!Object.keys(nconf.stores).length) {
             // Quick & dirty nconf setup for when you cannot rely on nconf having been required already
-            const configFile = path.resolve(
-                __dirname,
-                '../../',
-                nconf.any(['config', 'CONFIG']) || 'config.json',
-            );
+            const configFile = path.resolve(__dirname, '../../', nconf.any(['config', 'CONFIG']) || 'config.json');
             nconf.env().file({
                 // not sure why adding .argv() causes the process to terminate
                 file: configFile,
             });
         }
-        if (
-            nconf.get('package_manager') &&
-            !pkgInstall.supportedPackageManager.includes(
-                nconf.get('package_manager'),
-            )
-        ) {
+        if (nconf.get('package_manager') && !pkgInstall.supportedPackageManager.includes(nconf.get('package_manager'))) {
             nconf.clear('package_manager');
         }
 
@@ -128,10 +103,7 @@ function getPackageManagerByLockfile() {
         pnpm: 'pnpm-lock.yaml',
     })) {
         try {
-            fs.accessSync(
-                path.resolve(__dirname, `../../${lockfile}`),
-                fs.constants.R_OK,
-            );
+            fs.accessSync(path.resolve(__dirname, `../../${lockfile}`), fs.constants.R_OK);
             return packageManager;
         } catch (e) {}
     }
@@ -182,33 +154,21 @@ pkgInstall.preserveExtraneousPlugins = () => {
         return;
     }
 
-    const packages = fs
-        .readdirSync(paths.nodeModules)
-        .filter(pkgName => pluginNamePattern.test(pkgName));
+    const packages = fs.readdirSync(paths.nodeModules).filter(pkgName => pluginNamePattern.test(pkgName));
 
-    const packageContents = JSON.parse(
-        fs.readFileSync(paths.currentPackage, 'utf8'),
-    );
+    const packageContents = JSON.parse(fs.readFileSync(paths.currentPackage, 'utf8'));
 
     const extraneous = packages
         // only extraneous plugins (ones not in package.json) which are not links
         .filter(pkgName => {
-            const extraneous =
-                !packageContents.dependencies.hasOwnProperty(pkgName);
-            const isLink = fs
-                .lstatSync(path.join(paths.nodeModules, pkgName))
-                .isSymbolicLink();
+            const extraneous = !packageContents.dependencies.hasOwnProperty(pkgName);
+            const isLink = fs.lstatSync(path.join(paths.nodeModules, pkgName)).isSymbolicLink();
 
             return extraneous && !isLink;
         })
         // reduce to a map of package names to package versions
         .reduce((map, pkgName) => {
-            const pkgConfig = JSON.parse(
-                fs.readFileSync(
-                    path.join(paths.nodeModules, pkgName, 'package.json'),
-                    'utf8',
-                ),
-            );
+            const pkgConfig = JSON.parse(fs.readFileSync(path.join(paths.nodeModules, pkgName, 'package.json'), 'utf8'));
             map[pkgName] = pkgConfig.version;
             return map;
         }, {});
@@ -219,8 +179,5 @@ pkgInstall.preserveExtraneousPlugins = () => {
         ...extraneous,
     });
 
-    fs.writeFileSync(
-        paths.currentPackage,
-        JSON.stringify(packageContents, null, 4),
-    );
+    fs.writeFileSync(paths.currentPackage, JSON.stringify(packageContents, null, 4));
 };

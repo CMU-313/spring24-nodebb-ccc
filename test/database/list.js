@@ -54,7 +54,7 @@ describe('List methods', () => {
                 err => {
                     assert.equal(err, null);
                     done();
-                },
+                }
             );
         });
 
@@ -90,7 +90,7 @@ describe('List methods', () => {
                         db.listAppend('testList4', 5, next);
                     },
                 ],
-                done,
+                done
             );
         });
 
@@ -143,7 +143,7 @@ describe('List methods', () => {
                         db.listPrepend('testList7', 9, next);
                     },
                 ],
-                done,
+                done
             );
         });
 
@@ -166,16 +166,7 @@ describe('List methods', () => {
 
     describe('listRemoveAll()', () => {
         before(done => {
-            async.series(
-                [
-                    async.apply(db.listAppend, 'testList5', 1),
-                    async.apply(db.listAppend, 'testList5', 1),
-                    async.apply(db.listAppend, 'testList5', 1),
-                    async.apply(db.listAppend, 'testList5', 2),
-                    async.apply(db.listAppend, 'testList5', 5),
-                ],
-                done,
-            );
+            async.series([async.apply(db.listAppend, 'testList5', 1), async.apply(db.listAppend, 'testList5', 1), async.apply(db.listAppend, 'testList5', 1), async.apply(db.listAppend, 'testList5', 2), async.apply(db.listAppend, 'testList5', 5)], done);
         });
 
         it('should remove all the matching elements of list', done => {
@@ -233,7 +224,7 @@ describe('List methods', () => {
                             done();
                         });
                     });
-                },
+                }
             );
         });
 

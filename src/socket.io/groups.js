@@ -16,10 +16,7 @@ SocketGroups.before = async (socket, method, data) => {
 
 SocketGroups.addMember = async (socket, data) => {
     await isOwner(socket, data);
-    if (
-        data.groupName === 'administrators' ||
-        groups.isPrivilegeGroup(data.groupName)
-    ) {
+    if (data.groupName === 'administrators' || groups.isPrivilegeGroup(data.groupName)) {
         throw new Error('[[error:not-allowed]]');
     }
     if (!data.uid) {
@@ -51,10 +48,7 @@ async function isOwner(socket, data) {
         group: groups.getGroupData(data.groupName),
     });
 
-    const isOwner =
-        results.isOwner ||
-        results.hasAdminPrivilege ||
-        (results.isGlobalModerator && !results.group.system);
+    const isOwner = results.isOwner || results.hasAdminPrivilege || (results.isGlobalModerator && !results.group.system);
     if (!isOwner) {
         throw new Error('[[error:no-privileges]]');
     }
@@ -106,7 +100,7 @@ async function acceptRejectAll(method, socket, data) {
     await Promise.all(
         uids.map(async uid => {
             await method(socket, { groupName: data.groupName, toUid: uid });
-        }),
+        })
     );
 }
 
@@ -180,24 +174,15 @@ SocketGroups.search = async (socket, data) => {
 
     if (!data.query) {
         const groupsPerPage = 15;
-        const groupData = await groups.getGroupsBySort(
-            data.options.sort,
-            0,
-            groupsPerPage - 1,
-        );
+        const groupData = await groups.getGroupsBySort(data.options.sort, 0, groupsPerPage - 1);
         return groupData;
     }
-    data.options.filterHidden =
-        data.options.filterHidden || !(await user.isAdministrator(socket.uid));
+    data.options.filterHidden = data.options.filterHidden || !(await user.isAdministrator(socket.uid));
     return await groups.search(data.query, data.options);
 };
 
 SocketGroups.loadMore = async (socket, data) => {
-    if (
-        !data.sort ||
-        !utils.isNumber(data.after) ||
-        parseInt(data.after, 10) < 0
-    ) {
+    if (!data.sort || !utils.isNumber(data.after) || parseInt(data.after, 10) < 0) {
         throw new Error('[[error:invalid-data]]');
     }
 
@@ -224,21 +209,12 @@ SocketGroups.searchMembers = async (socket, data) => {
 };
 
 SocketGroups.loadMoreMembers = async (socket, data) => {
-    if (
-        !data.groupName ||
-        !utils.isNumber(data.after) ||
-        parseInt(data.after, 10) < 0
-    ) {
+    if (!data.groupName || !utils.isNumber(data.after) || parseInt(data.after, 10) < 0) {
         throw new Error('[[error:invalid-data]]');
     }
     await canSearchMembers(socket.uid, data.groupName);
     data.after = parseInt(data.after, 10);
-    const users = await groups.getOwnersAndMembers(
-        data.groupName,
-        socket.uid,
-        data.after,
-        data.after + 9,
-    );
+    const users = await groups.getOwnersAndMembers(data.groupName, socket.uid, data.after, data.after + 9);
     return {
         users: users,
         nextStart: data.after + 10,
@@ -246,19 +222,9 @@ SocketGroups.loadMoreMembers = async (socket, data) => {
 };
 
 async function canSearchMembers(uid, groupName) {
-    const [isHidden, isMember, hasAdminPrivilege, isGlobalMod, viewGroups] =
-        await Promise.all([
-            groups.isHidden(groupName),
-            groups.isMember(uid, groupName),
-            privileges.admin.can('admin:groups', uid),
-            user.isGlobalModerator(uid),
-            privileges.global.can('view:groups', uid),
-        ]);
+    const [isHidden, isMember, hasAdminPrivilege, isGlobalMod, viewGroups] = await Promise.all([groups.isHidden(groupName), groups.isMember(uid, groupName), privileges.admin.can('admin:groups', uid), user.isGlobalModerator(uid), privileges.global.can('view:groups', uid)]);
 
-    if (
-        !viewGroups ||
-        (isHidden && !isMember && !hasAdminPrivilege && !isGlobalMod)
-    ) {
+    if (!viewGroups || (isHidden && !isMember && !hasAdminPrivilege && !isGlobalMod)) {
         throw new Error('[[error:no-privileges]]');
     }
 }
@@ -302,13 +268,7 @@ async function canModifyGroup(uid, groupName) {
         isGlobalMod: user.isGlobalModerator(uid),
     });
 
-    if (
-        !(
-            results.isOwner ||
-            results.hasAdminPrivilege ||
-            (results.isGlobalMod && !results.system)
-        )
-    ) {
+    if (!(results.isOwner || results.hasAdminPrivilege || (results.isGlobalMod && !results.system))) {
         throw new Error('[[error:no-privileges]]');
     }
 }

@@ -65,14 +65,10 @@ exports.doTopicAction = async function (action, event, caller, { tids }) {
         tids.map(async tid => {
             const title = await topics.getTopicField(tid, 'title');
             const data = await topics.tools[action](tid, caller.uid);
-            const notifyUids = await privileges.categories.filterUids(
-                'topics:read',
-                data.cid,
-                uids,
-            );
+            const notifyUids = await privileges.categories.filterUids('topics:read', data.cid, uids);
             socketHelpers.emitToUids(event, data, notifyUids);
             await logTopicAction(action, caller, tid, title);
-        }),
+        })
     );
 };
 
@@ -91,13 +87,7 @@ async function logTopicAction(action, req, tid, title) {
     });
 }
 
-exports.postCommand = async function (
-    caller,
-    command,
-    eventName,
-    notification,
-    data,
-) {
+exports.postCommand = async function (caller, command, eventName, notification, data) {
     if (!caller.uid) {
         throw new Error('[[error:not-logged-in]]');
     }
@@ -109,10 +99,7 @@ exports.postCommand = async function (
     if (!data.room_id) {
         throw new Error(`[[error:invalid-room-id, ${data.room_id} ]]`);
     }
-    const [exists, deleted] = await Promise.all([
-        posts.exists(data.pid),
-        posts.getPostField(data.pid, 'deleted'),
-    ]);
+    const [exists, deleted] = await Promise.all([posts.exists(data.pid), posts.getPostField(data.pid, 'deleted')]);
 
     if (!exists) {
         throw new Error('[[error:invalid-pid]]');
@@ -134,13 +121,7 @@ exports.postCommand = async function (
         data: data,
         uid: caller.uid,
     });
-    return await executeCommand(
-        caller,
-        command,
-        eventName,
-        notification,
-        filteredData.data,
-    );
+    return await executeCommand(caller, command, eventName, notification, filteredData.data);
 };
 
 async function executeCommand(caller, command, eventName, notification, data) {
@@ -152,12 +133,7 @@ async function executeCommand(caller, command, eventName, notification, data) {
     if (result && command === 'upvote') {
         socketHelpers.upvote(result, notification);
     } else if (result && notification) {
-        socketHelpers.sendNotificationToPostOwner(
-            data.pid,
-            caller.uid,
-            command,
-            notification,
-        );
+        socketHelpers.sendNotificationToPostOwner(data.pid, caller.uid, command, notification);
     } else if (result && command === 'unvote') {
         socketHelpers.rescindUpvoteNotification(data.pid, caller.uid);
     }

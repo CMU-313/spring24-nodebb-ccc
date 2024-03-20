@@ -18,9 +18,7 @@ define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
             container = el || $body;
         }
         previousScrollTop = $(window).scrollTop();
-        $(window)
-            .off('scroll', startScrollTimeout)
-            .on('scroll', startScrollTimeout);
+        $(window).off('scroll', startScrollTimeout).on('scroll', startScrollTimeout);
 
         if ($body.height() <= $(window).height()) {
             callback(1);
@@ -39,9 +37,7 @@ define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
 
     function onScroll() {
         const bsEnv = utils.findBootstrapEnvironment();
-        const mobileComposerOpen =
-            (bsEnv === 'xs' || bsEnv === 'sm') &&
-            $('html').hasClass('composing');
+        const mobileComposerOpen = (bsEnv === 'xs' || bsEnv === 'sm') && $('html').hasClass('composing');
         if (loadingMore || mobileComposerOpen) {
             return;
         }
@@ -49,9 +45,7 @@ define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
         const wh = $(window).height();
         const viewportHeight = container.height() - wh;
         const offsetTop = container.offset() ? container.offset().top : 0;
-        const scrollPercent =
-            (100 * (currentScrollTop - offsetTop)) /
-            (viewportHeight <= 0 ? wh : viewportHeight);
+        const scrollPercent = (100 * (currentScrollTop - offsetTop)) / (viewportHeight <= 0 ? wh : viewportHeight);
 
         const top = 15;
         const bottom = 85;
@@ -59,10 +53,7 @@ define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
 
         if (scrollPercent < top && currentScrollTop < previousScrollTop) {
             callback(direction);
-        } else if (
-            scrollPercent > bottom &&
-            currentScrollTop > previousScrollTop
-        ) {
+        } else if (scrollPercent > bottom && currentScrollTop > previousScrollTop) {
             callback(direction);
         } else if (scrollPercent < 0 && direction > 0 && viewportHeight < 0) {
             callback(direction);
@@ -96,13 +87,7 @@ define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
             return;
         }
         loadingMore = true;
-        const url =
-            config.relative_path +
-            '/api' +
-            location.pathname.replace(
-                new RegExp('^' + config.relative_path),
-                '',
-            );
+        const url = config.relative_path + '/api' + location.pathname.replace(new RegExp('^' + config.relative_path), '');
         const hookData = { url: url, data: data };
         hooks.fire('action:infinitescroll.loadmore.xhr', hookData);
 

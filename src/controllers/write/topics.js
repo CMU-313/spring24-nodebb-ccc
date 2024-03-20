@@ -72,11 +72,7 @@ Topics.purge = async (req, res) => {
 Topics.pin = async (req, res) => {
     // Pin expiry was not available w/ sockets hence not included in api lib method
     if (req.body.expiry) {
-        await topics.tools.setPinExpiry(
-            req.params.tid,
-            req.body.expiry,
-            req.uid,
-        );
+        await topics.tools.setPinExpiry(req.params.tid, req.body.expiry, req.uid);
     }
     await api.topics.pin(req, { tids: [req.params.tid] });
 
@@ -137,20 +133,13 @@ Topics.deleteTags = async (req, res) => {
 Topics.getThumbs = async (req, res) => {
     if (isFinite(req.params.tid)) {
         // post_uuids can be passed in occasionally, in that case no checks are necessary
-        const [exists, canRead] = await Promise.all([
-            topics.exists(req.params.tid),
-            privileges.topics.can('topics:read', req.params.tid, req.uid),
-        ]);
+        const [exists, canRead] = await Promise.all([topics.exists(req.params.tid), privileges.topics.can('topics:read', req.params.tid, req.uid)]);
         if (!exists || !canRead) {
             return helpers.formatApiResponse(403, res);
         }
     }
 
-    helpers.formatApiResponse(
-        200,
-        res,
-        await topics.thumbs.get(req.params.tid),
-    );
+    helpers.formatApiResponse(200, res, await topics.thumbs.get(req.params.tid));
 };
 
 Topics.addThumb = async (req, res) => {
@@ -169,16 +158,13 @@ Topics.addThumb = async (req, res) => {
                     id: req.params.tid,
                     path: fileObj.path || fileObj.url,
                 });
-            }),
+            })
         );
     }
 };
 
 Topics.migrateThumbs = async (req, res) => {
-    await Promise.all([
-        checkThumbPrivileges({ tid: req.params.tid, uid: req.user.uid, res }),
-        checkThumbPrivileges({ tid: req.body.tid, uid: req.user.uid, res }),
-    ]);
+    await Promise.all([checkThumbPrivileges({ tid: req.params.tid, uid: req.user.uid, res }), checkThumbPrivileges({ tid: req.body.tid, uid: req.user.uid, res })]);
     if (res.headersSent) {
         return;
     }
@@ -201,11 +187,7 @@ Topics.deleteThumb = async (req, res) => {
     }
 
     await topics.thumbs.delete(req.params.tid, req.body.path);
-    helpers.formatApiResponse(
-        200,
-        res,
-        await topics.thumbs.get(req.params.tid),
-    );
+    helpers.formatApiResponse(200, res, await topics.thumbs.get(req.params.tid));
 };
 
 Topics.reorderThumbs = async (req, res) => {
@@ -234,35 +216,21 @@ async function checkThumbPrivileges({ tid, uid, res }) {
 
     // Sanity-check the tid if it's strictly not a uuid
     if (!isUUID && (isNaN(parseInt(tid, 10)) || !(await topics.exists(tid)))) {
-        return helpers.formatApiResponse(
-            404,
-            res,
-            new Error('[[error:no-topic]]'),
-        );
+        return helpers.formatApiResponse(404, res, new Error('[[error:no-topic]]'));
     }
 
     // While drafts are not protected, tids are
     if (!isUUID && !(await privileges.topics.canEdit(tid, uid))) {
-        return helpers.formatApiResponse(
-            403,
-            res,
-            new Error('[[error:no-privileges]]'),
-        );
+        return helpers.formatApiResponse(403, res, new Error('[[error:no-privileges]]'));
     }
 }
 
 Topics.getEvents = async (req, res) => {
-    if (
-        !(await privileges.topics.can('topics:read', req.params.tid, req.uid))
-    ) {
+    if (!(await privileges.topics.can('topics:read', req.params.tid, req.uid))) {
         return helpers.formatApiResponse(403, res);
     }
 
-    helpers.formatApiResponse(
-        200,
-        res,
-        await topics.events.get(req.params.tid, req.uid),
-    );
+    helpers.formatApiResponse(200, res, await topics.events.get(req.params.tid, req.uid));
 };
 
 Topics.deleteEvent = async (req, res) => {

@@ -41,24 +41,22 @@ describe('Search', () => {
                                 categories.create(
                                     {
                                         name: 'Test Category',
-                                        description:
-                                            'Test category created by testing script',
+                                        description: 'Test category created by testing script',
                                     },
-                                    next,
+                                    next
                                 );
                             },
                             category2: function (next) {
                                 categories.create(
                                     {
                                         name: 'Test Category',
-                                        description:
-                                            'Test category created by testing script',
+                                        description: 'Test category created by testing script',
                                     },
-                                    next,
+                                    next
                                 );
                             },
                         },
-                        next,
+                        next
                     );
                 },
                 function (results, next) {
@@ -73,11 +71,10 @@ describe('Search', () => {
                                 categories.create(
                                     {
                                         name: 'Child Test Category',
-                                        description:
-                                            'Test category created by testing script',
+                                        description: 'Test category created by testing script',
                                         parentCid: cid2,
                                     },
-                                    next,
+                                    next
                                 );
                             },
                             function (category, next) {
@@ -87,17 +84,10 @@ describe('Search', () => {
                                         uid: phoebeUid,
                                         cid: cid1,
                                         title: 'nodebb mongodb bugs',
-                                        content:
-                                            'avocado cucumber apple orange fox',
-                                        tags: [
-                                            'nodebb',
-                                            'bug',
-                                            'plugin',
-                                            'nodebb-plugin',
-                                            'jquery',
-                                        ],
+                                        content: 'avocado cucumber apple orange fox',
+                                        tags: ['nodebb', 'bug', 'plugin', 'nodebb-plugin', 'jquery'],
                                     },
-                                    next,
+                                    next
                                 );
                             },
                             function (results, next) {
@@ -109,17 +99,10 @@ describe('Search', () => {
                                         uid: gingerUid,
                                         cid: cid2,
                                         title: 'java mongodb redis',
-                                        content:
-                                            'avocado cucumber carrot armadillo',
-                                        tags: [
-                                            'nodebb',
-                                            'bug',
-                                            'plugin',
-                                            'nodebb-plugin',
-                                            'javascript',
-                                        ],
+                                        content: 'avocado cucumber carrot armadillo',
+                                        tags: ['nodebb', 'bug', 'plugin', 'nodebb-plugin', 'javascript'],
                                     },
-                                    next,
+                                    next
                                 );
                             },
                             function (results, next) {
@@ -131,7 +114,7 @@ describe('Search', () => {
                                         content: 'reply post apple',
                                         tid: topic2Data.tid,
                                     },
-                                    next,
+                                    next
                                 );
                             },
                             function (_post3Data, next) {
@@ -139,11 +122,11 @@ describe('Search', () => {
                                 setTimeout(next, 500);
                             },
                         ],
-                        next,
+                        next
                     );
                 },
             ],
-            done,
+            done
         );
     });
 
@@ -165,12 +148,8 @@ describe('Search', () => {
                     assert.equal(body.posts[0].pid, post1Data.pid);
                     assert.equal(body.posts[0].uid, phoebeUid);
 
-                    privileges.global.rescind(
-                        ['groups:search:content'],
-                        'guests',
-                        done,
-                    );
-                },
+                    privileges.global.rescind(['groups:search:content'], 'guests', done);
+                }
             );
         });
     });
@@ -189,7 +168,7 @@ describe('Search', () => {
                 assert.equal(data.users[0].uid, gingerUid);
                 assert.equal(data.users[0].username, 'ginger');
                 done();
-            },
+            }
         );
     });
 
@@ -207,7 +186,7 @@ describe('Search', () => {
                 assert.equal(data.tags[0].value, 'plugin');
                 assert.equal(data.tags[0].score, 2);
                 done();
-            },
+            }
         );
     });
 
@@ -230,15 +209,9 @@ describe('Search', () => {
 
     it('should search for categories', async () => {
         const socketCategories = require('../src/socket.io/categories');
-        let data = await socketCategories.categorySearch(
-            { uid: phoebeUid },
-            { query: 'baz', parentCid: 0 },
-        );
+        let data = await socketCategories.categorySearch({ uid: phoebeUid }, { query: 'baz', parentCid: 0 });
         assert.strictEqual(data[0].name, 'baz category');
-        data = await socketCategories.categorySearch(
-            { uid: phoebeUid },
-            { query: '', parentCid: 0 },
-        );
+        data = await socketCategories.categorySearch({ uid: phoebeUid }, { query: '', parentCid: 0 });
         assert.strictEqual(data.length, 5);
     });
 
@@ -251,7 +224,7 @@ describe('Search', () => {
             err => {
                 assert.equal(err.message, '[[error:unknown-search-filter]]');
                 done();
-            },
+            }
         );
     });
 
@@ -266,7 +239,7 @@ describe('Search', () => {
                 assert.ifError(err);
                 assert.equal(data.posts[0].tid, topic2Data.tid);
                 done();
-            },
+            }
         );
     });
 
@@ -280,7 +253,7 @@ describe('Search', () => {
             (err, data) => {
                 assert.ifError(err);
                 done();
-            },
+            }
         );
     });
 
@@ -295,7 +268,7 @@ describe('Search', () => {
                 assert(Array.isArray(data.posts));
                 assert(!data.matchCount);
                 done();
-            },
+            }
         );
     });
 
@@ -310,7 +283,7 @@ describe('Search', () => {
                             title: 'child category topic',
                             content: 'avocado cucumber carrot armadillo',
                         },
-                        next,
+                        next
                     );
                 },
                 function (result, next) {
@@ -323,21 +296,17 @@ describe('Search', () => {
                             sortBy: 'topic.timestamp',
                             sortDirection: 'desc',
                         },
-                        next,
+                        next
                     );
                 },
                 function (result, next) {
                     assert(result.posts.length, 2);
-                    assert(
-                        result.posts[0].topic.title === 'child category topic',
-                    );
-                    assert(
-                        result.posts[1].topic.title === 'java mongodb redis',
-                    );
+                    assert(result.posts[0].topic.title === 'child category topic');
+                    assert(result.posts[1].topic.title === 'java mongodb redis');
                     next();
                 },
             ],
-            done,
+            done
         );
     });
 
@@ -359,12 +328,8 @@ describe('Search', () => {
                     assert(body.hasOwnProperty('posts'));
                     assert(!body.hasOwnProperty('categories'));
 
-                    privileges.global.rescind(
-                        ['groups:search:content'],
-                        'guests',
-                        done,
-                    );
-                },
+                    privileges.global.rescind(['groups:search:content'], 'guests', done);
+                }
             );
         });
     });
@@ -382,12 +347,8 @@ describe('Search', () => {
                     assert.ifError(err);
                     assert(body);
                     assert.strictEqual(response.statusCode, 200);
-                    privileges.global.rescind(
-                        ['groups:search:content'],
-                        'guests',
-                        done,
-                    );
-                },
+                    privileges.global.rescind(['groups:search:content'], 'guests', done);
+                }
             );
         });
     });

@@ -11,8 +11,7 @@ define('groupSearch', function () {
         if (!searchEl.length) {
             return;
         }
-        const toggleVisibility =
-            searchEl.parent('[component="group-selector"]').length > 0;
+        const toggleVisibility = searchEl.parent('[component="group-selector"]').length > 0;
 
         const groupEls = el.find('[component="group-list"] [data-name]');
         el.on('show.bs.dropdown', function () {
@@ -21,9 +20,7 @@ define('groupSearch', function () {
                 let noMatch = true;
                 groupEls.each(function () {
                     const liEl = $(this);
-                    const isMatch =
-                        liEl.attr('data-name').toLowerCase().indexOf(val) !==
-                        -1;
+                    const isMatch = liEl.attr('data-name').toLowerCase().indexOf(val) !== -1;
                     if (noMatch && isMatch) {
                         noMatch = false;
                     }
@@ -31,9 +28,7 @@ define('groupSearch', function () {
                     liEl.toggleClass('hidden', !isMatch);
                 });
 
-                el.find(
-                    '[component="group-list"] [component="group-no-matches"]',
-                ).toggleClass('hidden', !noMatch);
+                el.find('[component="group-list"] [component="group-no-matches"]').toggleClass('hidden', !noMatch);
             }
             if (toggleVisibility) {
                 el.find('.dropdown-toggle').addClass('hidden');

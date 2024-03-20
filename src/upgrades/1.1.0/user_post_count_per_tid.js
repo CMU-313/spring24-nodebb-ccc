@@ -35,35 +35,26 @@ module.exports = {
                                 async.eachSeries(
                                     pids,
                                     (pid, next) => {
-                                        db.getObjectField(
-                                            `post:${pid}`,
-                                            'uid',
-                                            (err, uid) => {
-                                                if (err) {
-                                                    return next(err);
-                                                }
-                                                if (!parseInt(uid, 10)) {
-                                                    return next();
-                                                }
-                                                db.sortedSetIncrBy(
-                                                    `tid:${tid}:posters`,
-                                                    1,
-                                                    uid,
-                                                    next,
-                                                );
-                                            },
-                                        );
+                                        db.getObjectField(`post:${pid}`, 'uid', (err, uid) => {
+                                            if (err) {
+                                                return next(err);
+                                            }
+                                            if (!parseInt(uid, 10)) {
+                                                return next();
+                                            }
+                                            db.sortedSetIncrBy(`tid:${tid}:posters`, 1, uid, next);
+                                        });
                                     },
-                                    next,
+                                    next
                                 );
                             });
                         });
                     },
-                    next,
+                    next
                 );
             },
             {},
-            callback,
+            callback
         );
     },
 };

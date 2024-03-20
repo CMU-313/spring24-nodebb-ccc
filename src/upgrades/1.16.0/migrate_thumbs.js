@@ -22,22 +22,13 @@ module.exports = {
             'topics:tid',
             async tids => {
                 const keys = tids.map(tid => `topic:${tid}`);
-                const topicThumbs = (
-                    await db.getObjectsFields(keys, ['thumb'])
-                ).map(obj =>
-                    obj.thumb
-                        ? obj.thumb.replace(nconf.get('upload_url'), '')
-                        : null,
-                );
+                const topicThumbs = (await db.getObjectsFields(keys, ['thumb'])).map(obj => (obj.thumb ? obj.thumb.replace(nconf.get('upload_url'), '') : null));
 
                 await Promise.all(
                     tids.map(async (tid, idx) => {
                         const path = topicThumbs[idx];
                         if (path) {
-                            if (
-                                path.length < 255 &&
-                                !path.startsWith('data:')
-                            ) {
+                            if (path.length < 255 && !path.startsWith('data:')) {
                                 await topics.thumbs.associate({
                                     id: tid,
                                     path,
@@ -47,13 +38,13 @@ module.exports = {
                         }
 
                         progress.incr();
-                    }),
+                    })
                 );
             },
             {
                 batch: 500,
                 progress: progress,
-            },
+            }
         );
     },
 };

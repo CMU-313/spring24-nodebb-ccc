@@ -39,8 +39,7 @@
 //
 //## Font, line-height, and color for body text, headings, and more.
 
-@font-family-sans-serif: 'Roboto', 'Helvetica Neue', Helvetica, Arial,
-  sans-serif;
+@font-family-sans-serif: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 @font-family-serif: Georgia, 'Times New Roman', Times, serif;
 //** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
 @font-family-monospace: Menlo, Monaco, Consolas, 'Courier New', monospace;
@@ -201,15 +200,9 @@
 //** Default `.form-control` height
 @input-height-base: (@line-height-computed + (@padding-base-vertical * 2) + 2);
 //** Large `.form-control` height
-@input-height-large: (
-  ceil(@font-size-large * @line-height-large) + (@padding-large-vertical * 2) +
-    2
-);
+@input-height-large: (ceil(@font-size-large * @line-height-large) + (@padding-large-vertical * 2) + 2);
 //** Small `.form-control` height
-@input-height-small: (
-  floor(@font-size-small * @line-height-small) + (@padding-small-vertical * 2) +
-    2
-);
+@input-height-small: (floor(@font-size-small * @line-height-small) + (@padding-small-vertical * 2) + 2);
 
 //** `.form-group` margin
 @form-group-margin-bottom: 15px;
@@ -542,10 +535,7 @@
 //** Popover outer arrow color
 @popover-arrow-outer-color: fadein(@popover-border-color, 12%);
 //** Popover outer arrow fallback color
-@popover-arrow-outer-fallback-color: darken(
-  @popover-fallback-border-color,
-  20%
-);
+@popover-arrow-outer-fallback-color: darken(@popover-fallback-border-color, 20%);
 
 //== Labels
 //

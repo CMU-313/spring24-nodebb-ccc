@@ -7,27 +7,20 @@ define('categorySearch', ['alerts'], function (alerts) {
         let categoriesList = null;
         options = options || {};
         options.privilege = options.privilege || 'topics:read';
-        options.states = options.states || [
-            'watching',
-            'notwatching',
-            'ignoring',
-        ];
+        options.states = options.states || ['watching', 'notwatching', 'ignoring'];
 
         let localCategories = [];
         if (Array.isArray(options.localCategories)) {
             localCategories = options.localCategories.map(c => ({ ...c }));
         }
-        options.selectedCids =
-            options.selectedCids || ajaxify.data.selectedCids || [];
+        options.selectedCids = options.selectedCids || ajaxify.data.selectedCids || [];
 
         const searchEl = el.find('[component="category-selector-search"]');
         if (!searchEl.length) {
             return;
         }
 
-        const toggleVisibility =
-            searchEl.parent('[component="category/dropdown"]').length > 0 ||
-            searchEl.parent('[component="category-selector"]').length > 0;
+        const toggleVisibility = searchEl.parent('[component="category/dropdown"]').length > 0 || searchEl.parent('[component="category-selector"]').length > 0;
 
         el.on('show.bs.dropdown', function () {
             if (toggleVisibility) {
@@ -54,10 +47,7 @@ define('categorySearch', ['alerts'], function (alerts) {
                 ev.preventDefault();
                 ev.stopPropagation();
             });
-            searchEl
-                .find('input')
-                .val('')
-                .on('keyup', utils.debounce(doSearch, 300));
+            searchEl.find('input').val('').on('keyup', utils.debounce(doSearch, 300));
             doSearch();
         });
 
@@ -92,7 +82,7 @@ define('categorySearch', ['alerts'], function (alerts) {
                         return alerts.error(err);
                     }
                     callback(localCategories.concat(categories));
-                },
+                }
             );
         }
 
@@ -105,13 +95,9 @@ define('categorySearch', ['alerts'], function (alerts) {
                     allCategoriesUrl: ajaxify.data.allCategoriesUrl,
                 },
                 function (html) {
-                    el.find('[component="category/list"]').replaceWith(
-                        html.find('[component="category/list"]'),
-                    );
-                    el.find(
-                        '[component="category/list"] [component="category/no-matches"]',
-                    ).toggleClass('hidden', !!categories.length);
-                },
+                    el.find('[component="category/list"]').replaceWith(html.find('[component="category/list"]'));
+                    el.find('[component="category/list"] [component="category/no-matches"]').toggleClass('hidden', !!categories.length);
+                }
             );
         }
     };

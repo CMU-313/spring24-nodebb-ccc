@@ -15,33 +15,19 @@ module.exports = {
             async.eachSeries(
                 cids,
                 (cid, next) => {
-                    db.getSortedSetRevRange(
-                        `cid:${cid}:pids`,
-                        0,
-                        0,
-                        (err, pid) => {
-                            if (err || !pid) {
+                    db.getSortedSetRevRange(`cid:${cid}:pids`, 0, 0, (err, pid) => {
+                        if (err || !pid) {
+                            return next(err);
+                        }
+                        db.getObjectFields(`post:${pid}`, ['tid', 'timestamp'], (err, postData) => {
+                            if (err || !postData || !postData.tid) {
                                 return next(err);
                             }
-                            db.getObjectFields(
-                                `post:${pid}`,
-                                ['tid', 'timestamp'],
-                                (err, postData) => {
-                                    if (err || !postData || !postData.tid) {
-                                        return next(err);
-                                    }
-                                    db.sortedSetAdd(
-                                        `cid:${cid}:recent_tids`,
-                                        postData.timestamp,
-                                        postData.tid,
-                                        next,
-                                    );
-                                },
-                            );
-                        },
-                    );
+                            db.sortedSetAdd(`cid:${cid}:recent_tids`, postData.timestamp, postData.tid, next);
+                        });
+                    });
                 },
-                callback,
+                callback
             );
         });
     },

@@ -62,10 +62,7 @@ SocketUser.reset.send = async function (socket, email) {
     } catch (err) {
         await logEvent(err.message);
         await sleep(2500 + (Math.random() * 500 - 250));
-        const internalErrors = [
-            '[[error:invalid-email]]',
-            '[[error:reset-rate-limited]]',
-        ];
+        const internalErrors = ['[[error:invalid-email]]', '[[error:reset-rate-limited]]'];
         if (!internalErrors.includes(err.message)) {
             throw err;
         }
@@ -76,11 +73,7 @@ SocketUser.reset.commit = async function (socket, data) {
     if (!data || !data.code || !data.password) {
         throw new Error('[[error:invalid-data]]');
     }
-    const [uid] = await Promise.all([
-        db.getObjectField('reset:uid', data.code),
-        user.reset.commit(data.code, data.password),
-        plugins.hooks.fire('action:password.reset', { uid: socket.uid }),
-    ]);
+    const [uid] = await Promise.all([db.getObjectField('reset:uid', data.code), user.reset.commit(data.code, data.password), plugins.hooks.fire('action:password.reset', { uid: socket.uid })]);
 
     await events.log({
         type: 'password-reset',
@@ -143,11 +136,7 @@ SocketUser.getUserByUID = async function (socket, uid) {
 };
 
 SocketUser.getUserByUsername = async function (socket, username) {
-    return await userController.getUserDataByField(
-        socket.uid,
-        'username',
-        username,
-    );
+    return await userController.getUserDataByField(socket.uid, 'username', username);
 };
 
 SocketUser.getUserByEmail = async function (socket, email) {

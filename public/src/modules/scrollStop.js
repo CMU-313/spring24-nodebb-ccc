@@ -15,14 +15,11 @@ define('scrollStop', function () {
         $(element).on('mousewheel', function (e) {
             const scrollTop = this.scrollTop;
             const scrollHeight = this.scrollHeight;
-            const elementHeight = Math.round(
-                this.getBoundingClientRect().height,
-            );
+            const elementHeight = Math.round(this.getBoundingClientRect().height);
 
             if (
                 (e.originalEvent.deltaY < 0 && scrollTop === 0) || // scroll up
-                (e.originalEvent.deltaY > 0 &&
-                    elementHeight + scrollTop >= scrollHeight) // scroll down
+                (e.originalEvent.deltaY > 0 && elementHeight + scrollTop >= scrollHeight) // scroll down
             ) {
                 return false;
             }

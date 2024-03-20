@@ -48,14 +48,8 @@ module.exports = function (User) {
             ]);
         }
 
-        const [followingCount, followerCount] = await Promise.all([
-            db.sortedSetCard(`following:${uid}`),
-            db.sortedSetCard(`followers:${theiruid}`),
-        ]);
-        await Promise.all([
-            User.setUserField(uid, 'followingCount', followingCount),
-            User.setUserField(theiruid, 'followerCount', followerCount),
-        ]);
+        const [followingCount, followerCount] = await Promise.all([db.sortedSetCard(`following:${uid}`), db.sortedSetCard(`followers:${theiruid}`)]);
+        await Promise.all([User.setUserField(uid, 'followingCount', followingCount), User.setUserField(theiruid, 'followerCount', followerCount)]);
     }
 
     User.getFollowing = async function (uid, start, stop) {
@@ -70,11 +64,7 @@ module.exports = function (User) {
         if (parseInt(uid, 10) <= 0) {
             return [];
         }
-        const uids = await db.getSortedSetRevRange(
-            `${type}:${uid}`,
-            start,
-            stop,
-        );
+        const uids = await db.getSortedSetRevRange(`${type}:${uid}`, start, stop);
         const data = await plugins.hooks.fire(`filter:user.${type}`, {
             uids: uids,
             uid: uid,

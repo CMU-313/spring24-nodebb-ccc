@@ -12,29 +12,13 @@ module.exports = function (SocketPosts) {
             throw new Error('[[error:invalid-data]]');
         }
         const showDownvotes = !meta.config['downvote:disabled'];
-        const canSeeVotes =
-            meta.config.votesArePublic ||
-            (await privileges.categories.isAdminOrMod(data.cid, socket.uid));
+        const canSeeVotes = meta.config.votesArePublic || (await privileges.categories.isAdminOrMod(data.cid, socket.uid));
         if (!canSeeVotes) {
             throw new Error('[[error:no-privileges]]');
         }
-        const [upvoteUids, downvoteUids] = await Promise.all([
-            db.getSetMembers(`pid:${data.pid}:upvote`),
-            showDownvotes ? db.getSetMembers(`pid:${data.pid}:downvote`) : [],
-        ]);
+        const [upvoteUids, downvoteUids] = await Promise.all([db.getSetMembers(`pid:${data.pid}:upvote`), showDownvotes ? db.getSetMembers(`pid:${data.pid}:downvote`) : []]);
 
-        const [upvoters, downvoters] = await Promise.all([
-            user.getUsersFields(upvoteUids, [
-                'username',
-                'userslug',
-                'picture',
-            ]),
-            user.getUsersFields(downvoteUids, [
-                'username',
-                'userslug',
-                'picture',
-            ]),
-        ]);
+        const [upvoters, downvoters] = await Promise.all([user.getUsersFields(upvoteUids, ['username', 'userslug', 'picture']), user.getUsersFields(downvoteUids, ['username', 'userslug', 'picture'])]);
 
         return {
             upvoteCount: upvoters.length,
@@ -66,7 +50,7 @@ module.exports = function (SocketPosts) {
                     otherCount: otherCount,
                     usernames: usernames,
                 };
-            }),
+            })
         );
         return result;
     };

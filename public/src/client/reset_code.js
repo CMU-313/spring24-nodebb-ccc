@@ -15,16 +15,10 @@ define('forum/reset_code', ['alerts', 'zxcvbn'], function (alerts, zxcvbn) {
                 utils.assertPasswordValidity(password.val(), zxcvbn);
 
                 if (password.val() !== repeat.val()) {
-                    throw new Error(
-                        '[[reset_password:passwords_do_not_match]]',
-                    );
+                    throw new Error('[[reset_password:passwords_do_not_match]]');
                 }
 
-                resetEl
-                    .prop('disabled', true)
-                    .translateHtml(
-                        '<i class="fa fa-spin fa-refresh"></i> [[reset_password:changing_password]]',
-                    );
+                resetEl.prop('disabled', true).translateHtml('<i class="fa fa-spin fa-refresh"></i> [[reset_password:changing_password]]');
                 socket.emit(
                     'user.reset.commit',
                     {
@@ -38,7 +32,7 @@ define('forum/reset_code', ['alerts', 'zxcvbn'], function (alerts, zxcvbn) {
                         }
 
                         window.location.href = config.relative_path + '/login';
-                    },
+                    }
                 );
             } catch (err) {
                 $('#notice').removeClass('hidden');

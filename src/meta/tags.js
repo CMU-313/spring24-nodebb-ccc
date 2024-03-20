@@ -84,11 +84,7 @@ Tags.parse = async (req, data, meta, link) => {
         defaultLinks.push({
             rel: 'search',
             type: 'application/opensearchdescription+xml',
-            title: utils.escapeHTML(
-                String(
-                    Meta.config.title || Meta.config.browserTitle || 'NodeBB',
-                ),
-            ),
+            title: utils.escapeHTML(String(Meta.config.title || Meta.config.browserTitle || 'NodeBB')),
             href: `${relative_path}/osd.xml`,
         });
     }
@@ -129,7 +125,7 @@ Tags.parse = async (req, data, meta, link) => {
                 rel: 'icon',
                 sizes: '192x192',
                 href: `${relative_path + upload_url}/system/touchicon-192.png`,
-            },
+            }
         );
     } else {
         defaultLinks.push(
@@ -171,7 +167,7 @@ Tags.parse = async (req, data, meta, link) => {
                 rel: 'icon',
                 sizes: '512x512',
                 href: `${relative_path}/assets/images/touch/512.png`,
-            },
+            }
         );
     }
 
@@ -207,9 +203,7 @@ Tags.parse = async (req, data, meta, link) => {
     await addSiteOGImage(meta);
 
     addIfNotExists(meta, 'property', 'og:title', Meta.config.title || 'NodeBB');
-    const ogUrl =
-        url +
-        (req.originalUrl !== '/' ? stripRelativePath(req.originalUrl) : '');
+    const ogUrl = url + (req.originalUrl !== '/' ? stripRelativePath(req.originalUrl) : '');
     addIfNotExists(meta, 'property', 'og:url', ogUrl);
     addIfNotExists(meta, 'name', 'description', Meta.config.description);
     addIfNotExists(meta, 'property', 'og:description', Meta.config.description);
@@ -286,7 +280,7 @@ async function addSiteOGImage(meta) {
                                 property: 'og:image:url',
                                 content: image.url,
                                 noEscape: true,
-                            },
+                            }
                         );
                         break;
                     }

@@ -38,7 +38,7 @@ module.exports = {
                 },
                 {
                     batch: 1000,
-                },
+                }
             );
         } else if (db.client && db.client.collection) {
             await db.client.collection('sessions').deleteMany({}, {});

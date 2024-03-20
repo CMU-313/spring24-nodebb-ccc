@@ -152,9 +152,7 @@ SocketRooms.getLocalStats = function () {
             }
         }
 
-        topTenTopics = topTenTopics
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 10);
+        topTenTopics = topTenTopics.sort((a, b) => b.count - a.count).slice(0, 10);
         socketData.topics = topTenTopics;
     }
 

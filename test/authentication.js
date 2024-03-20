@@ -29,17 +29,14 @@ describe('authentication', () => {
                 regularUid = uid;
                 assert.strictEqual(uid, 1);
                 done();
-            },
+            }
         );
     });
 
     it('should allow login with email for uid 1', async () => {
         const oldValue = meta.config.allowLoginWith;
         meta.config.allowLoginWith = 'username-email';
-        const { res } = await helpers.loginUser(
-            'regular@nodebb.org',
-            'regularpwd',
-        );
+        const { res } = await helpers.loginUser('regular@nodebb.org', 'regularpwd');
         assert.strictEqual(res.statusCode, 200);
         meta.config.allowLoginWith = oldValue;
     });
@@ -52,10 +49,7 @@ describe('authentication', () => {
             password: '2ndpassword',
             email: '2nduser@nodebb.org',
         });
-        const { res, body } = await helpers.loginUser(
-            '2nduser@nodebb.org',
-            '2ndpassword',
-        );
+        const { res, body } = await helpers.loginUser('2nduser@nodebb.org', '2ndpassword');
         assert.strictEqual(res.statusCode, 403);
         assert.strictEqual(body, '[[error:invalid-login-credentials]]');
         meta.config.allowLoginWith = oldValue;
@@ -72,7 +66,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 400);
                 assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
@@ -87,7 +81,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 400);
                 assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
@@ -102,7 +96,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 400);
                 assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
@@ -117,7 +111,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 400);
                 assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
@@ -150,11 +144,7 @@ describe('authentication', () => {
                         },
                     },
                     async (err, response, body) => {
-                        const validationPending =
-                            await user.email.isValidationPending(
-                                body.uid,
-                                'admin@nodebb.org',
-                            );
+                        const validationPending = await user.email.isValidationPending(body.uid, 'admin@nodebb.org');
                         assert.strictEqual(validationPending, true);
                         assert.ifError(err);
                         assert(body);
@@ -176,11 +166,11 @@ describe('authentication', () => {
                                     assert.equal(settings.userLang, 'it');
                                     done();
                                 });
-                            },
+                            }
                         );
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
@@ -198,7 +188,7 @@ describe('authentication', () => {
                     assert.equal(res.statusCode, 401);
                     assert.strictEqual(body.status.code, 'not-authorised');
                     done();
-                },
+                }
             );
         });
     });
@@ -218,16 +208,13 @@ describe('authentication', () => {
                     assert(body);
                     assert.equal(body.username, 'regular');
                     assert.equal(body.email, 'regular@nodebb.org');
-                    db.getObject(
-                        `uid:${regularUid}:sessionUUID:sessionId`,
-                        (err, sessions) => {
-                            assert.ifError(err);
-                            assert(sessions);
-                            assert(Object.keys(sessions).length > 0);
-                            done();
-                        },
-                    );
-                },
+                    db.getObject(`uid:${regularUid}:sessionUUID:sessionId`, (err, sessions) => {
+                        assert.ifError(err);
+                        assert(sessions);
+                        assert(Object.keys(sessions).length > 0);
+                        done();
+                    });
+                }
             );
         });
     });
@@ -236,14 +223,10 @@ describe('authentication', () => {
         const matchRegexp = /express\.sid=s%3A(.+?);/;
         const { hostname, path } = url.parse(nconf.get('url'));
 
-        const sid = String(
-            jar._jar.store.idx[hostname][path]['express.sid'],
-        ).match(matchRegexp)[1];
+        const sid = String(jar._jar.store.idx[hostname][path]['express.sid']).match(matchRegexp)[1];
         await helpers.logoutUser(jar);
         const newJar = (await helpers.loginUser('regular', 'regularpwd')).jar;
-        const newSid = String(
-            newJar._jar.store.idx[hostname][path]['express.sid'],
-        ).match(matchRegexp)[1];
+        const newSid = String(newJar._jar.store.idx[hostname][path]['express.sid']).match(matchRegexp)[1];
 
         assert.notStrictEqual(newSid, sid);
     });
@@ -295,9 +278,9 @@ describe('authentication', () => {
                         assert.ifError(err);
                         assert.equal(response.statusCode, 500);
                         done();
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
@@ -338,25 +321,15 @@ describe('authentication', () => {
     });
 
     it('should fail to login if user does not have password field in db', done => {
-        user.create(
-            { username: 'hasnopassword', email: 'no@pass.org' },
-            (err, uid) => {
+        user.create({ username: 'hasnopassword', email: 'no@pass.org' }, (err, uid) => {
+            assert.ifError(err);
+            helpers.loginUser('hasnopassword', 'doesntmatter', (err, data) => {
                 assert.ifError(err);
-                helpers.loginUser(
-                    'hasnopassword',
-                    'doesntmatter',
-                    (err, data) => {
-                        assert.ifError(err);
-                        assert.equal(data.res.statusCode, 403);
-                        assert.equal(
-                            data.body,
-                            '[[error:invalid-login-credentials]]',
-                        );
-                        done();
-                    },
-                );
-            },
-        );
+                assert.equal(data.res.statusCode, 403);
+                assert.equal(data.body, '[[error:invalid-login-credentials]]');
+                done();
+            });
+        });
     });
 
     it('should fail to login if password is longer than 4096', done => {
@@ -373,23 +346,15 @@ describe('authentication', () => {
     });
 
     it('should fail to login if local login is disabled', done => {
-        privileges.global.rescind(
-            ['groups:local:login'],
-            'registered-users',
-            err => {
+        privileges.global.rescind(['groups:local:login'], 'registered-users', err => {
+            assert.ifError(err);
+            helpers.loginUser('regular', 'regularpwd', (err, data) => {
                 assert.ifError(err);
-                helpers.loginUser('regular', 'regularpwd', (err, data) => {
-                    assert.ifError(err);
-                    assert.equal(data.res.statusCode, 403);
-                    assert.equal(data.body, '[[error:local-login-disabled]]');
-                    privileges.global.give(
-                        ['groups:local:login'],
-                        'registered-users',
-                        done,
-                    );
-                });
-            },
-        );
+                assert.equal(data.res.statusCode, 403);
+                assert.equal(data.body, '[[error:local-login-disabled]]');
+                privileges.global.give(['groups:local:login'], 'registered-users', done);
+            });
+        });
     });
 
     it('should fail to register if registraton is disabled', done => {
@@ -405,7 +370,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 403);
                 assert.equal(body, 'Forbidden');
                 done();
-            },
+            }
         );
     });
 
@@ -423,7 +388,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 400);
                 assert.equal(body, '[[register:invite.error-invite-only]]');
                 done();
-            },
+            }
         );
     });
 
@@ -449,9 +414,9 @@ describe('authentication', () => {
                         assert.equal(response.statusCode, 400);
                         assert.equal(body, '[[error:username-too-short]]');
                         done();
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
@@ -467,7 +432,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 400);
                 assert.equal(body, '[[error:username-too-long]]');
                 done();
-            },
+            }
         );
     });
 
@@ -483,7 +448,7 @@ describe('authentication', () => {
                 assert.equal(response.statusCode, 400);
                 assert.equal(body, 'Invalid account type');
                 done();
-            },
+            }
         );
     });
 
@@ -501,12 +466,9 @@ describe('authentication', () => {
                 meta.config.registrationApprovalType = 'normal';
                 assert.ifError(err);
                 assert.equal(response.statusCode, 200);
-                assert.equal(
-                    body.message,
-                    '[[register:registration-added-to-queue]]',
-                );
+                assert.equal(body.message, '[[register:registration-added-to-queue]]');
                 done();
-            },
+            }
         );
     });
 
@@ -560,9 +522,9 @@ describe('authentication', () => {
                         assert.equal(res.statusCode, 200);
                         assert.equal(body, 'not-logged-in');
                         done();
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
@@ -584,73 +546,46 @@ describe('authentication', () => {
         it('should prevent banned user from logging in', done => {
             user.bans.ban(bannedUser.uid, 0, 'spammer', err => {
                 assert.ifError(err);
-                helpers.loginUser(
-                    bannedUser.username,
-                    bannedUser.pw,
-                    (err, data) => {
+                helpers.loginUser(bannedUser.username, bannedUser.pw, (err, data) => {
+                    assert.ifError(err);
+                    assert.equal(data.res.statusCode, 403);
+                    delete data.body.timestamp;
+                    assert.deepStrictEqual(data.body, {
+                        banned_until: 0,
+                        banned_until_readable: '',
+                        expiry: 0,
+                        expiry_readable: '',
+                        reason: 'spammer',
+                        uid: bannedUser.uid,
+                    });
+                    user.bans.unban(bannedUser.uid, err => {
                         assert.ifError(err);
-                        assert.equal(data.res.statusCode, 403);
-                        delete data.body.timestamp;
-                        assert.deepStrictEqual(data.body, {
-                            banned_until: 0,
-                            banned_until_readable: '',
-                            expiry: 0,
-                            expiry_readable: '',
-                            reason: 'spammer',
-                            uid: bannedUser.uid,
-                        });
-                        user.bans.unban(bannedUser.uid, err => {
+                        const expiry = Date.now() + 10000;
+                        user.bans.ban(bannedUser.uid, expiry, '', err => {
                             assert.ifError(err);
-                            const expiry = Date.now() + 10000;
-                            user.bans.ban(bannedUser.uid, expiry, '', err => {
+                            helpers.loginUser(bannedUser.username, bannedUser.pw, (err, data) => {
                                 assert.ifError(err);
-                                helpers.loginUser(
-                                    bannedUser.username,
-                                    bannedUser.pw,
-                                    (err, data) => {
-                                        assert.ifError(err);
-                                        assert.equal(data.res.statusCode, 403);
-                                        assert(data.body.banned_until);
-                                        assert(
-                                            data.body.reason,
-                                            '[[user:info.banned-no-reason]]',
-                                        );
-                                        done();
-                                    },
-                                );
+                                assert.equal(data.res.statusCode, 403);
+                                assert(data.body.banned_until);
+                                assert(data.body.reason, '[[user:info.banned-no-reason]]');
+                                done();
                             });
                         });
-                    },
-                );
+                    });
+                });
             });
         });
 
         it('should allow banned user to log in if the "banned-users" group has "local-login" privilege', async () => {
-            await privileges.global.give(
-                ['groups:local:login'],
-                'banned-users',
-            );
-            const { res } = await helpers.loginUser(
-                bannedUser.username,
-                bannedUser.pw,
-            );
+            await privileges.global.give(['groups:local:login'], 'banned-users');
+            const { res } = await helpers.loginUser(bannedUser.username, bannedUser.pw);
             assert.strictEqual(res.statusCode, 200);
         });
 
         it('should allow banned user to log in if the user herself has "local-login" privilege', async () => {
-            await privileges.global.rescind(
-                ['groups:local:login'],
-                'banned-users',
-            );
-            await privileges.categories.give(
-                ['local:login'],
-                0,
-                bannedUser.uid,
-            );
-            const { res } = await helpers.loginUser(
-                bannedUser.username,
-                bannedUser.pw,
-            );
+            await privileges.global.rescind(['groups:local:login'], 'banned-users');
+            await privileges.categories.give(['local:login'], 0, bannedUser.uid);
+            const { res } = await helpers.loginUser(bannedUser.username, bannedUser.pw);
             assert.strictEqual(res.statusCode, 200);
         });
     });
@@ -661,10 +596,7 @@ describe('authentication', () => {
         async.waterfall(
             [
                 function (next) {
-                    user.create(
-                        { username: 'lockme', password: '123456' },
-                        next,
-                    );
+                    user.create({ username: 'lockme', password: '123456' }, next);
                 },
                 function (_uid, next) {
                     uid = _uid;
@@ -695,7 +627,7 @@ describe('authentication', () => {
                     next();
                 },
             ],
-            done,
+            done
         );
     });
 

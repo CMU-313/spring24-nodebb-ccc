@@ -58,11 +58,7 @@ redisModule.checkCompatibility = async function () {
 
 redisModule.checkCompatibilityVersion = function (version, callback) {
     if (semver.lt(version, '2.8.9')) {
-        callback(
-            new Error(
-                'Your Redis version is not new enough to support NodeBB, please upgrade Redis to v2.8.9 or higher.',
-            ),
-        );
+        callback(new Error('Your Redis version is not new enough to support NodeBB, please upgrade Redis to v2.8.9 or higher.'));
     }
     callback();
 };
@@ -94,26 +90,13 @@ redisModule.info = async function (cxn) {
         redisData.avg_ttl = (split[2] || '').replace('avg_ttl=', '');
     }
 
-    redisData.instantaneous_input = (
-        redisData.instantaneous_input_kbps / 1024
-    ).toFixed(3);
-    redisData.instantaneous_output = (
-        redisData.instantaneous_output_kbps / 1024
-    ).toFixed(3);
+    redisData.instantaneous_input = (redisData.instantaneous_input_kbps / 1024).toFixed(3);
+    redisData.instantaneous_output = (redisData.instantaneous_output_kbps / 1024).toFixed(3);
 
-    redisData.total_net_input = (
-        redisData.total_net_input_bytes /
-        (1024 * 1024 * 1024)
-    ).toFixed(3);
-    redisData.total_net_output = (
-        redisData.total_net_output_bytes /
-        (1024 * 1024 * 1024)
-    ).toFixed(3);
+    redisData.total_net_input = (redisData.total_net_input_bytes / (1024 * 1024 * 1024)).toFixed(3);
+    redisData.total_net_output = (redisData.total_net_output_bytes / (1024 * 1024 * 1024)).toFixed(3);
 
-    redisData.used_memory_human = (
-        redisData.used_memory /
-        (1024 * 1024 * 1024)
-    ).toFixed(3);
+    redisData.used_memory_human = (redisData.used_memory / (1024 * 1024 * 1024)).toFixed(3);
     redisData.raw = JSON.stringify(redisData, null, 4);
     redisData.redis = true;
     return redisData;

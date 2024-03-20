@@ -23,7 +23,7 @@ describe('helpers', () => {
                     },
                 },
             },
-            0,
+            0
         );
         assert(!flag);
         done();
@@ -39,7 +39,7 @@ describe('helpers', () => {
                     },
                 },
             },
-            0,
+            0
         );
         assert(!flag);
         done();
@@ -55,7 +55,7 @@ describe('helpers', () => {
                     },
                 },
             },
-            0,
+            0
         );
         assert(!flag);
         done();
@@ -63,10 +63,7 @@ describe('helpers', () => {
 
     it('should stringify object', done => {
         const str = helpers.stringify({ a: 'herp < derp > and & quote "' });
-        assert.equal(
-            str,
-            '{&quot;a&quot;:&quot;herp &lt; derp &gt; and &amp; quote \\&quot;&quot;}',
-        );
+        assert.equal(str, '{&quot;a&quot;:&quot;herp &lt; derp &gt; and &amp; quote \\&quot;&quot;}');
         done();
     });
 
@@ -89,10 +86,7 @@ describe('helpers', () => {
             imageClass: 'auto',
         };
         const bg = helpers.generateCategoryBackground(category);
-        assert.equal(
-            bg,
-            'background-color: #ff0000; color: #00ff00; background-image: url(/assets/uploads/image.png); background-size: auto;',
-        );
+        assert.equal(bg, 'background-color: #ff0000; color: #00ff00; background-image: url(/assets/uploads/image.png); background-size: auto;');
         done();
     });
 
@@ -117,10 +111,7 @@ describe('helpers', () => {
             ],
         };
         const html = helpers.generateChildrenCategories(category);
-        assert.equal(
-            html,
-            `<span class="category-children"><span class="category-children-item pull-left"><div role="presentation" class="icon pull-left" style="background-color: #ff0000; color: #00ff00;"><i class="fa fa-fw undefined"></i></div><a href="${nconf.get('relative_path')}/category/undefined"><small>children</small></a></span></span>`,
-        );
+        assert.equal(html, `<span class="category-children"><span class="category-children-item pull-left"><div role="presentation" class="icon pull-left" style="background-color: #ff0000; color: #00ff00;"><i class="fa fa-fw undefined"></i></div><a href="${nconf.get('relative_path')}/category/undefined"><small>children</small></a></span></span>`);
         done();
     });
 
@@ -141,10 +132,7 @@ describe('helpers', () => {
             name: 'some group',
             isMember: true,
         });
-        assert.equal(
-            btn,
-            '<button class="btn btn-danger" data-action="leave" data-group="some group"><i class="fa fa-times"></i> [[groups:membership.leave-group]]</button>',
-        );
+        assert.equal(btn, '<button class="btn btn-danger" data-action="leave" data-group="some group"><i class="fa fa-times"></i> [[groups:membership.leave-group]]</button>');
         done();
     });
 
@@ -154,10 +142,7 @@ describe('helpers', () => {
             name: 'some group',
             isPending: true,
         });
-        assert.equal(
-            btn,
-            '<button class="btn btn-warning disabled"><i class="fa fa-clock-o"></i> [[groups:membership.invitation-pending]]</button>',
-        );
+        assert.equal(btn, '<button class="btn btn-warning disabled"><i class="fa fa-clock-o"></i> [[groups:membership.invitation-pending]]</button>');
         done();
     });
 
@@ -167,10 +152,7 @@ describe('helpers', () => {
             name: 'some group',
             isInvited: true,
         });
-        assert.equal(
-            btn,
-            '<button class="btn btn-link" data-action="rejectInvite" data-group="some group">[[groups:membership.reject]]</button><button class="btn btn-success" data-action="acceptInvite" data-group="some group"><i class="fa fa-plus"></i> [[groups:membership.accept-invitation]]</button>',
-        );
+        assert.equal(btn, '<button class="btn btn-link" data-action="rejectInvite" data-group="some group">[[groups:membership.reject]]</button><button class="btn btn-success" data-action="acceptInvite" data-group="some group"><i class="fa fa-plus"></i> [[groups:membership.accept-invitation]]</button>');
         done();
     });
 
@@ -180,10 +162,7 @@ describe('helpers', () => {
             name: 'some group',
             disableJoinRequests: false,
         });
-        assert.equal(
-            btn,
-            '<button class="btn btn-success" data-action="join" data-group="some group"><i class="fa fa-plus"></i> [[groups:membership.join-group]]</button>',
-        );
+        assert.equal(btn, '<button class="btn btn-success" data-action="join" data-group="some group"><i class="fa fa-plus"></i> [[groups:membership.join-group]]</button>');
         done();
     });
 
@@ -202,10 +181,7 @@ describe('helpers', () => {
             read: true,
         };
         const html = helpers.spawnPrivilegeStates('guests', privs);
-        assert.equal(
-            html,
-            '<td class="text-center" data-privilege="find" data-value="true"><input autocomplete="off" type="checkbox" checked /></td><td class="text-center" data-privilege="read" data-value="true"><input autocomplete="off" type="checkbox" checked /></td>',
-        );
+        assert.equal(html, '<td class="text-center" data-privilege="find" data-value="true"><input autocomplete="off" type="checkbox" checked /></td><td class="text-center" data-privilege="read" data-value="true"><input autocomplete="off" type="checkbox" checked /></td>');
         done();
     });
 
@@ -215,10 +191,7 @@ describe('helpers', () => {
             user: { username: 'baris' },
         };
         const html = helpers.renderTopicImage(topicObj);
-        assert.equal(
-            html,
-            `<img src="${topicObj.thumb}" class="img-circle user-img" title="${topicObj.user.username}" />`,
-        );
+        assert.equal(html, `<img src="${topicObj.thumb}" class="img-circle user-img" title="${topicObj.user.username}" />`);
         done();
     });
 
@@ -228,10 +201,7 @@ describe('helpers', () => {
             user: { uid: 1, username: 'baris', picture: '/uploads/2.png' },
         };
         const html = helpers.renderTopicImage(topicObj);
-        assert.equal(
-            html,
-            `<img component="user/picture" data-uid="${topicObj.user.uid}" src="${topicObj.user.picture}" class="user-img" title="${topicObj.user.username}" />`,
-        );
+        assert.equal(html, `<img component="user/picture" data-uid="${topicObj.user.uid}" src="${topicObj.user.picture}" class="user-img" title="${topicObj.user.username}" />`);
         done();
     });
 
@@ -240,10 +210,7 @@ describe('helpers', () => {
             teaser: { user: { username: 'baris', picture: '/uploads/1.png' } },
         };
         const html = helpers.renderDigestAvatar(block);
-        assert.equal(
-            html,
-            `<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="${block.teaser.user.picture}" title="${block.teaser.user.username}" />`,
-        );
+        assert.equal(html, `<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="${block.teaser.user.picture}" title="${block.teaser.user.username}" />`);
         done();
     });
 
@@ -258,10 +225,7 @@ describe('helpers', () => {
             },
         };
         const html = helpers.renderDigestAvatar(block);
-        assert.equal(
-            html,
-            `<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ${block.teaser.user['icon:bgColor']}; color: white; text-align: center; display: inline-block; border-radius: 50%;">${block.teaser.user['icon:text']}</div>`,
-        );
+        assert.equal(html, `<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ${block.teaser.user['icon:bgColor']}; color: white; text-align: center; display: inline-block; border-radius: 50%;">${block.teaser.user['icon:text']}</div>`);
         done();
     });
 
@@ -270,10 +234,7 @@ describe('helpers', () => {
             user: { username: 'baris', picture: '/uploads/1.png' },
         };
         const html = helpers.renderDigestAvatar(block);
-        assert.equal(
-            html,
-            `<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="${block.user.picture}" title="${block.user.username}" />`,
-        );
+        assert.equal(html, `<img style="vertical-align: middle; width: 32px; height: 32px; border-radius: 50%;" src="${block.user.picture}" title="${block.user.username}" />`);
         done();
     });
 
@@ -286,10 +247,7 @@ describe('helpers', () => {
             },
         };
         const html = helpers.renderDigestAvatar(block);
-        assert.equal(
-            html,
-            `<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ${block.user['icon:bgColor']}; color: white; text-align: center; display: inline-block; border-radius: 50%;">${block.user['icon:text']}</div>`,
-        );
+        assert.equal(html, `<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ${block.user['icon:bgColor']}; color: white; text-align: center; display: inline-block; border-radius: 50%;">${block.user['icon:text']}</div>`);
         done();
     });
 
@@ -298,10 +256,7 @@ describe('helpers', () => {
             platform: 'Linux',
             browser: 'Chrome',
         });
-        assert.equal(
-            html,
-            '<i class="fa fa-fw fa-linux"></i><i class="fa fa-fw fa-chrome"></i>',
-        );
+        assert.equal(html, '<i class="fa fa-fw fa-linux"></i><i class="fa fa-fw fa-chrome"></i>');
         done();
     });
 
@@ -310,10 +265,7 @@ describe('helpers', () => {
             platform: 'Microsoft Windows',
             browser: 'Firefox',
         });
-        assert.equal(
-            html,
-            '<i class="fa fa-fw fa-windows"></i><i class="fa fa-fw fa-firefox"></i>',
-        );
+        assert.equal(html, '<i class="fa fa-fw fa-windows"></i><i class="fa fa-fw fa-firefox"></i>');
         done();
     });
 
@@ -322,10 +274,7 @@ describe('helpers', () => {
             platform: 'Apple Mac',
             browser: 'Safari',
         });
-        assert.equal(
-            html,
-            '<i class="fa fa-fw fa-apple"></i><i class="fa fa-fw fa-safari"></i>',
-        );
+        assert.equal(html, '<i class="fa fa-fw fa-apple"></i><i class="fa fa-fw fa-safari"></i>');
         done();
     });
 
@@ -334,10 +283,7 @@ describe('helpers', () => {
             platform: 'Android',
             browser: 'IE',
         });
-        assert.equal(
-            html,
-            '<i class="fa fa-fw fa-android"></i><i class="fa fa-fw fa-internet-explorer"></i>',
-        );
+        assert.equal(html, '<i class="fa fa-fw fa-android"></i><i class="fa fa-fw fa-internet-explorer"></i>');
         done();
     });
 
@@ -346,10 +292,7 @@ describe('helpers', () => {
             platform: 'iPad',
             browser: 'Edge',
         });
-        assert.equal(
-            html,
-            '<i class="fa fa-fw fa-tablet"></i><i class="fa fa-fw fa-edge"></i>',
-        );
+        assert.equal(html, '<i class="fa fa-fw fa-tablet"></i><i class="fa fa-fw fa-edge"></i>');
         done();
     });
 
@@ -358,10 +301,7 @@ describe('helpers', () => {
             platform: 'iPhone',
             browser: 'unknow',
         });
-        assert.equal(
-            html,
-            '<i class="fa fa-fw fa-mobile"></i><i class="fa fa-fw fa-question-circle"></i>',
-        );
+        assert.equal(html, '<i class="fa fa-fw fa-mobile"></i><i class="fa fa-fw fa-question-circle"></i>');
         done();
     });
 
@@ -370,10 +310,7 @@ describe('helpers', () => {
             platform: 'unknow',
             browser: 'unknown',
         });
-        assert.equal(
-            html,
-            '<i class="fa fa-fw fa-question-circle"></i><i class="fa fa-fw fa-question-circle"></i>',
-        );
+        assert.equal(html, '<i class="fa fa-fw fa-question-circle"></i><i class="fa fa-fw fa-question-circle"></i>');
         done();
     });
 });

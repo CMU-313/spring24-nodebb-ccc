@@ -10,9 +10,7 @@ module.exports = {
         const { progress } = this;
 
         async function getTopicsTags(tids) {
-            return await db.getSetsMembers(
-                tids.map(tid => `topic:${tid}:tags`),
-            );
+            return await db.getSetsMembers(tids.map(tid => `topic:${tid}:tags`));
         }
 
         await batch.processSortedSet(
@@ -28,19 +26,14 @@ module.exports = {
                     })
                     .filter(t => t && t.tags.length);
 
-                await db.setObjectBulk(
-                    topicsWithTags.map(t => [
-                        `topic:${t.tid}`,
-                        { tags: t.tags.join(',') },
-                    ]),
-                );
+                await db.setObjectBulk(topicsWithTags.map(t => [`topic:${t.tid}`, { tags: t.tags.join(',') }]));
                 await db.deleteAll(tids.map(tid => `topic:${tid}:tags`));
                 progress.incr(tids.length);
             },
             {
                 batch: 500,
                 progress: progress,
-            },
+            }
         );
     },
 };

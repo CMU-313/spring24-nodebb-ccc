@@ -13,9 +13,7 @@ module.exports = {
 
         const defaultLang = await meta.configs.get('defaultLang');
         if (defaultLang) {
-            const newLanguage = defaultLang
-                .replace('_', '-')
-                .replace('@', '-x-');
+            const newLanguage = defaultLang.replace('_', '-').replace('@', '-x-');
             if (newLanguage !== defaultLang) {
                 await meta.configs.set('defaultLang', newLanguage);
             }
@@ -27,28 +25,19 @@ module.exports = {
                 await Promise.all(
                     ids.map(async uid => {
                         progress.incr();
-                        const language = await db.getObjectField(
-                            `user:${uid}:settings`,
-                            'userLang',
-                        );
+                        const language = await db.getObjectField(`user:${uid}:settings`, 'userLang');
                         if (language) {
-                            const newLanguage = language
-                                .replace('_', '-')
-                                .replace('@', '-x-');
+                            const newLanguage = language.replace('_', '-').replace('@', '-x-');
                             if (newLanguage !== language) {
-                                await user.setSetting(
-                                    uid,
-                                    'userLang',
-                                    newLanguage,
-                                );
+                                await user.setSetting(uid, 'userLang', newLanguage);
                             }
                         }
-                    }),
+                    })
                 );
             },
             {
                 progress: progress,
-            },
+            }
         );
     },
 };

@@ -11,12 +11,7 @@ describe('settings v3', () => {
     let settings2;
 
     it('should create a new settings object', done => {
-        settings1 = new settings(
-            'my-plugin',
-            '1.0',
-            { foo: 1, bar: { derp: 2 } },
-            done,
-        );
+        settings1 = new settings('my-plugin', '1.0', { foo: 1, bar: { derp: 2 } }, done);
     });
 
     it('should get the saved settings ', done => {
@@ -26,12 +21,7 @@ describe('settings v3', () => {
     });
 
     it('should create a new settings instance for same key', done => {
-        settings2 = new settings(
-            'my-plugin',
-            '1.0',
-            { foo: 1, bar: { derp: 2 } },
-            done,
-        );
+        settings2 = new settings('my-plugin', '1.0', { foo: 1, bar: { derp: 2 } }, done);
     });
 
     it('should pass change between settings object over pubsub', done => {

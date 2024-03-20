@@ -83,10 +83,7 @@ async function hashPassword(msg) {
 }
 
 async function compare(msg) {
-    return await bcrypt.compare(
-        String(msg.password || ''),
-        String(msg.hash || ''),
-    );
+    return await bcrypt.compare(String(msg.password || ''), String(msg.hash || ''));
 }
 
 require('./promisify')(exports);

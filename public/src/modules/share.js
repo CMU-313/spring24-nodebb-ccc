@@ -7,18 +7,7 @@ define('share', ['hooks'], function (hooks) {
         const baseUrl = window.location.protocol + '//' + window.location.host;
 
         function openShare(url, urlToPost, width, height) {
-            window.open(
-                url +
-                    encodeURIComponent(
-                        baseUrl + config.relative_path + urlToPost,
-                    ),
-                '_blank',
-                'width=' +
-                    width +
-                    ',height=' +
-                    height +
-                    ',scrollbars=no,status=no',
-            );
+            window.open(url + encodeURIComponent(baseUrl + config.relative_path + urlToPost), '_blank', 'width=' + width + ',height=' + height + ',scrollbars=no,status=no');
             hooks.fire('action:share.open', {
                 url: url,
                 urlToPost: urlToPost,
@@ -44,23 +33,11 @@ define('share', ['hooks'], function (hooks) {
         });
 
         addHandler('[component="share/twitter"]', function () {
-            return openShare(
-                'https://twitter.com/intent/tweet?text=' +
-                    encodeURIComponent(name) +
-                    '&url=',
-                getPostUrl($(this)),
-                550,
-                420,
-            );
+            return openShare('https://twitter.com/intent/tweet?text=' + encodeURIComponent(name) + '&url=', getPostUrl($(this)), 550, 420);
         });
 
         addHandler('[component="share/facebook"]', function () {
-            return openShare(
-                'https://www.facebook.com/sharer/sharer.php?u=',
-                getPostUrl($(this)),
-                626,
-                436,
-            );
+            return openShare('https://www.facebook.com/sharer/sharer.php?u=', getPostUrl($(this)), 626, 436);
         });
 
         hooks.fire('action:share.addHandlers', { openShare: openShare });
@@ -71,10 +48,7 @@ define('share', ['hooks'], function (hooks) {
     }
 
     function getPostUrl(clickedElement) {
-        const pid = parseInt(
-            clickedElement.parents('[data-pid]').attr('data-pid'),
-            10,
-        );
+        const pid = parseInt(clickedElement.parents('[data-pid]').attr('data-pid'), 10);
         return '/post' + (pid ? '/' + pid : '');
     }
 

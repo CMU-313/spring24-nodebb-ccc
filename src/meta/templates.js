@@ -32,10 +32,7 @@ async function processImports(paths, templatePath, source) {
 
     const partial = matches[1];
     if (paths[partial] && templatePath !== partial) {
-        const partialSource = await fs.promises.readFile(
-            paths[partial],
-            'utf8',
-        );
+        const partialSource = await fs.promises.readFile(paths[partial], 'utf8');
         source = source.replace(regex, partialSource);
         return await processImports(paths, templatePath, source);
     }
@@ -56,11 +53,7 @@ async function getTemplateDirs(activePlugins) {
             if (!plugins.pluginsData[id]) {
                 return '';
             }
-            return path.join(
-                paths.nodeModules,
-                id,
-                plugins.pluginsData[id].templates || 'templates',
-            );
+            return path.join(paths.nodeModules, id, plugins.pluginsData[id].templates || 'templates');
         })
         .filter(Boolean);
 
@@ -73,9 +66,7 @@ async function getTemplateDirs(activePlugins) {
         themePath = path.join(nconf.get('themes_path'), theme);
         themeConfig = require(path.join(themePath, 'theme.json'));
 
-        themeTemplates.push(
-            path.join(themePath, themeConfig.templates || 'templates'),
-        );
+        themeTemplates.push(path.join(themePath, themeConfig.templates || 'templates'));
         theme = themeConfig.baseTheme;
     }
 
@@ -84,15 +75,9 @@ async function getTemplateDirs(activePlugins) {
 
     const coreTemplatesPath = nconf.get('core_templates_path');
 
-    let templateDirs = _.uniq(
-        [coreTemplatesPath].concat(themeTemplates, pluginTemplates),
-    );
+    let templateDirs = _.uniq([coreTemplatesPath].concat(themeTemplates, pluginTemplates));
 
-    templateDirs = await Promise.all(
-        templateDirs.map(async path =>
-            (await file.exists(path)) ? path : false,
-        ),
-    );
+    templateDirs = await Promise.all(templateDirs.map(async path => ((await file.exists(path)) ? path : false)));
     return templateDirs.filter(Boolean);
 }
 
@@ -107,7 +92,7 @@ async function getTemplateFiles(dirs) {
                     path: file,
                 }));
             return files;
-        }),
+        })
     );
 
     const dict = {};
@@ -126,15 +111,12 @@ async function compileTemplate(filename, source) {
         paths.map(p => {
             const relative = path.relative(viewsPath, p).replace(/\\/g, '/');
             return [relative, p];
-        }),
+        })
     );
 
     source = await processImports(paths, filename, source);
     const compiled = await Benchpress.precompile(source, { filename });
-    return await fs.promises.writeFile(
-        path.join(viewsPath, filename.replace(/\.tpl$/, '.js')),
-        compiled,
-    );
+    return await fs.promises.writeFile(path.join(viewsPath, filename.replace(/\.tpl$/, '.js')), compiled);
 }
 Templates.compileTemplate = compileTemplate;
 
@@ -160,11 +142,8 @@ async function compile() {
             const compiled = await Benchpress.precompile(imported, {
                 filename: name,
             });
-            await fs.promises.writeFile(
-                path.join(viewsPath, name.replace(/\.tpl$/, '.js')),
-                compiled,
-            );
-        }),
+            await fs.promises.writeFile(path.join(viewsPath, name.replace(/\.tpl$/, '.js')), compiled);
+        })
     );
 
     winston.verbose('[meta/templates] Successfully compiled templates.');

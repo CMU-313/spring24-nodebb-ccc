@@ -12,5 +12,5 @@ module.exports = require('../public/src/modules/translator.common')(
         const languages = require('./languages');
         return languages.get(lang, namespace);
     },
-    warn,
+    warn
 );

@@ -14,11 +14,7 @@ userController.getCurrentUser = async function (req, res) {
         return res.status(401).json('not-authorized');
     }
     const userslug = await user.getUserField(req.uid, 'userslug');
-    const userData = await accountHelpers.getUserDataByUserSlug(
-        userslug,
-        req.uid,
-        req.query,
-    );
+    const userData = await accountHelpers.getUserDataByUserSlug(userslug, req.uid, req.query);
     res.json(userData);
 };
 
@@ -35,22 +31,14 @@ userController.getUserByEmail = async function (req, res, next) {
 };
 
 async function byType(type, req, res, next) {
-    const userData = await userController.getUserDataByField(
-        req.uid,
-        type,
-        req.params[type],
-    );
+    const userData = await userController.getUserDataByField(req.uid, type, req.params[type]);
     if (!userData) {
         return next();
     }
     res.json(userData);
 }
 
-userController.getUserDataByField = async function (
-    callerUid,
-    field,
-    fieldValue,
-) {
+userController.getUserDataByField = async function (callerUid, field, fieldValue) {
     let uid = null;
     if (field === 'uid') {
         uid = fieldValue;
@@ -105,9 +93,7 @@ userController.exportProfile = async function (req, res, next) {
 
 // DEPRECATED; Remove in NodeBB v3.0.0
 function sendExport(filename, type, res, next) {
-    winston.warn(
-        `[users/export] Access via page API is deprecated, use GET /api/v3/users/:uid/exports/:type instead.`,
-    );
+    winston.warn(`[users/export] Access via page API is deprecated, use GET /api/v3/users/:uid/exports/:type instead.`);
 
     res.sendFile(
         filename,
@@ -126,16 +112,8 @@ function sendExport(filename, type, res, next) {
                 }
                 return next(err);
             }
-        },
+        }
     );
 }
 
-require('../promisify')(userController, [
-    'getCurrentUser',
-    'getUserByUID',
-    'getUserByUsername',
-    'getUserByEmail',
-    'exportPosts',
-    'exportUploads',
-    'exportProfile',
-]);
+require('../promisify')(userController, ['getCurrentUser', 'getUserByUID', 'getUserByUsername', 'getUserByEmail', 'exportPosts', 'exportUploads', 'exportProfile']);

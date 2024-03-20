@@ -1,32 +1,6 @@
 'use strict';
 
-define('forum/topic', [
-    'forum/infinitescroll',
-    'forum/topic/threadTools',
-    'forum/topic/postTools',
-    'forum/topic/events',
-    'forum/topic/posts',
-    'navigator',
-    'sort',
-    'components',
-    'storage',
-    'hooks',
-    'api',
-    'alerts',
-], function (
-    infinitescroll,
-    threadTools,
-    postTools,
-    events,
-    posts,
-    navigator,
-    sort,
-    components,
-    storage,
-    hooks,
-    api,
-    alerts,
-) {
+define('forum/topic', ['forum/infinitescroll', 'forum/topic/threadTools', 'forum/topic/postTools', 'forum/topic/events', 'forum/topic/posts', 'navigator', 'sort', 'components', 'storage', 'hooks', 'api', 'alerts'], function (infinitescroll, threadTools, postTools, events, posts, navigator, sort, components, storage, hooks, api, alerts) {
     const Topic = {};
     let tid = 0;
     let currentUrl = '';
@@ -42,8 +16,7 @@ define('forum/topic', [
     });
 
     Topic.init = function () {
-        const tidChanged =
-            !tid || parseInt(tid, 10) !== parseInt(ajaxify.data.tid, 10);
+        const tidChanged = !tid || parseInt(tid, 10) !== parseInt(ajaxify.data.tid, 10);
         tid = ajaxify.data.tid;
         currentUrl = ajaxify.currentPage;
         hooks.fire('action:topic.loading');
@@ -54,13 +27,7 @@ define('forum/topic', [
             posts.signaturesShown = {};
         }
         posts.onTopicPageLoad(components.get('post'));
-        navigator.init(
-            '[component="post"]',
-            ajaxify.data.postcount,
-            Topic.toTop,
-            Topic.toBottom,
-            utils.debounce(Topic.navigatorCallback, 500),
-        );
+        navigator.init('[component="post"]', ajaxify.data.postcount, Topic.toTop, Topic.toBottom, utils.debounce(Topic.navigatorCallback, 500));
 
         postTools.init(tid);
         threadTools.init(tid, $('.topic'));
@@ -93,9 +60,7 @@ define('forum/topic', [
                 require(['search'], function (search) {
                     mousetrap.bind(['command+f', 'ctrl+f'], function (e) {
                         e.preventDefault();
-                        $('#search-fields input').val(
-                            'in:topic-' + ajaxify.data.tid + ' ',
-                        );
+                        $('#search-fields input').val('in:topic-' + ajaxify.data.tid + ' ');
                         search.showAndFocusInput();
                     });
 
@@ -130,17 +95,13 @@ define('forum/topic', [
     };
 
     Topic.toBottom = function () {
-        socket.emit(
-            'topics.postcount',
-            ajaxify.data.tid,
-            function (err, postCount) {
-                if (err) {
-                    return alerts.error(err);
-                }
+        socket.emit('topics.postcount', ajaxify.data.tid, function (err, postCount) {
+            if (err) {
+                return alerts.error(err);
+            }
 
-                navigator.scrollBottom(postCount - 1);
-            },
-        );
+            navigator.scrollBottom(postCount - 1);
+        });
     };
 
     function handleBookmark(tid) {
@@ -150,22 +111,14 @@ define('forum/topic', [
                 return navigator.scrollToElement(el, true, 0);
             }
         }
-        const bookmark =
-            ajaxify.data.bookmark ||
-            storage.getItem('topic:' + tid + ':bookmark');
+        const bookmark = ajaxify.data.bookmark || storage.getItem('topic:' + tid + ':bookmark');
         const postIndex = ajaxify.data.postIndex;
 
         if (postIndex > 1) {
             if (components.get('post/anchor', postIndex - 1).length) {
                 return navigator.scrollToPostIndex(postIndex - 1, true, 0);
             }
-        } else if (
-            bookmark &&
-            (!config.usePagination ||
-                (config.usePagination &&
-                    ajaxify.data.pagination.currentPage === 1)) &&
-            ajaxify.data.postcount > ajaxify.data.bookmarkThreshold
-        ) {
+        } else if (bookmark && (!config.usePagination || (config.usePagination && ajaxify.data.pagination.currentPage === 1)) && ajaxify.data.postcount > ajaxify.data.bookmarkThreshold) {
             alerts.alert({
                 alert_id: 'bookmark',
                 message: '[[topic:bookmark_instructions]]',
@@ -190,45 +143,33 @@ define('forum/topic', [
             const toggle = $(this);
             blockQuote.toggleClass('uncollapsed');
             const collapsed = !blockQuote.hasClass('uncollapsed');
-            toggle
-                .toggleClass('fa-angle-down', collapsed)
-                .toggleClass('fa-angle-up', !collapsed);
+            toggle.toggleClass('fa-angle-down', collapsed).toggleClass('fa-angle-up', !collapsed);
         });
     }
 
     function addParentHandler() {
-        components
-            .get('topic')
-            .on('click', '[component="post/parent"]', function (e) {
-                const toPid = $(this).attr('data-topid');
+        components.get('topic').on('click', '[component="post/parent"]', function (e) {
+            const toPid = $(this).attr('data-topid');
 
-                const toPost = $(
-                    '[component="topic"]>[component="post"][data-pid="' +
-                        toPid +
-                        '"]',
-                );
-                if (toPost.length) {
-                    e.preventDefault();
-                    navigator.scrollToIndex(toPost.attr('data-index'), true);
-                    return false;
-                }
-            });
+            const toPost = $('[component="topic"]>[component="post"][data-pid="' + toPid + '"]');
+            if (toPost.length) {
+                e.preventDefault();
+                navigator.scrollToIndex(toPost.attr('data-index'), true);
+                return false;
+            }
+        });
     }
 
     Topic.applyDropup = function () {
         const containerRect = this.getBoundingClientRect();
         const dropdownEl = this.querySelector('.dropdown-menu');
         const dropdownStyle = window.getComputedStyle(dropdownEl);
-        const dropdownHeight = dropdownStyle
-            .getPropertyValue('height')
-            .slice(0, -2);
+        const dropdownHeight = dropdownStyle.getPropertyValue('height').slice(0, -2);
         const offset = 60;
 
         // Toggler position (including its height, since the menu spawns above it),
         // minus the dropdown's height and navbar offset
-        const dropUp =
-            containerRect.top + containerRect.height - dropdownHeight - offset >
-            0;
+        const dropUp = containerRect.top + containerRect.height - dropdownHeight - offset > 0;
         this.classList.toggle('dropup', dropUp);
     };
 
@@ -250,16 +191,12 @@ define('forum/topic', [
     }
 
     function addRepliesHandler() {
-        $('[component="topic"]').on(
-            'click',
-            '[component="post/reply-count"]',
-            function () {
-                const btn = $(this);
-                require(['forum/topic/replies'], function (replies) {
-                    replies.init(btn);
-                });
-            },
-        );
+        $('[component="topic"]').on('click', '[component="post/reply-count"]', function () {
+            const btn = $(this);
+            require(['forum/topic/replies'], function (replies) {
+                replies.init(btn);
+            });
+        });
     }
 
     function addPostsPreviewHandler() {
@@ -273,94 +210,61 @@ define('forum/topic', [
             $('#post-tooltip').remove();
         });
         $('[component="topic"]')
-            .on(
-                'mouseenter',
-                '[component="post"] a, [component="topic/event"] a',
-                async function () {
-                    const link = $(this);
+            .on('mouseenter', '[component="post"] a, [component="topic/event"] a', async function () {
+                const link = $(this);
 
-                    async function renderPost(pid) {
-                        const postData =
-                            postCache[pid] ||
-                            (await socket.emit('posts.getPostSummaryByPid', {
-                                pid: pid,
-                            }));
-                        $('#post-tooltip').remove();
-                        if (postData && ajaxify.data.template.topic) {
-                            postCache[pid] = postData;
-                            const tooltip = await app.parseAndTranslate(
-                                'partials/topic/post-preview',
-                                { post: postData },
-                            );
-                            tooltip.hide().find('.timeago').timeago();
-                            tooltip.appendTo($('body')).fadeIn(300);
-                            const postContent = link
-                                .parents('[component="topic"]')
-                                .find('[component="post/content"]')
-                                .first();
-                            const postRect = postContent.offset();
-                            const postWidth = postContent.width();
-                            const linkRect = link.offset();
-                            tooltip.css({
-                                top: linkRect.top + 30,
-                                left: postRect.left,
-                                width: postWidth,
-                            });
-                        }
+                async function renderPost(pid) {
+                    const postData =
+                        postCache[pid] ||
+                        (await socket.emit('posts.getPostSummaryByPid', {
+                            pid: pid,
+                        }));
+                    $('#post-tooltip').remove();
+                    if (postData && ajaxify.data.template.topic) {
+                        postCache[pid] = postData;
+                        const tooltip = await app.parseAndTranslate('partials/topic/post-preview', { post: postData });
+                        tooltip.hide().find('.timeago').timeago();
+                        tooltip.appendTo($('body')).fadeIn(300);
+                        const postContent = link.parents('[component="topic"]').find('[component="post/content"]').first();
+                        const postRect = postContent.offset();
+                        const postWidth = postContent.width();
+                        const linkRect = link.offset();
+                        tooltip.css({
+                            top: linkRect.top + 30,
+                            left: postRect.left,
+                            width: postWidth,
+                        });
+                    }
+                }
+
+                const href = link.attr('href');
+                const location = utils.urlToLocation(href);
+                const pathname = location.pathname;
+                const validHref = href && href !== '#' && window.location.hostname === location.hostname;
+                $('#post-tooltip').remove();
+                const postMatch = validHref && pathname && pathname.match(/\/post\/([\d]+)/);
+                const topicMatch = validHref && pathname && pathname.match(/\/topic\/([\d]+)/);
+                if (postMatch) {
+                    const pid = postMatch[1];
+                    if (parseInt(link.parents('[component="post"]').attr('data-pid'), 10) === parseInt(pid, 10)) {
+                        return; // dont render self post
                     }
 
-                    const href = link.attr('href');
-                    const location = utils.urlToLocation(href);
-                    const pathname = location.pathname;
-                    const validHref =
-                        href &&
-                        href !== '#' &&
-                        window.location.hostname === location.hostname;
-                    $('#post-tooltip').remove();
-                    const postMatch =
-                        validHref &&
-                        pathname &&
-                        pathname.match(/\/post\/([\d]+)/);
-                    const topicMatch =
-                        validHref &&
-                        pathname &&
-                        pathname.match(/\/topic\/([\d]+)/);
-                    if (postMatch) {
-                        const pid = postMatch[1];
-                        if (
-                            parseInt(
-                                link
-                                    .parents('[component="post"]')
-                                    .attr('data-pid'),
-                                10,
-                            ) === parseInt(pid, 10)
-                        ) {
-                            return; // dont render self post
-                        }
-
-                        timeoutId = setTimeout(async () => {
-                            renderPost(pid);
-                        }, 300);
-                    } else if (topicMatch) {
-                        timeoutId = setTimeout(async () => {
-                            const tid = topicMatch[1];
-                            const topicData = await api.get(
-                                '/topics/' + tid,
-                                {},
-                            );
-                            renderPost(topicData.mainPid);
-                        }, 300);
-                    }
-                },
-            )
-            .on(
-                'mouseleave',
-                '[component="post"] a, [component="topic/event"] a',
-                function () {
-                    clearTimeout(timeoutId);
-                    $('#post-tooltip').remove();
-                },
-            );
+                    timeoutId = setTimeout(async () => {
+                        renderPost(pid);
+                    }, 300);
+                } else if (topicMatch) {
+                    timeoutId = setTimeout(async () => {
+                        const tid = topicMatch[1];
+                        const topicData = await api.get('/topics/' + tid, {});
+                        renderPost(topicData.mainPid);
+                    }, 300);
+                }
+            })
+            .on('mouseleave', '[component="post"] a, [component="topic/event"] a', function () {
+                clearTimeout(timeoutId);
+                $('#post-tooltip').remove();
+            });
     }
 
     function updateTopicTitle() {
@@ -380,8 +284,7 @@ define('forum/topic', [
             return;
         }
 
-        const newUrl =
-            'topic/' + ajaxify.data.slug + (index > 1 ? '/' + index : '');
+        const newUrl = 'topic/' + ajaxify.data.slug + (index > 1 ? '/' + index : '');
         if (newUrl !== currentUrl) {
             currentUrl = newUrl;
 
@@ -395,8 +298,7 @@ define('forum/topic', [
             if (ajaxify.data.updateUrlWithPostIndex && history.replaceState) {
                 let search = window.location.search || '';
                 if (!config.usePagination) {
-                    search =
-                        search && !/^\?page=\d+$/.test(search) ? search : '';
+                    search = search && !/^\?page=\d+$/.test(search) ? search : '';
                 }
 
                 history.replaceState(
@@ -404,13 +306,7 @@ define('forum/topic', [
                         url: newUrl + search,
                     },
                     null,
-                    window.location.protocol +
-                        '//' +
-                        window.location.host +
-                        config.relative_path +
-                        '/' +
-                        newUrl +
-                        search,
+                    window.location.protocol + '//' + window.location.host + config.relative_path + '/' + newUrl + search
                 );
             }
         }
@@ -418,18 +314,12 @@ define('forum/topic', [
 
     function updateUserBookmark(index) {
         const bookmarkKey = 'topic:' + ajaxify.data.tid + ':bookmark';
-        const currentBookmark =
-            ajaxify.data.bookmark || storage.getItem(bookmarkKey);
+        const currentBookmark = ajaxify.data.bookmark || storage.getItem(bookmarkKey);
         if (config.topicPostSort === 'newest_to_oldest') {
             index = Math.max(1, ajaxify.data.postcount - index + 2);
         }
 
-        if (
-            ajaxify.data.postcount > ajaxify.data.bookmarkThreshold &&
-            (!currentBookmark ||
-                parseInt(index, 10) > parseInt(currentBookmark, 10) ||
-                ajaxify.data.postcount < parseInt(currentBookmark, 10))
-        ) {
+        if (ajaxify.data.postcount > ajaxify.data.bookmarkThreshold && (!currentBookmark || parseInt(index, 10) > parseInt(currentBookmark, 10) || ajaxify.data.postcount < parseInt(currentBookmark, 10))) {
             if (app.user.uid) {
                 socket.emit(
                     'topics.bookmark',
@@ -442,7 +332,7 @@ define('forum/topic', [
                             return alerts.error(err);
                         }
                         ajaxify.data.bookmark = index + 1;
-                    },
+                    }
                 );
             } else {
                 storage.setItem(bookmarkKey, index);
@@ -450,10 +340,7 @@ define('forum/topic', [
         }
 
         // removes the bookmark alert when we get to / past the bookmark
-        if (
-            !currentBookmark ||
-            parseInt(index, 10) >= parseInt(currentBookmark, 10)
-        ) {
+        if (!currentBookmark || parseInt(index, 10) >= parseInt(currentBookmark, 10)) {
             alerts.remove('bookmark');
         }
     }

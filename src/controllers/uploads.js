@@ -25,11 +25,7 @@ uploadsController.upload = async function (req, res, filesIterator) {
 
     // These checks added because of odd behaviour by request: https://github.com/request/request/issues/2445
     if (!Array.isArray(files)) {
-        return helpers.formatApiResponse(
-            500,
-            res,
-            new Error('[[error:invalid-file]]'),
-        );
+        return helpers.formatApiResponse(500, res, new Error('[[error:invalid-file]]'));
     }
     if (Array.isArray(files[0])) {
         files = files[0];
@@ -82,11 +78,7 @@ async function uploadAsImage(req, uploadedFile) {
     let fileObj = await uploadsController.uploadFile(req.uid, uploadedFile);
     // sharp can't save svgs skip resize for them
     const isSVG = uploadedFile.type === 'image/svg+xml';
-    if (
-        isSVG ||
-        meta.config.resizeImageWidth === 0 ||
-        meta.config.resizeImageWidthThreshold === 0
-    ) {
+    if (isSVG || meta.config.resizeImageWidth === 0 || meta.config.resizeImageWidthThreshold === 0) {
         return fileObj;
     }
 
@@ -109,10 +101,7 @@ async function uploadAsFile(req, uploadedFile) {
 
 async function resizeImage(fileObj) {
     const imageData = await image.size(fileObj.path);
-    if (
-        imageData.width < meta.config.resizeImageWidthThreshold ||
-        meta.config.resizeImageWidth > meta.config.resizeImageWidthThreshold
-    ) {
+    if (imageData.width < meta.config.resizeImageWidthThreshold || meta.config.resizeImageWidth > meta.config.resizeImageWidthThreshold) {
         return fileObj;
     }
 
@@ -131,11 +120,7 @@ async function resizeImage(fileObj) {
 uploadsController.uploadThumb = async function (req, res) {
     if (!meta.config.allowTopicsThumbnail) {
         deleteTempFiles(req.files.files);
-        return helpers.formatApiResponse(
-            503,
-            res,
-            new Error('[[error:topic-thumbnails-are-disabled]]'),
-        );
+        return helpers.formatApiResponse(503, res, new Error('[[error:topic-thumbnails-are-disabled]]'));
     }
 
     return await uploadsController.upload(req, res, async uploadedFile => {
@@ -177,21 +162,14 @@ uploadsController.uploadFile = async function (uid, uploadedFile) {
     }
 
     if (uploadedFile.size > meta.config.maximumFileSize * 1024) {
-        throw new Error(
-            `[[error:file-too-big, ${meta.config.maximumFileSize}]]`,
-        );
+        throw new Error(`[[error:file-too-big, ${meta.config.maximumFileSize}]]`);
     }
 
     const allowed = file.allowedExtensions();
 
     const extension = path.extname(uploadedFile.name).toLowerCase();
-    if (
-        allowed.length > 0 &&
-        (!extension || extension === '.' || !allowed.includes(extension))
-    ) {
-        throw new Error(
-            `[[error:invalid-file-type, ${allowed.join('&#44; ')}]]`,
-        );
+    if (allowed.length > 0 && (!extension || extension === '.' || !allowed.includes(extension))) {
+        throw new Error(`[[error:invalid-file-type, ${allowed.join('&#44; ')}]]`);
     }
 
     return await saveFileToLocal(uid, 'files', uploadedFile);
@@ -203,21 +181,14 @@ async function saveFileToLocal(uid, folder, uploadedFile) {
 
     const filename = `${Date.now()}-${validator.escape(name.slice(0, -extension.length)).slice(0, 255)}${extension}`;
 
-    const upload = await file.saveFileToLocal(
-        filename,
-        folder,
-        uploadedFile.path,
-    );
+    const upload = await file.saveFileToLocal(filename, folder, uploadedFile.path);
     const storedFile = {
         url: nconf.get('relative_path') + upload.url,
         path: upload.path,
         name: uploadedFile.name,
     };
 
-    await user.associateUpload(
-        uid,
-        upload.url.replace(`${nconf.get('upload_url')}/`, ''),
-    );
+    await user.associateUpload(uid, upload.url.replace(`${nconf.get('upload_url')}/`, ''));
     const data = await plugins.hooks.fire('filter:uploadStored', {
         uid: uid,
         uploadedFile: uploadedFile,
@@ -230,8 +201,4 @@ function deleteTempFiles(files) {
     files.forEach(fileObj => file.delete(fileObj.path));
 }
 
-require('../promisify')(uploadsController, [
-    'upload',
-    'uploadPost',
-    'uploadThumb',
-]);
+require('../promisify')(uploadsController, ['upload', 'uploadPost', 'uploadThumb']);

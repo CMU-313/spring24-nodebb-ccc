@@ -8,27 +8,14 @@ const routeHelpers = require('../helpers');
 const { setupApiRoute } = routeHelpers;
 
 module.exports = function () {
-    const middlewares = [
-        middleware.ensureLoggedIn,
-        middleware.admin.checkPrivileges,
-    ];
+    const middlewares = [middleware.ensureLoggedIn, middleware.admin.checkPrivileges];
 
     // setupApiRoute(router, 'put', '/', [
     //  ...middlewares,
     //  middleware.checkRequired.bind(null, ['path']),
     //  middleware.assert.folder
     // ], controllers.write.files.upload);
-    setupApiRoute(
-        router,
-        'delete',
-        '/',
-        [
-            ...middlewares,
-            middleware.checkRequired.bind(null, ['path']),
-            middleware.assert.path,
-        ],
-        controllers.write.files.delete,
-    );
+    setupApiRoute(router, 'delete', '/', [...middlewares, middleware.checkRequired.bind(null, ['path']), middleware.assert.path], controllers.write.files.delete);
 
     setupApiRoute(
         router,
@@ -41,7 +28,7 @@ module.exports = function () {
             // Should come after assert.path
             middleware.assert.folderName,
         ],
-        controllers.write.files.createFolder,
+        controllers.write.files.createFolder
     );
 
     return router;

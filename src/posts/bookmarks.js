@@ -19,10 +19,7 @@ module.exports = function (Posts) {
 
         const isBookmarking = type === 'bookmark';
 
-        const [postData, hasBookmarked] = await Promise.all([
-            Posts.getPostFields(pid, ['pid', 'uid']),
-            Posts.hasBookmarked(pid, uid),
-        ]);
+        const [postData, hasBookmarked] = await Promise.all([Posts.getPostFields(pid, ['pid', 'uid']), Posts.hasBookmarked(pid, uid)]);
 
         if (isBookmarking && hasBookmarked) {
             throw new Error('[[error:already-bookmarked]]');
@@ -37,10 +34,7 @@ module.exports = function (Posts) {
         } else {
             await db.sortedSetRemove(`uid:${uid}:bookmarks`, pid);
         }
-        await db[isBookmarking ? 'setAdd' : 'setRemove'](
-            `pid:${pid}:users_bookmarked`,
-            uid,
-        );
+        await db[isBookmarking ? 'setAdd' : 'setRemove'](`pid:${pid}:users_bookmarked`, uid);
         postData.bookmarks = await db.setCount(`pid:${pid}:users_bookmarked`);
         await Posts.setPostField(pid, 'bookmarks', postData.bookmarks);
 

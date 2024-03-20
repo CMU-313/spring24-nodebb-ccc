@@ -38,7 +38,7 @@ describe('batch', () => {
                 assert.ifError(err);
                 assert.strictEqual(total, 4950);
                 done();
-            },
+            }
         );
     });
 
@@ -57,7 +57,7 @@ describe('batch', () => {
                 assert.ifError(err);
                 assert.strictEqual(total, 490);
                 done();
-            },
+            }
         );
     });
 
@@ -72,7 +72,7 @@ describe('batch', () => {
 
                 setImmediate(next);
             },
-            {},
+            {}
         );
 
         assert.strictEqual(total, 490);
@@ -88,7 +88,7 @@ describe('batch', () => {
                 });
                 await db.getObject('doesnotexist');
             },
-            {},
+            {}
         );
 
         assert.strictEqual(total, 490);
@@ -114,7 +114,7 @@ describe('batch', () => {
                 assert.ifError(err);
                 assert.strictEqual(total, 4950);
                 done();
-            },
+            }
         );
     });
 
@@ -133,7 +133,7 @@ describe('batch', () => {
                 withScores: true,
                 interval: 50,
                 batch: 10,
-            },
+            }
         );
 
         assert.strictEqual(total, 4950);

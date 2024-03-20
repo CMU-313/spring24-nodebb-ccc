@@ -11,7 +11,7 @@ module.exports = {
             flags.map(async flag => {
                 flag = flag.split(':').slice(0, 2);
                 await db.sortedSetIncrBy('flags:byTarget', 1, flag.join(':'));
-            }),
+            })
         );
     },
 };

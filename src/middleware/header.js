@@ -86,18 +86,10 @@ middleware.renderHeader = async function renderHeader(req, res, data) {
         isModerator: user.isModeratorOfAnyCategory(req.uid),
         privileges: privileges.global.get(req.uid),
         user: user.getUserData(req.uid),
-        isEmailConfirmSent:
-            req.uid <= 0
-                ? false
-                : await user.email.isValidationPending(req.uid),
-        languageDirection: translator.translate(
-            '[[language:dir]]',
-            res.locals.config.userLang,
-        ),
+        isEmailConfirmSent: req.uid <= 0 ? false : await user.email.isValidationPending(req.uid),
+        languageDirection: translator.translate('[[language:dir]]', res.locals.config.userLang),
         timeagoCode: languages.userTimeagoCode(res.locals.config.userLang),
-        browserTitle: translator.translate(
-            controllers.helpers.buildTitle(translator.unescape(data.title)),
-        ),
+        browserTitle: translator.translate(controllers.helpers.buildTitle(translator.unescape(data.title))),
         navigation: navigation.get(req.uid),
     });
 
@@ -120,17 +112,9 @@ middleware.renderHeader = async function renderHeader(req, res, data) {
     results.user['email:confirmed'] = results.user['email:confirmed'] === 1;
     results.user.isEmailConfirmSent = !!results.isEmailConfirmSent;
 
-    templateValues.bootswatchSkin =
-        (parseInt(meta.config.disableCustomUserSkins, 10) !== 1
-            ? res.locals.config.bootswatchSkin
-            : '') ||
-        meta.config.bootswatchSkin ||
-        '';
+    templateValues.bootswatchSkin = (parseInt(meta.config.disableCustomUserSkins, 10) !== 1 ? res.locals.config.bootswatchSkin : '') || meta.config.bootswatchSkin || '';
     templateValues.browserTitle = results.browserTitle;
-    ({
-        navigation: templateValues.navigation,
-        unreadCount: templateValues.unreadCount,
-    } = await appendUnreadCounts({
+    ({ navigation: templateValues.navigation, unreadCount: templateValues.unreadCount } = await appendUnreadCounts({
         uid: req.uid,
         query: req.query,
         navigation: results.navigation,
@@ -138,32 +122,22 @@ middleware.renderHeader = async function renderHeader(req, res, data) {
     }));
     templateValues.isAdmin = results.user.isAdmin;
     templateValues.isGlobalMod = results.user.isGlobalMod;
-    templateValues.showModMenu =
-        results.user.isAdmin || results.user.isGlobalMod || results.user.isMod;
-    templateValues.canChat =
-        results.privileges.chat && meta.config.disableChat !== 1;
+    templateValues.showModMenu = results.user.isAdmin || results.user.isGlobalMod || results.user.isMod;
+    templateValues.canChat = results.privileges.chat && meta.config.disableChat !== 1;
     templateValues.user = results.user;
     templateValues.userJSON = jsesc(JSON.stringify(results.user), {
         isScriptContext: true,
     });
-    templateValues.useCustomCSS =
-        meta.config.useCustomCSS && meta.config.customCSS;
-    templateValues.customCSS = templateValues.useCustomCSS
-        ? meta.config.renderedCustomCSS || ''
-        : '';
+    templateValues.useCustomCSS = meta.config.useCustomCSS && meta.config.customCSS;
+    templateValues.customCSS = templateValues.useCustomCSS ? meta.config.renderedCustomCSS || '' : '';
     templateValues.useCustomHTML = meta.config.useCustomHTML;
-    templateValues.customHTML = templateValues.useCustomHTML
-        ? meta.config.customHTML
-        : '';
-    templateValues.maintenanceHeader =
-        meta.config.maintenanceMode && !results.isAdmin;
+    templateValues.customHTML = templateValues.useCustomHTML ? meta.config.customHTML : '';
+    templateValues.maintenanceHeader = meta.config.maintenanceMode && !results.isAdmin;
     templateValues.defaultLang = meta.config.defaultLang || 'en-GB';
     templateValues.userLang = res.locals.config.userLang;
     templateValues.languageDirection = results.languageDirection;
     if (req.query.noScriptMessage) {
-        templateValues.noScriptMessage = validator.escape(
-            String(req.query.noScriptMessage),
-        );
+        templateValues.noScriptMessage = validator.escape(String(req.query.noScriptMessage));
     }
 
     templateValues.template = { name: res.locals.template };
@@ -178,15 +152,12 @@ middleware.renderHeader = async function renderHeader(req, res, data) {
         modifyTitle(templateValues);
     }
 
-    const hookReturn = await plugins.hooks.fire(
-        'filter:middleware.renderHeader',
-        {
-            req: req,
-            res: res,
-            templateValues: templateValues,
-            data: data,
-        },
-    );
+    const hookReturn = await plugins.hooks.fire('filter:middleware.renderHeader', {
+        req: req,
+        res: res,
+        templateValues: templateValues,
+        data: data,
+    });
 
     return await req.app.renderAsync('header', hookReturn.templateValues);
 };
@@ -198,18 +169,13 @@ async function appendUnreadCounts({ uid, navigation, unreadData, query }) {
         unreadChatCount: messaging.getUnreadCount(uid),
         unreadNotificationCount: user.notifications.getUnreadCount(uid),
         unreadFlagCount: (async function () {
-            if (
-                originalRoutes.includes('/flags') &&
-                (await user.isPrivileged(uid))
-            ) {
+            if (originalRoutes.includes('/flags') && (await user.isPrivileged(uid))) {
                 return flags.getCount({
                     uid,
                     query,
                     filters: {
                         quick: 'unresolved',
-                        cid: (await user.isAdminOrGlobalMod(uid))
-                            ? []
-                            : await user.getModeratedCids(uid),
+                        cid: (await user.isAdminOrGlobalMod(uid)) ? [] : await user.getModeratedCids(uid),
                     },
                 });
             }
@@ -243,7 +209,7 @@ async function appendUnreadCounts({ uid, navigation, unreadData, query }) {
             if (item && item.originalRoute === route) {
                 unreadData[filter] = _.zipObject(
                     tidsByFilter[filter],
-                    tidsByFilter[filter].map(() => true),
+                    tidsByFilter[filter].map(() => true)
                 );
                 item.content = content;
                 unreadCount.mobileUnread = content;
@@ -255,25 +221,11 @@ async function appendUnreadCounts({ uid, navigation, unreadData, query }) {
         }
         modifyNavItem(item, '/unread', '', unreadCount.topic);
         modifyNavItem(item, '/unread?filter=new', 'new', unreadCount.newTopic);
-        modifyNavItem(
-            item,
-            '/unread?filter=watched',
-            'watched',
-            unreadCount.watchedTopic,
-        );
-        modifyNavItem(
-            item,
-            '/unread?filter=unreplied',
-            'unreplied',
-            unreadCount.unrepliedTopic,
-        );
+        modifyNavItem(item, '/unread?filter=watched', 'watched', unreadCount.watchedTopic);
+        modifyNavItem(item, '/unread?filter=unreplied', 'unreplied', unreadCount.unrepliedTopic);
 
         ['flags'].forEach(prop => {
-            if (
-                item &&
-                item.originalRoute === `/${prop}` &&
-                unreadCount[prop] > 0
-            ) {
+            if (item && item.originalRoute === `/${prop}` && unreadCount[prop] > 0) {
                 item.iconClass += ' unread-count';
                 item.content = unreadCount.flags;
             }
@@ -285,11 +237,7 @@ async function appendUnreadCounts({ uid, navigation, unreadData, query }) {
     return { navigation, unreadCount };
 }
 
-middleware.renderFooter = async function renderFooter(
-    req,
-    res,
-    templateValues,
-) {
+middleware.renderFooter = async function renderFooter(req, res, templateValues) {
     const data = await plugins.hooks.fire('filter:middleware.renderFooter', {
         req: req,
         res: res,
@@ -301,18 +249,14 @@ middleware.renderFooter = async function renderFooter(
     data.templateValues.scripts = scripts.map(script => ({ src: script }));
 
     data.templateValues.useCustomJS = meta.config.useCustomJS;
-    data.templateValues.customJS = data.templateValues.useCustomJS
-        ? meta.config.customJS
-        : '';
+    data.templateValues.customJS = data.templateValues.useCustomJS ? meta.config.customJS : '';
     data.templateValues.isSpider = req.uid === -1;
 
     return await req.app.renderAsync('footer', data.templateValues);
 };
 
 function modifyTitle(obj) {
-    const title = controllers.helpers.buildTitle(
-        meta.config.homePageTitle || '[[pages:home]]',
-    );
+    const title = controllers.helpers.buildTitle(meta.config.homePageTitle || '[[pages:home]]');
     obj.browserTitle = title;
 
     if (obj.metaTags) {

@@ -18,25 +18,19 @@ function filterDirectories(directories) {
                 dir
                     .replace(/^.*(admin.*?).tpl$/, '$1')
                     .split(path.sep)
-                    .join('/'),
+                    .join('/')
         )
         .filter(
             // exclude .js files
             // exclude partials
             // only include subpaths
             // exclude category.tpl, group.tpl, category-analytics.tpl
-            dir =>
-                !dir.endsWith('.js') &&
-                !dir.includes('/partials/') &&
-                /\/.*\//.test(dir) &&
-                !/manage\/(category|group|category-analytics)$/.test(dir),
+            dir => !dir.endsWith('.js') && !dir.includes('/partials/') && /\/.*\//.test(dir) && !/manage\/(category|group|category-analytics)$/.test(dir)
         );
 }
 
 async function getAdminNamespaces() {
-    const directories = await file.walk(
-        path.resolve(nconf.get('views_dir'), 'admin'),
-    );
+    const directories = await file.walk(path.resolve(nconf.get('views_dir'), 'admin'));
     return filterDirectories(directories);
 }
 
@@ -72,10 +66,7 @@ function nsToTitle(namespace) {
 const fallbackCache = {};
 
 async function initFallback(namespace) {
-    const template = await fs.promises.readFile(
-        path.resolve(nconf.get('views_dir'), `${namespace}.tpl`),
-        'utf8',
-    );
+    const template = await fs.promises.readFile(path.resolve(nconf.get('views_dir'), `${namespace}.tpl`), 'utf8');
 
     const title = nsToTitle(namespace);
     let translations = sanitize(template);
@@ -102,9 +93,7 @@ async function fallback(namespace) {
 
 async function initDict(language) {
     const namespaces = await getAdminNamespaces();
-    return await Promise.all(
-        namespaces.map(ns => buildNamespace(language, ns)),
-    );
+    return await Promise.all(namespaces.map(ns => buildNamespace(language, ns)));
 }
 
 async function buildNamespace(language, namespace) {
@@ -122,9 +111,7 @@ async function buildNamespace(language, namespace) {
 
         let title = namespace;
         title = title.match(/admin\/(.+?)\/(.+?)$/);
-        title = `[[admin/menu:section-${
-            title[1] === 'development' ? 'advanced' : title[1]
-        }]]${title[2] ? ` > [[admin/menu:${title[1]}/${title[2]}]]` : ''}`;
+        title = `[[admin/menu:section-${title[1] === 'development' ? 'advanced' : title[1]}]]${title[2] ? ` > [[admin/menu:${title[1]}/${title[2]}]]` : ''}`;
 
         title = await translator.translate(title);
         return {

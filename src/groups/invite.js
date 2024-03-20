@@ -29,10 +29,7 @@ module.exports = function (Groups) {
     };
 
     Groups.acceptMembership = async function (groupName, uid) {
-        await db.setsRemove(
-            [`group:${groupName}:pending`, `group:${groupName}:invited`],
-            uid,
-        );
+        await db.setsRemove([`group:${groupName}:pending`, `group:${groupName}:invited`], uid);
         await Groups.join(groupName, uid);
 
         const notification = await notifications.create({
@@ -49,12 +46,7 @@ module.exports = function (Groups) {
             groupNames = [groupNames];
         }
         const sets = [];
-        groupNames.forEach(groupName =>
-            sets.push(
-                `group:${groupName}:pending`,
-                `group:${groupName}:invited`,
-            ),
-        );
+        groupNames.forEach(groupName => sets.push(`group:${groupName}:pending`, `group:${groupName}:invited`));
         await db.setsRemove(sets, uid);
     };
 
@@ -70,45 +62,27 @@ module.exports = function (Groups) {
                     bodyLong: '',
                     nid: `group:${groupName}:uid:${uid}:invite`,
                     path: `/groups/${slugify(groupName)}`,
-                }),
-            ),
+                })
+            )
         );
 
-        await Promise.all(
-            uids.map((uid, index) =>
-                notifications.push(notificationData[index], uid),
-            ),
-        );
+        await Promise.all(uids.map((uid, index) => notifications.push(notificationData[index], uid)));
     };
 
     async function inviteOrRequestMembership(groupName, uids, type) {
         uids = Array.isArray(uids) ? uids : [uids];
         uids = uids.filter(uid => parseInt(uid, 10) > 0);
-        const [exists, isMember, isPending, isInvited] = await Promise.all([
-            Groups.exists(groupName),
-            Groups.isMembers(uids, groupName),
-            Groups.isPending(uids, groupName),
-            Groups.isInvited(uids, groupName),
-        ]);
+        const [exists, isMember, isPending, isInvited] = await Promise.all([Groups.exists(groupName), Groups.isMembers(uids, groupName), Groups.isPending(uids, groupName), Groups.isInvited(uids, groupName)]);
 
         if (!exists) {
             throw new Error('[[error:no-group]]');
         }
 
-        uids = uids.filter(
-            (uid, i) =>
-                !isMember[i] &&
-                ((type === 'invite' && !isInvited[i]) ||
-                    (type === 'request' && !isPending[i])),
-        );
+        uids = uids.filter((uid, i) => !isMember[i] && ((type === 'invite' && !isInvited[i]) || (type === 'request' && !isPending[i])));
 
-        const set =
-            type === 'invite'
-                ? `group:${groupName}:invited`
-                : `group:${groupName}:pending`;
+        const set = type === 'invite' ? `group:${groupName}:invited` : `group:${groupName}:pending`;
         await db.setAdd(set, uids);
-        const hookName =
-            type === 'invite' ? 'inviteMember' : 'requestMembership';
+        const hookName = type === 'invite' ? 'inviteMember' : 'requestMembership';
         plugins.hooks.fire(`action:group.${hookName}`, {
             groupName: groupName,
             uids: uids,

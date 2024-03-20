@@ -14,10 +14,7 @@ module.exports = function (SocketTopics) {
             throw new Error('[[error:invalid-data]]');
         }
 
-        const canMove = await privileges.categories.isAdminOrMod(
-            data.cid,
-            socket.uid,
-        );
+        const canMove = await privileges.categories.isAdminOrMod(data.cid, socket.uid);
         if (!canMove) {
             throw new Error('[[error:no-privileges]]');
         }
@@ -25,39 +22,18 @@ module.exports = function (SocketTopics) {
         const uids = await user.getUidsFromSet('users:online', 0, -1);
 
         await async.eachLimit(data.tids, 10, async tid => {
-            const canMove = await privileges.topics.isAdminOrMod(
-                tid,
-                socket.uid,
-            );
+            const canMove = await privileges.topics.isAdminOrMod(tid, socket.uid);
             if (!canMove) {
                 throw new Error('[[error:no-privileges]]');
             }
-            const topicData = await topics.getTopicFields(tid, [
-                'tid',
-                'cid',
-                'slug',
-                'deleted',
-            ]);
+            const topicData = await topics.getTopicFields(tid, ['tid', 'cid', 'slug', 'deleted']);
             data.uid = socket.uid;
             await topics.tools.move(tid, data);
 
-            const notifyUids = await privileges.categories.filterUids(
-                'topics:read',
-                topicData.cid,
-                uids,
-            );
-            socketHelpers.emitToUids(
-                'event:topic_moved',
-                topicData,
-                notifyUids,
-            );
+            const notifyUids = await privileges.categories.filterUids('topics:read', topicData.cid, uids);
+            socketHelpers.emitToUids('event:topic_moved', topicData, notifyUids);
             if (!topicData.deleted) {
-                socketHelpers.sendNotificationToTopicOwner(
-                    tid,
-                    socket.uid,
-                    'move',
-                    'notifications:moved_your_topic',
-                );
+                socketHelpers.sendNotificationToTopicOwner(tid, socket.uid, 'move', 'notifications:moved_your_topic');
             }
 
             await events.log({
@@ -75,11 +51,7 @@ module.exports = function (SocketTopics) {
         if (!data || !data.cid || !data.currentCid) {
             throw new Error('[[error:invalid-data]]');
         }
-        const canMove = await privileges.categories.canMoveAllTopics(
-            data.currentCid,
-            data.cid,
-            socket.uid,
-        );
+        const canMove = await privileges.categories.canMoveAllTopics(data.currentCid, data.cid, socket.uid);
         if (!canMove) {
             throw new Error('[[error:no-privileges]]');
         }

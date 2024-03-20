@@ -15,21 +15,12 @@ Settings.get = async function (hash) {
     if (cached) {
         return _.cloneDeep(cached);
     }
-    const [data, sortedLists] = await Promise.all([
-        db.getObject(`settings:${hash}`),
-        db.getSetMembers(`settings:${hash}:sorted-lists`),
-    ]);
+    const [data, sortedLists] = await Promise.all([db.getObject(`settings:${hash}`), db.getSetMembers(`settings:${hash}:sorted-lists`)]);
     const values = data || {};
     await Promise.all(
         sortedLists.map(async list => {
-            const members = await db.getSortedSetRange(
-                `settings:${hash}:sorted-list:${list}`,
-                0,
-                -1,
-            );
-            const keys = members.map(
-                order => `settings:${hash}:sorted-list:${list}:${order}`,
-            );
+            const members = await db.getSortedSetRange(`settings:${hash}:sorted-list:${list}`, 0, -1);
+            const keys = members.map(order => `settings:${hash}:sorted-list:${list}:${order}`);
 
             values[list] = [];
 
@@ -37,7 +28,7 @@ Settings.get = async function (hash) {
             objects.forEach(obj => {
                 values[list].push(obj);
             });
-        }),
+        })
     );
 
     const result = await plugins.hooks.fire('filter:settings.get', {
@@ -79,23 +70,19 @@ Settings.set = async function (hash, values, quiet) {
         // Remove provided (but empty) sorted lists from the hash set
         await db.setRemove(
             `settings:${hash}:sorted-lists`,
-            sortedLists.filter(list => !sortedListData[list].length),
+            sortedLists.filter(list => !sortedListData[list].length)
         );
         await db.setAdd(`settings:${hash}:sorted-lists`, sortedLists);
 
         await Promise.all(
             sortedLists.map(async list => {
-                const numItems = await db.sortedSetCard(
-                    `settings:${hash}:sorted-list:${list}`,
-                );
+                const numItems = await db.sortedSetCard(`settings:${hash}:sorted-list:${list}`);
                 const deleteKeys = [`settings:${hash}:sorted-list:${list}`];
                 for (let x = 0; x < numItems; x++) {
-                    deleteKeys.push(
-                        `settings:${hash}:sorted-list:${list}:${x}`,
-                    );
+                    deleteKeys.push(`settings:${hash}:sorted-list:${list}:${x}`);
                 }
                 await db.deleteAll(deleteKeys);
-            }),
+            })
         );
 
         const sortedSetData = [];
@@ -103,22 +90,12 @@ Settings.set = async function (hash, values, quiet) {
         sortedLists.forEach(list => {
             const arr = sortedListData[list];
             arr.forEach((data, order) => {
-                sortedSetData.push([
-                    `settings:${hash}:sorted-list:${list}`,
-                    order,
-                    order,
-                ]);
-                objectData.push([
-                    `settings:${hash}:sorted-list:${list}:${order}`,
-                    data,
-                ]);
+                sortedSetData.push([`settings:${hash}:sorted-list:${list}`, order, order]);
+                objectData.push([`settings:${hash}:sorted-list:${list}:${order}`, data]);
             });
         });
 
-        await Promise.all([
-            db.sortedSetAddBulk(sortedSetData),
-            db.setObjectBulk(objectData),
-        ]);
+        await Promise.all([db.sortedSetAddBulk(sortedSetData), db.setObjectBulk(objectData)]);
     }
 
     if (Object.keys(values).length) {

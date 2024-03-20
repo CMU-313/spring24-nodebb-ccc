@@ -61,14 +61,8 @@ module.exports = function (Plugins) {
         add(Plugins.acpScripts, results.acpScripts);
         Object.assign(meta.js.scripts.modules, results.modules || {});
         if (results.languageData) {
-            Plugins.languageData.languages = _.union(
-                Plugins.languageData.languages,
-                results.languageData.languages,
-            );
-            Plugins.languageData.namespaces = _.union(
-                Plugins.languageData.namespaces,
-                results.languageData.namespaces,
-            );
+            Plugins.languageData.languages = _.union(Plugins.languageData.languages, results.languageData.languages);
+            Plugins.languageData.namespaces = _.union(Plugins.languageData.namespaces, results.languageData.namespaces);
             pluginData.languageData = results.languageData;
         }
         Plugins.pluginsData[pluginData.id] = pluginData;
@@ -81,11 +75,7 @@ module.exports = function (Plugins) {
             'client js bundle': ['clientScripts'],
             'admin js bundle': ['acpScripts'],
             'client side styles': ['cssFiles', 'lessFiles'],
-            'admin control panel styles': [
-                'cssFiles',
-                'lessFiles',
-                'acpLessFiles',
-            ],
+            'admin control panel styles': ['cssFiles', 'lessFiles', 'acpLessFiles'],
             languages: ['languageData'],
         };
 
@@ -109,9 +99,7 @@ module.exports = function (Plugins) {
             }
         });
 
-        winston.verbose(
-            `[plugins] loading the following fields from plugin data: ${fields.join(', ')}`,
-        );
+        winston.verbose(`[plugins] loading the following fields from plugin data: ${fields.join(', ')}`);
         const plugins = await Plugins.data.getActive();
         await Promise.all(plugins.map(p => registerPluginAssets(p, fields)));
     };
@@ -136,9 +124,7 @@ module.exports = function (Plugins) {
             await registerPluginAssets(pluginData);
         } catch (err) {
             winston.error(err.stack);
-            winston.verbose(
-                `[plugins] Could not load plugin : ${pluginData.id}`,
-            );
+            winston.verbose(`[plugins] Could not load plugin : ${pluginData.id}`);
             return;
         }
 
@@ -159,17 +145,8 @@ module.exports = function (Plugins) {
             }
         }
 
-        if (
-            pluginData.nbbpm &&
-            pluginData.nbbpm.compatibility &&
-            semver.validRange(pluginData.nbbpm.compatibility)
-        ) {
-            if (
-                !semver.satisfies(
-                    nconf.get('version'),
-                    pluginData.nbbpm.compatibility,
-                )
-            ) {
+        if (pluginData.nbbpm && pluginData.nbbpm.compatibility && semver.validRange(pluginData.nbbpm.compatibility)) {
+            if (!semver.satisfies(nconf.get('version'), pluginData.nbbpm.compatibility)) {
                 add();
             }
         } else {
@@ -184,14 +161,10 @@ module.exports = function (Plugins) {
             }
 
             if (Array.isArray(pluginData.hooks)) {
-                pluginData.hooks.forEach(hook =>
-                    Plugins.hooks.register(pluginData.id, hook),
-                );
+                pluginData.hooks.forEach(hook => Plugins.hooks.register(pluginData.id, hook));
             }
         } catch (err) {
-            winston.warn(
-                `[plugins] Unable to load library for: ${pluginData.id}`,
-            );
+            winston.warn(`[plugins] Unable to load library for: ${pluginData.id}`);
             throw err;
         }
     }

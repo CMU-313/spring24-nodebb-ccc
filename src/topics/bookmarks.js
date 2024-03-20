@@ -19,7 +19,7 @@ module.exports = function (Topics) {
         }
         return await db.sortedSetsScore(
             tids.map(tid => `tid:${tid}:bookmarks`),
-            uid,
+            uid
         );
     };
 
@@ -28,11 +28,7 @@ module.exports = function (Topics) {
     };
 
     Topics.getTopicBookmarks = async function (tid) {
-        return await db.getSortedSetRangeWithScores(
-            `tid:${tid}:bookmarks`,
-            0,
-            -1,
-        );
+        return await db.getSortedSetRangeWithScores(`tid:${tid}:bookmarks`, 0, -1);
     };
 
     Topics.updateTopicBookmarks = async function (tid, pids) {
@@ -43,9 +39,7 @@ module.exports = function (Topics) {
 
         const bookmarks = await Topics.getTopicBookmarks(tid);
 
-        const uidData = bookmarks
-            .map(b => ({ uid: b.value, bookmark: parseInt(b.score, 10) }))
-            .filter(data => data.bookmark >= minIndex);
+        const uidData = bookmarks.map(b => ({ uid: b.value, bookmark: parseInt(b.score, 10) })).filter(data => data.bookmark >= minIndex);
 
         await async.eachLimit(uidData, 50, async data => {
             let bookmark = Math.min(data.bookmark, maxIndex);

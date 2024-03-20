@@ -35,22 +35,11 @@ admin.save = async function (data) {
 };
 
 admin.getAdmin = async function () {
-    const [enabled, available] = await Promise.all([
-        admin.get(),
-        getAvailable(),
-    ]);
+    const [enabled, available] = await Promise.all([admin.get(), getAvailable()]);
     return { enabled: enabled, available: available };
 };
 
-const fieldsToEscape = [
-    'iconClass',
-    'class',
-    'route',
-    'id',
-    'text',
-    'textClass',
-    'title',
-];
+const fieldsToEscape = ['iconClass', 'class', 'route', 'id', 'text', 'textClass', 'title'];
 
 admin.escapeFields = navItems => toggleEscape(navItems, true);
 admin.unescapeFields = navItems => toggleEscape(navItems, false);
@@ -60,9 +49,7 @@ function toggleEscape(navItems, flag) {
         if (item) {
             fieldsToEscape.forEach(field => {
                 if (item.hasOwnProperty(field)) {
-                    item[field] = validator[flag ? 'escape' : 'unescape'](
-                        String(item[field]),
-                    );
+                    item[field] = validator[flag ? 'escape' : 'unescape'](String(item[field]));
                 }
             });
         }
@@ -102,10 +89,7 @@ async function getAvailable() {
         return item;
     });
 
-    const navItems = await plugins.hooks.fire(
-        'filter:navigation.available',
-        core,
-    );
+    const navItems = await plugins.hooks.fire('filter:navigation.available', core);
     navItems.forEach(item => {
         if (item && !item.hasOwnProperty('enabled')) {
             item.enabled = true;

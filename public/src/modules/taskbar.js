@@ -1,10 +1,6 @@
 'use strict';
 
-define('taskbar', ['benchpress', 'translator', 'hooks'], function (
-    Benchpress,
-    translator,
-    hooks,
-) {
+define('taskbar', ['benchpress', 'translator', 'hooks'], function (Benchpress, translator, hooks) {
     const taskbar = {};
 
     taskbar.init = function () {
@@ -42,9 +38,7 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (
 
     taskbar.close = async function (moduleName, uuid) {
         // Sends signal to the appropriate module's .close() fn (if present)
-        const btnEl = taskbar.tasklist.find(
-            '[data-module="' + module + '"][data-uuid="' + uuid + '"]',
-        );
+        const btnEl = taskbar.tasklist.find('[data-module="' + module + '"][data-uuid="' + uuid + '"]');
         let fnName = 'close';
 
         // TODO: Refactor chat module to not take uuid in close instead of by jQuery element
@@ -69,17 +63,12 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (
         }
 
         taskbar.tasklist.find(selector).each(function (idx, el) {
-            taskbar.close(
-                module || el.getAttribute('data-module'),
-                el.getAttribute('data-uuid'),
-            );
+            taskbar.close(module || el.getAttribute('data-module'), el.getAttribute('data-uuid'));
         });
     };
 
     taskbar.discard = function (module, uuid) {
-        const btnEl = taskbar.tasklist.find(
-            '[data-module="' + module + '"][data-uuid="' + uuid + '"]',
-        );
+        const btnEl = taskbar.tasklist.find('[data-module="' + module + '"][data-uuid="' + uuid + '"]');
         btnEl.remove();
 
         update();
@@ -106,19 +95,15 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (
     };
 
     taskbar.get = function (module) {
-        const items = $('[data-module="' + module + '"]').map(
-            function (idx, el) {
-                return $(el).data();
-            },
-        );
+        const items = $('[data-module="' + module + '"]').map(function (idx, el) {
+            return $(el).data();
+        });
 
         return items;
     };
 
     taskbar.minimize = function (module, uuid) {
-        const btnEl = taskbar.tasklist.find(
-            '[data-module="' + module + '"][data-uuid="' + uuid + '"]',
-        );
+        const btnEl = taskbar.tasklist.find('[data-module="' + module + '"][data-uuid="' + uuid + '"]');
         btnEl.toggleClass('active', false);
     };
 
@@ -136,14 +121,8 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (
         tasks.removeClass('active');
         tasks.filter('[data-uuid="' + uuid + '"]').addClass('active');
 
-        $('[data-uuid]:not([data-module])').toggleClass(
-            'modal-unfocused',
-            true,
-        );
-        $('[data-uuid="' + uuid + '"]:not([data-module])').toggleClass(
-            'modal-unfocused',
-            false,
-        );
+        $('[data-uuid]:not([data-module])').toggleClass('modal-unfocused', true);
+        $('[data-uuid="' + uuid + '"]:not([data-module])').toggleClass('modal-unfocused', false);
     };
 
     taskbar.isActive = function (uuid) {
@@ -173,34 +152,13 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (
 
             const taskbarEl = $('<li></li>')
                 .addClass(data.options.className)
-                .html(
-                    '<a href="#"' +
-                        (data.options.image
-                            ? ' style="background-image: url(\'' +
-                              data.options.image.replace(/&#x2F;/g, '/') +
-                              '\'); background-size: cover;"'
-                            : '') +
-                        '>' +
-                        (data.options.icon
-                            ? '<i class="fa ' + data.options.icon + '"></i> '
-                            : '') +
-                        '<span aria-label="' +
-                        title +
-                        '" component="taskbar/title">' +
-                        title +
-                        '</span>' +
-                        '</a>',
-                )
+                .html('<a href="#"' + (data.options.image ? ' style="background-image: url(\'' + data.options.image.replace(/&#x2F;/g, '/') + '\'); background-size: cover;"' : '') + '>' + (data.options.icon ? '<i class="fa ' + data.options.icon + '"></i> ' : '') + '<span aria-label="' + title + '" component="taskbar/title">' + title + '</span>' + '</a>')
                 .attr({
                     title: title,
                     'data-module': data.module,
                     'data-uuid': data.uuid,
                 })
-                .addClass(
-                    data.options.state !== undefined
-                        ? data.options.state
-                        : 'active',
-                );
+                .addClass(data.options.state !== undefined ? data.options.state : 'active');
 
             if (!data.options.state || data.options.state === 'active') {
                 minimizeAll();
@@ -226,14 +184,7 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (
                 element.find('i').attr('class', 'fa fa-' + value);
                 break;
             case 'image':
-                element
-                    .find('a')
-                    .css(
-                        'background-image',
-                        value
-                            ? 'url("' + value.replace(/&#x2F;/g, '/') + '")'
-                            : '',
-                    );
+                element.find('a').css('background-image', value ? 'url("' + value.replace(/&#x2F;/g, '/') + '")' : '');
                 break;
             case 'background-color':
                 element.find('a').css('background-color', value);
@@ -242,9 +193,7 @@ define('taskbar', ['benchpress', 'translator', 'hooks'], function (
     };
 
     taskbar.update = function (module, uuid, options) {
-        const element = taskbar.tasklist.find(
-            '[data-module="' + module + '"][data-uuid="' + uuid + '"]',
-        );
+        const element = taskbar.tasklist.find('[data-module="' + module + '"][data-uuid="' + uuid + '"]');
         if (!element.length) {
             return;
         }

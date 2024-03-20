@@ -8,11 +8,7 @@ module.exports = function (module) {
 
         const data = await module.client
             .collection('objects')
-            .aggregate([
-                { $match: { _key: { $in: keys } } },
-                { $group: { _id: { value: '$value' } } },
-                { $group: { _id: null, count: { $sum: 1 } } },
-            ])
+            .aggregate([{ $match: { _key: { $in: keys } } }, { $group: { _id: { value: '$value' } } }, { $group: { _id: null, count: { $sum: 1 } } }])
             .toArray();
         return Array.isArray(data) && data.length ? data[0].count : 0;
     };
@@ -43,11 +39,7 @@ module.exports = function (module) {
             aggregate.$sum = '$score';
         }
 
-        const pipeline = [
-            { $match: { _key: { $in: params.sets } } },
-            { $group: { _id: { value: '$value' }, totalScore: aggregate } },
-            { $sort: { totalScore: params.sort } },
-        ];
+        const pipeline = [{ $match: { _key: { $in: params.sets } } }, { $group: { _id: { value: '$value' }, totalScore: aggregate } }, { $sort: { totalScore: params.sort } }];
 
         if (params.start) {
             pipeline.push({ $skip: params.start });
@@ -63,10 +55,7 @@ module.exports = function (module) {
         }
         pipeline.push({ $project: project });
 
-        let data = await module.client
-            .collection('objects')
-            .aggregate(pipeline)
-            .toArray();
+        let data = await module.client.collection('objects').aggregate(pipeline).toArray();
         if (!params.withScores) {
             data = data.map(item => item.value);
         }

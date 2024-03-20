@@ -20,8 +20,7 @@ describe('blacklist', () => {
     });
 
     const socketBlacklist = require('../src/socket.io/blacklist');
-    const rules =
-        '1.1.1.1\n2.2.2.2\n::ffff:0:2.2.2.2\n127.0.0.1\n192.168.100.0/22';
+    const rules = '1.1.1.1\n2.2.2.2\n::ffff:0:2.2.2.2\n127.0.0.1\n192.168.100.0/22';
 
     it('should validate blacklist', done => {
         socketBlacklist.validate(
@@ -32,7 +31,7 @@ describe('blacklist', () => {
             (err, data) => {
                 assert.ifError(err);
                 done();
-            },
+            }
         );
     });
 

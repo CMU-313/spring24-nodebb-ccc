@@ -21,7 +21,7 @@ module.exports = {
                 progress: this.progress,
                 batch: 500,
             },
-            callback,
+            callback
         );
     },
 };

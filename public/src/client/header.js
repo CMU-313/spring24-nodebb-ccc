@@ -1,11 +1,6 @@
 'use strict';
 
-define('forum/header', [
-    'forum/header/unread',
-    'forum/header/notifications',
-    'forum/header/chat',
-    'alerts',
-], function (unread, notifications, chat, alerts) {
+define('forum/header', ['forum/header/unread', 'forum/header/notifications', 'forum/header/chat', 'alerts'], function (unread, notifications, chat, alerts) {
     const module = {};
 
     module.prepareDOM = function () {
@@ -28,23 +23,14 @@ define('forum/header', [
                     if (err) {
                         return alerts.error(err);
                     }
-                    $(
-                        '[data-uid="' +
-                            app.user.uid +
-                            '"] [component="user/status"], [component="header/profilelink"] [component="user/status"]',
-                    )
+                    $('[data-uid="' + app.user.uid + '"] [component="user/status"], [component="header/profilelink"] [component="user/status"]')
                         .removeClass('away online dnd offline')
                         .addClass(status);
-                    $('[component="header/usercontrol"] [data-status]').each(
-                        function () {
-                            $(this)
-                                .find('span')
-                                .toggleClass(
-                                    'bold',
-                                    $(this).attr('data-status') === status,
-                                );
-                        },
-                    );
+                    $('[component="header/usercontrol"] [data-status]').each(function () {
+                        $(this)
+                            .find('span')
+                            .toggleClass('bold', $(this).attr('data-status') === status);
+                    });
                     app.user.status = status;
                 });
                 e.preventDefault();
@@ -78,16 +64,12 @@ define('forum/header', [
     }
 
     function handleLogout() {
-        $('#header-menu .container').on(
-            'click',
-            '[component="user/logout"]',
-            function () {
-                require(['logout'], function (logout) {
-                    logout();
-                });
-                return false;
-            },
-        );
+        $('#header-menu .container').on('click', '[component="user/logout"]', function () {
+            require(['logout'], function (logout) {
+                logout();
+            });
+            return false;
+        });
     }
 
     return module;

@@ -15,8 +15,7 @@ module.exports = {
             let newJS = [];
 
             // Forgive me for parsing HTML with regex...
-            const scriptMatch =
-                /^<script\s?(?!async|deferred)?>([\s\S]+?)<\/script>/m;
+            const scriptMatch = /^<script\s?(?!async|deferred)?>([\s\S]+?)<\/script>/m;
             let match = scriptMatch.exec(newHTML);
 
             while (match) {
@@ -25,10 +24,7 @@ module.exports = {
                     newJS.push(match[1].trim());
 
                     // Remove the match from the existing value
-                    newHTML = (
-                        (match.index > 0 ? newHTML.slice(0, match.index) : '') +
-                        newHTML.slice(match.index + match[0].length)
-                    ).trim();
+                    newHTML = ((match.index > 0 ? newHTML.slice(0, match.index) : '') + newHTML.slice(match.index + match[0].length)).trim();
                 }
 
                 match = scriptMatch.exec(newHTML);
@@ -43,7 +39,7 @@ module.exports = {
                     customHTML: newHTML,
                     customJS: newJS,
                 },
-                callback,
+                callback
             );
         });
     },

@@ -34,18 +34,12 @@ usersAPI.update = async function (caller, data) {
         throw new Error('[[error:invalid-data]]');
     }
 
-    const oldUserData = await user.getUserFields(data.uid, [
-        'email',
-        'username',
-    ]);
+    const oldUserData = await user.getUserFields(data.uid, ['email', 'username']);
     if (!oldUserData || !oldUserData.username) {
         throw new Error('[[error:invalid-data]]');
     }
 
-    const [isAdminOrGlobalMod, canEdit] = await Promise.all([
-        user.isAdminOrGlobalMod(caller.uid),
-        privileges.users.canEdit(caller.uid, data.uid),
-    ]);
+    const [isAdminOrGlobalMod, canEdit] = await Promise.all([user.isAdminOrGlobalMod(caller.uid), privileges.users.canEdit(caller.uid, data.uid)]);
 
     // Changing own email/username requires password confirmation
     if (data.hasOwnProperty('email') || data.hasOwnProperty('username')) {
@@ -94,11 +88,7 @@ usersAPI.deleteAccount = async function (caller, { uid, password }) {
 
 usersAPI.deleteMany = async function (caller, data) {
     if (await canDeleteUids(data.uids)) {
-        await Promise.all(
-            data.uids.map(uid =>
-                processDeletion({ uid, method: 'delete', caller }),
-            ),
-        );
+        await Promise.all(data.uids.map(uid => processDeletion({ uid, method: 'delete', caller })));
     }
 };
 
@@ -128,10 +118,7 @@ usersAPI.updateSettings = async function (caller, data) {
 };
 
 usersAPI.changePassword = async function (caller, data) {
-    await user.changePassword(
-        caller.uid,
-        Object.assign(data, { ip: caller.ip }),
-    );
+    await user.changePassword(caller.uid, Object.assign(data, { ip: caller.ip }));
     await events.log({
         type: 'password-change',
         uid: caller.uid,
@@ -147,10 +134,7 @@ usersAPI.follow = async function (caller, data) {
         toUid: data.uid,
     });
 
-    const userData = await user.getUserFields(caller.uid, [
-        'username',
-        'userslug',
-    ]);
+    const userData = await user.getUserFields(caller.uid, ['username', 'userslug']);
     const { displayname } = userData;
 
     const notifObj = await notifications.create({
@@ -184,16 +168,10 @@ usersAPI.ban = async function (caller, data) {
     }
 
     const banData = await user.bans.ban(data.uid, data.until, data.reason);
-    await db.setObjectField(
-        `uid:${data.uid}:ban:${banData.timestamp}`,
-        'fromUid',
-        caller.uid,
-    );
+    await db.setObjectField(`uid:${data.uid}:ban:${banData.timestamp}`, 'fromUid', caller.uid);
 
     if (!data.reason) {
-        data.reason = await translator.translate(
-            '[[user:info.banned-no-reason]]',
-        );
+        data.reason = await translator.translate('[[user:info.banned-no-reason]]');
     }
 
     sockets.in(`uid_${data.uid}`).emit('event:banned', {
@@ -290,10 +268,7 @@ usersAPI.unmute = async function (caller, data) {
         throw new Error('[[error:no-privileges]]');
     }
 
-    await db.deleteObjectFields(`user:${data.uid}`, [
-        'mutedUntil',
-        'mutedReason',
-    ]);
+    await db.deleteObjectFields(`user:${data.uid}`, ['mutedUntil', 'mutedReason']);
 
     await events.log({
         type: 'user-unmute',
@@ -316,12 +291,7 @@ async function isPrivilegedOrSelfAndPasswordMatch(caller, data) {
     if (!canEdit) {
         throw new Error('[[error:no-privileges]]');
     }
-    const [hasPassword, passwordMatch] = await Promise.all([
-        user.hasPassword(data.uid),
-        data.password
-            ? user.isPasswordCorrect(data.uid, data.password, caller.ip)
-            : false,
-    ]);
+    const [hasPassword, passwordMatch] = await Promise.all([user.hasPassword(data.uid), data.password ? user.isPasswordCorrect(data.uid, data.password, caller.ip) : false]);
 
     if (isSelf && hasPassword && !passwordMatch) {
         throw new Error('[[error:invalid-password]]');
@@ -342,10 +312,7 @@ async function processDeletion({ uid, method, password, caller }) {
     }
 
     // Privilege checks -- only deleteAccount is available for non-admins
-    const hasAdminPrivilege = await privileges.admin.can(
-        'admin:users',
-        caller.uid,
-    );
+    const hasAdminPrivilege = await privileges.admin.can('admin:users', caller.uid);
     if (!hasAdminPrivilege && ['delete', 'deleteContent'].includes(method)) {
         throw new Error('[[error:no-privileges]]');
     }
@@ -407,20 +374,10 @@ usersAPI.search = async function (caller, data) {
     if (!data) {
         throw new Error('[[error:invalid-data]]');
     }
-    const [allowed, isPrivileged] = await Promise.all([
-        privileges.global.can('search:users', caller.uid),
-        user.isPrivileged(caller.uid),
-    ]);
+    const [allowed, isPrivileged] = await Promise.all([privileges.global.can('search:users', caller.uid), user.isPrivileged(caller.uid)]);
     let filters = data.filters || [];
     filters = Array.isArray(filters) ? filters : [filters];
-    if (
-        !allowed ||
-        ((data.searchBy === 'ip' ||
-            data.searchBy === 'email' ||
-            filters.includes('banned') ||
-            filters.includes('flagged')) &&
-            !isPrivileged)
-    ) {
+    if (!allowed || ((data.searchBy === 'ip' || data.searchBy === 'email' || filters.includes('banned') || filters.includes('flagged')) && !isPrivileged)) {
         throw new Error('[[error:no-privileges]]');
     }
     return await user.search({
@@ -440,11 +397,7 @@ usersAPI.changePicture = async (caller, data) => {
     const { type, url } = data;
     let picture = '';
 
-    await user.checkMinReputation(
-        caller.uid,
-        data.uid,
-        'min:rep:profile-picture',
-    );
+    await user.checkMinReputation(caller.uid, data.uid, 'min:rep:profile-picture');
     const canEdit = await privileges.users.canEdit(caller.uid, data.uid);
     if (!canEdit) {
         throw new Error('[[error:no-privileges]]');
@@ -477,7 +430,7 @@ usersAPI.changePicture = async (caller, data) => {
             picture: picture,
             'icon:bgColor': data.bgColor,
         },
-        ['picture', 'icon:bgColor'],
+        ['picture', 'icon:bgColor']
     );
 };
 
@@ -487,13 +440,9 @@ usersAPI.generateExport = async (caller, { uid, type }) => {
         throw new Error('[[error:already-exporting]]');
     }
 
-    const child = require('child_process').fork(
-        `./src/user/jobs/export-${type}.js`,
-        [],
-        {
-            env: process.env,
-        },
-    );
+    const child = require('child_process').fork(`./src/user/jobs/export-${type}.js`, [], {
+        env: process.env,
+    });
     child.send({ uid });
     child.on('error', async err => {
         winston.error(err.stack);
@@ -501,10 +450,7 @@ usersAPI.generateExport = async (caller, { uid, type }) => {
     });
     child.on('exit', async () => {
         await db.deleteObjectField('locks', `export:${uid}${type}`);
-        const userData = await user.getUserFields(uid, [
-            'username',
-            'userslug',
-        ]);
+        const userData = await user.getUserFields(uid, ['username', 'userslug']);
         const { displayname } = userData;
         const n = await notifications.create({
             bodyShort: `[[notifications:${type}-exported, ${displayname}]]`,

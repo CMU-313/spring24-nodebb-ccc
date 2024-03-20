@@ -1,11 +1,6 @@
 'use strict';
 
-define('navigator', [
-    'forum/pagination',
-    'components',
-    'hooks',
-    'alerts',
-], function (pagination, components, hooks, alerts) {
+define('navigator', ['forum/pagination', 'components', 'hooks', 'alerts'], function (pagination, components, hooks, alerts) {
     const navigator = {};
     let index = 0;
     let count = 0;
@@ -52,9 +47,7 @@ define('navigator', [
         thumb = $('.scroller-thumb');
         thumbText = thumb.find('.thumb-text');
 
-        $(window)
-            .off('scroll', navigator.delayedUpdate)
-            .on('scroll', navigator.delayedUpdate);
+        $(window).off('scroll', navigator.delayedUpdate).on('scroll', navigator.delayedUpdate);
 
         paginationBlockEl
             .find('.dropdown-menu')
@@ -63,44 +56,22 @@ define('navigator', [
                 e.stopPropagation();
             });
 
-        paginationBlockEl
-            .off('shown.bs.dropdown', '.wrapper')
-            .on('shown.bs.dropdown', '.wrapper', function () {
-                setTimeout(async function () {
-                    if (utils.findBootstrapEnvironment() === 'lg') {
-                        $('.pagination-block input').focus();
-                    }
-                    const postCountInTopic = await socket.emit(
-                        'topics.getPostCountInTopic',
-                        ajaxify.data.tid,
-                    );
-                    if (postCountInTopic > 0) {
-                        paginationBlockEl
-                            .find('#myNextPostBtn')
-                            .removeAttr('disabled');
-                    }
-                }, 100);
-            });
-        paginationBlockEl
-            .find('.pageup')
-            .off('click')
-            .on('click', navigator.scrollUp);
-        paginationBlockEl
-            .find('.pagedown')
-            .off('click')
-            .on('click', navigator.scrollDown);
-        paginationBlockEl
-            .find('.pagetop')
-            .off('click')
-            .on('click', navigator.toTop);
-        paginationBlockEl
-            .find('.pagebottom')
-            .off('click')
-            .on('click', navigator.toBottom);
-        paginationBlockEl
-            .find('#myNextPostBtn')
-            .off('click')
-            .on('click', gotoMyNextPost);
+        paginationBlockEl.off('shown.bs.dropdown', '.wrapper').on('shown.bs.dropdown', '.wrapper', function () {
+            setTimeout(async function () {
+                if (utils.findBootstrapEnvironment() === 'lg') {
+                    $('.pagination-block input').focus();
+                }
+                const postCountInTopic = await socket.emit('topics.getPostCountInTopic', ajaxify.data.tid);
+                if (postCountInTopic > 0) {
+                    paginationBlockEl.find('#myNextPostBtn').removeAttr('disabled');
+                }
+            }, 100);
+        });
+        paginationBlockEl.find('.pageup').off('click').on('click', navigator.scrollUp);
+        paginationBlockEl.find('.pagedown').off('click').on('click', navigator.scrollDown);
+        paginationBlockEl.find('.pagetop').off('click').on('click', navigator.toTop);
+        paginationBlockEl.find('.pagebottom').off('click').on('click', navigator.toBottom);
+        paginationBlockEl.find('#myNextPostBtn').off('click').on('click', gotoMyNextPost);
 
         paginationBlockEl.find('input').on('keydown', function (e) {
             if (e.which === 13) {
@@ -146,12 +117,8 @@ define('navigator', [
             if (nextIndex && index !== nextIndex + 1) {
                 lastNextIndex = nextIndex;
                 $(window).one('action:ajaxify.end', function () {
-                    if (
-                        paginationBlockEl.find('.dropdown-menu').is(':hidden')
-                    ) {
-                        paginationBlockEl
-                            .find('.dropdown-toggle')
-                            .dropdown('toggle');
+                    if (paginationBlockEl.find('.dropdown-menu').is(':hidden')) {
+                        paginationBlockEl.find('.dropdown-toggle').dropdown('toggle');
                     }
                 });
                 navigator.scrollToIndex(nextIndex, true, 0);
@@ -171,10 +138,7 @@ define('navigator', [
         const parentOffset = parent.offset();
         if (newTop < parentOffset.top) {
             newTop = parentOffset.top;
-        } else if (
-            newTop >
-            parentOffset.top + parent.height() - thumbIconHeight
-        ) {
+        } else if (newTop > parentOffset.top + parent.height() - thumbIconHeight) {
             newTop = parentOffset.top + parent.height() - thumbIconHeight;
         }
         return newTop;
@@ -190,9 +154,7 @@ define('navigator', [
         if (index === count) {
             percent = 1;
         }
-        const newTop = clampTop(
-            parentOffset.top + (parent.height() - thumbIconHeight) * percent,
-        );
+        const newTop = clampTop(parentOffset.top + (parent.height() - thumbIconHeight) * percent);
 
         const offset = { top: newTop, left: thumb.offset().left };
         thumb.offset(offset);
@@ -217,9 +179,7 @@ define('navigator', [
         function calculateIndexFromY(y) {
             const newTop = clampTop(y - thumbIconHalfHeight);
             const parentOffset = parent.offset();
-            const percent =
-                (newTop - parentOffset.top) /
-                (parent.height() - thumbIconHeight);
+            const percent = (newTop - parentOffset.top) / (parent.height() - thumbIconHeight);
             index = Math.max(1, Math.ceil(ajaxify.data.postcount * percent));
             return index > ajaxify.data.postcount ? ajaxify.data.count : index;
         }
@@ -244,9 +204,7 @@ define('navigator', [
             $(window).off('mousemove', mousemove);
             if (mouseDragging) {
                 navigator.scrollToIndex(index - 1, true, 0);
-                paginationBlockEl
-                    .find('[data-toggle="dropdown"]')
-                    .trigger('click');
+                paginationBlockEl.find('[data-toggle="dropdown"]').trigger('click');
             }
             clearRenderInterval();
             mouseDragging = false;
@@ -279,28 +237,16 @@ define('navigator', [
 
         thumb.on('touchstart', function (ev) {
             isNavigating = true;
-            touchX = Math.min(
-                $(window).width(),
-                Math.max(0, ev.touches[0].clientX),
-            );
-            touchY = Math.min(
-                $(window).height(),
-                Math.max(0, ev.touches[0].clientY),
-            );
+            touchX = Math.min($(window).width(), Math.max(0, ev.touches[0].clientX));
+            touchY = Math.min($(window).height(), Math.max(0, ev.touches[0].clientY));
             firstMove = true;
         });
 
         thumb.on('touchmove', function (ev) {
             const windowWidth = $(window).width();
             const windowHeight = $(window).height();
-            const deltaX = Math.abs(
-                touchX -
-                    Math.min(windowWidth, Math.max(0, ev.touches[0].clientX)),
-            );
-            const deltaY = Math.abs(
-                touchY -
-                    Math.min(windowHeight, Math.max(0, ev.touches[0].clientY)),
-            );
+            const deltaX = Math.abs(touchX - Math.min(windowWidth, Math.max(0, ev.touches[0].clientX)));
+            const deltaY = Math.abs(touchY - Math.min(windowHeight, Math.max(0, ev.touches[0].clientY)));
             touchX = Math.min(windowWidth, Math.max(0, ev.touches[0].clientX));
             touchY = Math.min(windowHeight, Math.max(0, ev.touches[0].clientY));
 
@@ -312,13 +258,9 @@ define('navigator', [
             if (isNavigating && ev.cancelable) {
                 ev.preventDefault();
                 ev.stopPropagation();
-                const newTop = clampTop(
-                    touchY + $(window).scrollTop() - thumbIconHalfHeight,
-                );
+                const newTop = clampTop(touchY + $(window).scrollTop() - thumbIconHalfHeight);
                 thumb.offset({ top: newTop, left: thumb.offset().left });
-                const index = calculateIndexFromY(
-                    touchY + $(window).scrollTop(),
-                );
+                const index = calculateIndexFromY(touchY + $(window).scrollTop());
                 navigator.updateTextAndProgressBar();
                 thumbText.text(index + '/' + ajaxify.data.postcount);
                 if (firstMove) {
@@ -333,9 +275,7 @@ define('navigator', [
             if (isNavigating) {
                 navigator.scrollToIndex(index - 1, true, 0);
                 isNavigating = false;
-                paginationBlockEl
-                    .find('[data-toggle="dropdown"]')
-                    .trigger('click');
+                paginationBlockEl.find('[data-toggle="dropdown"]').trigger('click');
             }
         });
     }
@@ -349,36 +289,21 @@ define('navigator', [
 
     function renderPost(index, callback) {
         callback = callback || function () {};
-        if (
-            renderPostIndex === index ||
-            paginationBlockEl.find('.post-content').is(':hidden')
-        ) {
+        if (renderPostIndex === index || paginationBlockEl.find('.post-content').is(':hidden')) {
             return;
         }
         renderPostIndex = index;
 
-        socket.emit(
-            'posts.getPostSummaryByIndex',
-            { tid: ajaxify.data.tid, index: index - 1 },
-            function (err, postData) {
-                if (err) {
-                    return alerts.error(err);
-                }
-                app.parseAndTranslate(
-                    'partials/topic/navigation-post',
-                    { post: postData },
-                    function (html) {
-                        paginationBlockEl
-                            .find('.post-content')
-                            .html(html)
-                            .find('.timeago')
-                            .timeago();
-                    },
-                );
+        socket.emit('posts.getPostSummaryByIndex', { tid: ajaxify.data.tid, index: index - 1 }, function (err, postData) {
+            if (err) {
+                return alerts.error(err);
+            }
+            app.parseAndTranslate('partials/topic/navigation-post', { post: postData }, function (html) {
+                paginationBlockEl.find('.post-content').html(html).find('.timeago').timeago();
+            });
 
-                callback();
-            },
-        );
+            callback();
+        });
     }
 
     function handleKeys() {
@@ -405,19 +330,9 @@ define('navigator', [
     }
 
     function generateUrl(index) {
-        const pathname = window.location.pathname.replace(
-            config.relative_path,
-            '',
-        );
+        const pathname = window.location.pathname.replace(config.relative_path, '');
         const parts = pathname.split('/');
-        return (
-            parts[1] +
-            '/' +
-            parts[2] +
-            '/' +
-            parts[3] +
-            (index ? '/' + index : '')
-        );
+        return parts[1] + '/' + parts[2] + '/' + parts[3] + (index ? '/' + index : '');
     }
 
     navigator.getCount = () => count;
@@ -446,9 +361,7 @@ define('navigator', [
     };
 
     function toggle(flag) {
-        const path = ajaxify.removeRelativePath(
-            window.location.pathname.slice(1),
-        );
+        const path = ajaxify.removeRelativePath(window.location.pathname.slice(1));
         if (flag && !path.startsWith('topic') && !path.startsWith('category')) {
             return;
         }
@@ -486,10 +399,7 @@ define('navigator', [
             const $this = $(this);
             const elIndex = parseInt($this.attr('data-index'), 10);
             if (elIndex >= 0) {
-                const distanceToMiddle = Math.abs(
-                    middleOfViewport -
-                        ($this.offset().top + $this.outerHeight(true) / 2),
-                );
+                const distanceToMiddle = Math.abs(middleOfViewport - ($this.offset().top + $this.outerHeight(true) / 2));
 
                 if (distanceToMiddle > previousDistance) {
                     return false;
@@ -502,12 +412,8 @@ define('navigator', [
             }
         });
 
-        const atTop =
-            scrollTop === 0 &&
-            parseInt(els.first().attr('data-index'), 10) === 0;
-        const nearBottom =
-            scrollTop + windowHeight > documentHeight - 100 &&
-            parseInt(els.last().attr('data-index'), 10) === count - 1;
+        const atTop = scrollTop === 0 && parseInt(els.first().attr('data-index'), 10) === 0;
+        const nearBottom = scrollTop + windowHeight > documentHeight - 100 && parseInt(els.last().attr('data-index'), 10) === count - 1;
 
         if (atTop) {
             newIndex = 1;
@@ -554,9 +460,7 @@ define('navigator', [
             return;
         }
         index = index > count ? count : index;
-        paginationTextEl.translateHtml(
-            '[[global:pagination.out_of, ' + index + ', ' + count + ']]',
-        );
+        paginationTextEl.translateHtml('[[global:pagination.out_of, ' + index + ', ' + count + ']]');
         const fraction = (index - 1) / (count - 1 || 1);
         paginationBlockMeterEl.val(fraction);
         paginationBlockProgressEl.width(fraction * 100 + '%');
@@ -569,9 +473,7 @@ define('navigator', [
             const atTop = $window.scrollTop() <= 0;
             if (atTop) {
                 return pagination.previousPage(function () {
-                    $('body,html').scrollTop(
-                        $(document).height() - $window.height(),
-                    );
+                    $('body,html').scrollTop($(document).height() - $window.height());
                 });
             }
         }
@@ -584,8 +486,7 @@ define('navigator', [
         const $window = $(window);
 
         if (config.usePagination) {
-            const atBottom =
-                $window.scrollTop() >= $(document).height() - $window.height();
+            const atBottom = $window.scrollTop() >= $(document).height() - $window.height();
             if (atBottom) {
                 return pagination.nextPage();
             }
@@ -633,10 +534,7 @@ define('navigator', [
         }
 
         // if in category and item alreay on page
-        if (
-            inCategory &&
-            $('[component="category/topic"][data-index="' + index + '"]').length
-        ) {
+        if (inCategory && $('[component="category/topic"][data-index="' + index + '"]').length) {
             return navigator.scrollToTopicIndex(index, highlight, duration);
         }
 
@@ -647,9 +545,7 @@ define('navigator', [
             return;
         }
 
-        const scrollMethod = inTopic
-            ? navigator.scrollToPostIndex
-            : navigator.scrollToTopicIndex;
+        const scrollMethod = inTopic ? navigator.scrollToPostIndex : navigator.scrollToTopicIndex;
 
         const page = 1 + Math.floor(index / config.postsPerPage);
         if (parseInt(page, 10) !== ajaxify.data.pagination.currentPage) {
@@ -667,18 +563,11 @@ define('navigator', [
     };
 
     navigator.scrollToTopicIndex = function (topicIndex, highlight, duration) {
-        const scrollTo = $(
-            '[component="category/topic"][data-index="' + topicIndex + '"]',
-        );
+        const scrollTo = $('[component="category/topic"][data-index="' + topicIndex + '"]');
         navigator.scrollToElement(scrollTo, highlight, duration, topicIndex);
     };
 
-    navigator.scrollToElement = async (
-        scrollTo,
-        highlight,
-        duration,
-        newIndex = null,
-    ) => {
+    navigator.scrollToElement = async (scrollTo, highlight, duration, newIndex = null) => {
         if (!scrollTo.length) {
             navigator.scrollActive = false;
             return;
@@ -737,15 +626,10 @@ define('navigator', [
             }
 
             let scrollTop = 0;
-            if (
-                postHeight <
-                viewportHeight - navbarHeight - topicHeaderHeight
-            ) {
-                scrollTop =
-                    scrollTo.offset().top - viewportHeight / 2 + postHeight / 2;
+            if (postHeight < viewportHeight - navbarHeight - topicHeaderHeight) {
+                scrollTop = scrollTo.offset().top - viewportHeight / 2 + postHeight / 2;
             } else {
-                scrollTop =
-                    scrollTo.offset().top - navbarHeight - topicHeaderHeight;
+                scrollTop = scrollTo.offset().top - navbarHeight - topicHeaderHeight;
             }
 
             if (duration === 0) {
@@ -759,15 +643,13 @@ define('navigator', [
                     scrollTop: scrollTop + 'px',
                 },
                 duration,
-                onAnimateComplete,
+                onAnimateComplete
             );
         }
 
         function highlightPost() {
             if (highlight) {
-                $(
-                    '[component="post"],[component="category/topic"]',
-                ).removeClass('highlight');
+                $('[component="post"],[component="category/topic"]').removeClass('highlight');
                 scrollTo.addClass('highlight');
                 setTimeout(function () {
                     scrollTo.removeClass('highlight');

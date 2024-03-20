@@ -24,9 +24,7 @@ helpers.request = async function (method, uri, options) {
     const ignoreMethods = ['GET', 'HEAD', 'OPTIONS'];
     const lowercaseMethod = String(method).toLowerCase();
     let csrf_token;
-    if (
-        !ignoreMethods.some(method => method.toLowerCase() === lowercaseMethod)
-    ) {
+    if (!ignoreMethods.some(method => method.toLowerCase() === lowercaseMethod)) {
         csrf_token = await helpers.getCsrfToken(options.jar);
     }
 
@@ -35,14 +33,10 @@ helpers.request = async function (method, uri, options) {
         if (csrf_token) {
             options.headers['x-csrf-token'] = csrf_token;
         }
-        request[lowercaseMethod](
-            `${nconf.get('url')}${uri}`,
-            options,
-            (err, res, body) => {
-                if (err) reject(err);
-                else resolve({ res, body });
-            },
-        );
+        request[lowercaseMethod](`${nconf.get('url')}${uri}`, options, (err, res, body) => {
+            if (err) reject(err);
+            else resolve({ res, body });
+        });
     });
 };
 
@@ -75,14 +69,12 @@ helpers.loginUser = function (username, password, callback) {
                 },
                 (err, res, body) => {
                     if (err) {
-                        return callback(
-                            err || new Error('[[error:invalid-response]]'),
-                        );
+                        return callback(err || new Error('[[error:invalid-response]]'));
                     }
                     callback(null, { jar, res, body, csrf_token: csrf_token });
-                },
+                }
             );
-        },
+        }
     );
 };
 
@@ -110,9 +102,9 @@ helpers.logoutUser = function (jar, callback) {
                 },
                 (err, response, body) => {
                     callback(err, response, body);
-                },
+                }
             );
-        },
+        }
     );
 };
 
@@ -138,14 +130,7 @@ helpers.connectSocketIO = function (res, callback) {
     });
 };
 
-helpers.uploadFile = function (
-    uploadEndPoint,
-    filePath,
-    body,
-    jar,
-    csrf_token,
-    callback,
-) {
+helpers.uploadFile = function (uploadEndPoint, filePath, body, jar, csrf_token, callback) {
     let formData = {
         files: [
             fs.createReadStream(filePath),
@@ -171,7 +156,7 @@ helpers.uploadFile = function (
                 winston.error(JSON.stringify(body));
             }
             callback(null, res, body);
-        },
+        }
     );
 };
 
@@ -204,9 +189,9 @@ helpers.registerUser = function (data, callback) {
                 },
                 (err, response, body) => {
                     callback(err, jar, response, body);
-                },
+                }
             );
-        },
+        }
     );
 };
 
@@ -236,19 +221,16 @@ helpers.copyFile = function (source, target, callback) {
 };
 
 helpers.invite = async function (body, uid, jar, csrf_token) {
-    const res = await requestAsync.post(
-        `${nconf.get('url')}/api/v3/users/${uid}/invites`,
-        {
-            jar: jar,
-            // using "form" since client "api" module make requests with "application/x-www-form-urlencoded" content-type
-            form: body,
-            headers: {
-                'x-csrf-token': csrf_token,
-            },
-            simple: false,
-            resolveWithFullResponse: true,
+    const res = await requestAsync.post(`${nconf.get('url')}/api/v3/users/${uid}/invites`, {
+        jar: jar,
+        // using "form" since client "api" module make requests with "application/x-www-form-urlencoded" content-type
+        form: body,
+        headers: {
+            'x-csrf-token': csrf_token,
         },
-    );
+        simple: false,
+        resolveWithFullResponse: true,
+    });
 
     res.body = JSON.parse(res.body);
     return { res, body };

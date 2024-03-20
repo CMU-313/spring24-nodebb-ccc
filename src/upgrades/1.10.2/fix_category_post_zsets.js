@@ -21,15 +21,11 @@ module.exports = {
                 const topicData = await posts.getPostsFields(pids, ['tid']);
                 const categoryData = await topics.getTopicsFields(
                     topicData.map(t => t.tid),
-                    ['cid'],
+                    ['cid']
                 );
 
                 await db.sortedSetRemove(keys, pids);
-                const bulkAdd = postData.map((p, i) => [
-                    `cid:${categoryData[i].cid}:pids`,
-                    p.score,
-                    p.value,
-                ]);
+                const bulkAdd = postData.map((p, i) => [`cid:${categoryData[i].cid}:pids`, p.score, p.value]);
                 await db.sortedSetAddBulk(bulkAdd);
                 progress.incr(postData.length);
             },
@@ -37,7 +33,7 @@ module.exports = {
                 batch: 500,
                 progress: progress,
                 withScores: true,
-            },
+            }
         );
     },
 };

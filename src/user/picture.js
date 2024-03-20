@@ -12,9 +12,7 @@ const meta = require('../meta');
 
 module.exports = function (User) {
     User.getAllowedProfileImageExtensions = function () {
-        const exts = User.getAllowedImageTypes().map(type =>
-            mime.getExtension(type),
-        );
+        const exts = User.getAllowedImageTypes().map(type => mime.getExtension(type));
         if (exts.includes('jpeg')) {
             exts.push('jpg');
         }
@@ -28,9 +26,7 @@ module.exports = function (User) {
     User.updateCoverPosition = async function (uid, position) {
         // Reject anything that isn't two percentages
         if (!/^[\d.]+%\s[\d.]+%$/.test(position)) {
-            winston.warn(
-                `[user/updateCoverPosition] Invalid position received: ${position}`,
-            );
+            winston.warn(`[user/updateCoverPosition] Invalid position received: ${position}`);
             throw new Error('[[error:invalid-data]]');
         }
 
@@ -48,23 +44,13 @@ module.exports = function (User) {
                 return await User.updateCoverPosition(data.uid, data.position);
             }
 
-            validateUpload(data, meta.config.maximumCoverImageSize, [
-                'image/png',
-                'image/jpeg',
-                'image/bmp',
-            ]);
+            validateUpload(data, meta.config.maximumCoverImageSize, ['image/png', 'image/jpeg', 'image/bmp']);
 
             picture.path = await image.writeImageDataToTempFile(data.imageData);
 
-            const extension = file.typeToExtension(
-                image.mimeFromBase64(data.imageData),
-            );
+            const extension = file.typeToExtension(image.mimeFromBase64(data.imageData));
             const filename = `${data.uid}-profilecover-${Date.now()}${extension}`;
-            const uploadData = await image.uploadImage(
-                filename,
-                'profile',
-                picture,
-            );
+            const uploadData = await image.uploadImage(filename, 'profile', picture);
 
             await deleteCurrentPicture(data.uid, 'cover:url');
             await User.setUserField(data.uid, 'cover:url', uploadData.url);
@@ -89,15 +75,10 @@ module.exports = function (User) {
         }
 
         if (userPhoto.size > meta.config.maximumProfileImageSize * 1024) {
-            throw new Error(
-                `[[error:file-too-big, ${meta.config.maximumProfileImageSize}]]`,
-            );
+            throw new Error(`[[error:file-too-big, ${meta.config.maximumProfileImageSize}]]`);
         }
 
-        if (
-            !userPhoto.type ||
-            !User.getAllowedImageTypes().includes(userPhoto.type)
-        ) {
+        if (!userPhoto.type || !User.getAllowedImageTypes().includes(userPhoto.type)) {
             throw new Error('[[error:invalid-image]]');
         }
 
@@ -129,7 +110,7 @@ module.exports = function (User) {
                 uploadedpicture: uploadedImage.url,
                 picture: uploadedImage.url,
             },
-            ['uploadedpicture', 'picture'],
+            ['uploadedpicture', 'picture']
         );
         return uploadedImage;
     };
@@ -146,15 +127,9 @@ module.exports = function (User) {
                 throw new Error('[[error:profile-image-uploads-disabled]]');
             }
 
-            validateUpload(
-                data,
-                meta.config.maximumProfileImageSize,
-                User.getAllowedImageTypes(),
-            );
+            validateUpload(data, meta.config.maximumProfileImageSize, User.getAllowedImageTypes());
 
-            const extension = file.typeToExtension(
-                image.mimeFromBase64(data.imageData),
-            );
+            const extension = file.typeToExtension(image.mimeFromBase64(data.imageData));
             if (!extension) {
                 throw new Error('[[error:invalid-image-extension]]');
             }
@@ -169,11 +144,7 @@ module.exports = function (User) {
             });
 
             const filename = generateProfileImageFilename(data.uid, extension);
-            const uploadedImage = await image.uploadImage(
-                filename,
-                'profile',
-                picture,
-            );
+            const uploadedImage = await image.uploadImage(filename, 'profile', picture);
 
             await deleteCurrentPicture(data.uid, 'uploadedpicture');
             await User.updateProfile(
@@ -183,7 +154,7 @@ module.exports = function (User) {
                     uploadedpicture: uploadedImage.url,
                     picture: uploadedImage.url,
                 },
-                ['uploadedpicture', 'picture'],
+                ['uploadedpicture', 'picture']
             );
             return uploadedImage;
         } finally {
@@ -221,8 +192,7 @@ module.exports = function (User) {
     }
 
     async function convertToPNG(path) {
-        const convertToPNG =
-            meta.config['profile:convertProfileImageToPNG'] === 1;
+        const convertToPNG = meta.config['profile:convertProfileImageToPNG'] === 1;
         if (!convertToPNG) {
             return path;
         }
@@ -232,32 +202,22 @@ module.exports = function (User) {
     }
 
     function generateProfileImageFilename(uid, extension) {
-        const convertToPNG =
-            meta.config['profile:convertProfileImageToPNG'] === 1;
+        const convertToPNG = meta.config['profile:convertProfileImageToPNG'] === 1;
         return `${uid}-profileavatar-${Date.now()}${convertToPNG ? '.png' : extension}`;
     }
 
     User.removeCoverPicture = async function (data) {
         await deletePicture(data.uid, 'cover:url');
-        await db.deleteObjectFields(`user:${data.uid}`, [
-            'cover:url',
-            'cover:position',
-        ]);
+        await db.deleteObjectFields(`user:${data.uid}`, ['cover:url', 'cover:position']);
     };
 
     User.removeProfileImage = async function (uid) {
-        const userData = await User.getUserFields(uid, [
-            'uploadedpicture',
-            'picture',
-        ]);
+        const userData = await User.getUserFields(uid, ['uploadedpicture', 'picture']);
         await deletePicture(uid, 'uploadedpicture');
         await User.setUserFields(uid, {
             uploadedpicture: '',
             // if current picture is uploaded picture, reset to user icon
-            picture:
-                userData.uploadedpicture === userData.picture
-                    ? ''
-                    : userData.picture,
+            picture: userData.uploadedpicture === userData.picture ? '' : userData.picture,
         });
         return userData;
     };
@@ -272,12 +232,7 @@ module.exports = function (User) {
 
     async function getPicturePath(uid, field) {
         const value = await User.getUserField(uid, field);
-        if (
-            !value ||
-            !value.startsWith(
-                `${nconf.get('relative_path')}/assets/uploads/profile/`,
-            )
-        ) {
+        if (!value || !value.startsWith(`${nconf.get('relative_path')}/assets/uploads/profile/`)) {
             return false;
         }
         const filename = value.split('/').pop();

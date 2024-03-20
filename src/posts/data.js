@@ -4,20 +4,7 @@ const db = require('../database');
 const plugins = require('../plugins');
 const utils = require('../utils');
 
-const intFields = [
-    'uid',
-    'pid',
-    'tid',
-    'deleted',
-    'timestamp',
-    'upvotes',
-    'downvotes',
-    'reactions',
-    'deleterUid',
-    'edited',
-    'replies',
-    'bookmarks',
-];
+const intFields = ['uid', 'pid', 'tid', 'deleted', 'timestamp', 'upvotes', 'downvotes', 'reactions', 'deleterUid', 'edited', 'replies', 'bookmarks'];
 // fields inside DB
 
 module.exports = function (Posts) {
@@ -68,18 +55,14 @@ module.exports = function (Posts) {
 function modifyPost(post, fields) {
     if (post) {
         db.parseIntFields(post, intFields, fields);
-        if (
-            post.hasOwnProperty('upvotes') &&
-            post.hasOwnProperty('downvotes')
-        ) {
+        if (post.hasOwnProperty('upvotes') && post.hasOwnProperty('downvotes')) {
             post.votes = post.upvotes - post.downvotes;
         }
         if (post.hasOwnProperty('timestamp')) {
             post.timestampISO = utils.toISOString(post.timestamp);
         }
         if (post.hasOwnProperty('edited')) {
-            post.editedISO =
-                post.edited !== 0 ? utils.toISOString(post.edited) : '';
+            post.editedISO = post.edited !== 0 ? utils.toISOString(post.edited) : '';
         }
     }
 }

@@ -25,7 +25,7 @@ describe('Language detection', () => {
 
                     assert.strictEqual(body.userLang, 'de');
                     done();
-                },
+                }
             );
         });
     });
@@ -47,7 +47,7 @@ describe('Language detection', () => {
 
                     assert.strictEqual(body.userLang, 'en-GB');
                     done();
-                },
+                }
             );
         });
     });

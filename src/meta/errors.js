@@ -17,7 +17,7 @@ new cronJob(
         Errors.writeData();
     },
     null,
-    true,
+    true
 );
 
 Errors.writeData = async function () {
@@ -51,9 +51,7 @@ Errors.log404 = function (route) {
 Errors.get = async function (escape) {
     const data = await db.getSortedSetRevRangeWithScores('errors:404', 0, 199);
     data.forEach(nfObject => {
-        nfObject.value = escape
-            ? validator.escape(String(nfObject.value || ''))
-            : nfObject.value;
+        nfObject.value = escape ? validator.escape(String(nfObject.value || '')) : nfObject.value;
     });
     return data;
 };

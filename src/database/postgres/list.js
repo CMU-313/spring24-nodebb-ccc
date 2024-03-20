@@ -131,7 +131,7 @@ UPDATE "legacy_list" l
    AND o."type" = l."type"
    AND o."_key" = $1::TEXT`,
                       values: [key, start, stop],
-                  },
+                  }
         );
     };
 
@@ -173,7 +173,7 @@ SELECT ARRAY(SELECT m.m
         AND o."type" = l."type"
  WHERE o."_key" = $1::TEXT`,
                       values: [key, start, stop],
-                  },
+                  }
         );
 
         return res.rows.length ? res.rows[0].l : [];

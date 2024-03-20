@@ -9,11 +9,7 @@ const meta = require('../meta');
 const helpers = module.exports;
 
 helpers.try = function (middleware) {
-    if (
-        middleware &&
-        middleware.constructor &&
-        middleware.constructor.name === 'AsyncFunction'
-    ) {
+    if (middleware && middleware.constructor && middleware.constructor.name === 'AsyncFunction') {
         return async function (req, res, next) {
             try {
                 await middleware(req, res, next);
@@ -48,9 +44,7 @@ helpers.buildBodyClass = function (req, res, templateData = {}) {
 
     if (templateData.template && templateData.template.topic) {
         parts.push(`page-topic-category-${templateData.category.cid}`);
-        parts.push(
-            `page-topic-category-${slugify(templateData.category.name)}`,
-        );
+        parts.push(`page-topic-category-${slugify(templateData.category.name)}`);
     }
 
     if (Array.isArray(templateData.breadcrumbs)) {
