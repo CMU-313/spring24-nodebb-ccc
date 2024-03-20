@@ -11,7 +11,9 @@ module.exports = function (User) {
         if (!(parseInt(uid, 10) > 0)) {
             return;
         }
-        const isStateValid = Object.values(categories.watchStates).includes(parseInt(state, 10));
+        const isStateValid = Object.values(categories.watchStates).includes(
+            parseInt(state, 10)
+        );
         if (!isStateValid) {
             throw new Error('[[error:invalid-watch-state]]');
         }
@@ -41,11 +43,16 @@ module.exports = function (User) {
         if (!(parseInt(uid, 10) > 0)) {
             return [];
         }
-        const cids = await User.getCategoriesByStates(uid, [categories.watchStates.ignoring]);
-        const result = await plugins.hooks.fire('filter:user.getIgnoredCategories', {
-            uid: uid,
-            cids: cids,
-        });
+        const cids = await User.getCategoriesByStates(uid, [
+            categories.watchStates.ignoring,
+        ]);
+        const result = await plugins.hooks.fire(
+            'filter:user.getIgnoredCategories',
+            {
+                uid: uid,
+                cids: cids,
+            }
+        );
         return result.cids;
     };
 
@@ -53,11 +60,16 @@ module.exports = function (User) {
         if (!(parseInt(uid, 10) > 0)) {
             return [];
         }
-        const cids = await User.getCategoriesByStates(uid, [categories.watchStates.watching]);
-        const result = await plugins.hooks.fire('filter:user.getWatchedCategories', {
-            uid: uid,
-            cids: cids,
-        });
+        const cids = await User.getCategoriesByStates(uid, [
+            categories.watchStates.watching,
+        ]);
+        const result = await plugins.hooks.fire(
+            'filter:user.getWatchedCategories',
+            {
+                uid: uid,
+                cids: cids,
+            }
+        );
         return result.cids;
     };
 
@@ -71,10 +83,18 @@ module.exports = function (User) {
     };
 
     User.ignoreCategory = async function (uid, cid) {
-        await User.setCategoryWatchState(uid, cid, categories.watchStates.ignoring);
+        await User.setCategoryWatchState(
+            uid,
+            cid,
+            categories.watchStates.ignoring
+        );
     };
 
     User.watchCategory = async function (uid, cid) {
-        await User.setCategoryWatchState(uid, cid, categories.watchStates.watching);
+        await User.setCategoryWatchState(
+            uid,
+            cid,
+            categories.watchStates.watching
+        );
     };
 };

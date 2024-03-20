@@ -13,7 +13,9 @@ privilegesController.get = async function (req, res) {
     if (cid > 0) {
         privilegesData = await privileges.categories.list(cid);
     } else if (cid === 0) {
-        privilegesData = await (isAdminPriv ? privileges.admin.list(req.uid) : privileges.global.list());
+        privilegesData = await (isAdminPriv
+            ? privileges.admin.list(req.uid)
+            : privileges.global.list());
     }
 
     const categoriesData = [
@@ -40,7 +42,13 @@ privilegesController.get = async function (req, res) {
         }
     });
     if (!selectedCategory) {
-        selectedCategory = await categories.getCategoryFields(cid, ['cid', 'name', 'icon', 'bgColor', 'color']);
+        selectedCategory = await categories.getCategoryFields(cid, [
+            'cid',
+            'name',
+            'icon',
+            'bgColor',
+            'color',
+        ]);
     }
 
     const group = req.query.group ? req.query.group : '';

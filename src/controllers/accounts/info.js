@@ -9,7 +9,11 @@ const pagination = require('../../pagination');
 const infoController = module.exports;
 
 infoController.get = async function (req, res, next) {
-    const userData = await accountHelpers.getUserDataByUserSlug(req.params.userslug, req.uid, req.query);
+    const userData = await accountHelpers.getUserDataByUserSlug(
+        req.params.userslug,
+        req.uid,
+        req.query
+    );
     if (!userData) {
         return next();
     }
@@ -18,7 +22,13 @@ infoController.get = async function (req, res, next) {
     const start = (page - 1) * itemsPerPage;
     const stop = start + itemsPerPage - 1;
 
-    const [history, sessions, usernames, emails, notes] = await Promise.all([user.getModerationHistory(userData.uid), user.auth.getSessions(userData.uid, req.sessionID), user.getHistory(`user:${userData.uid}:usernames`), user.getHistory(`user:${userData.uid}:emails`), getNotes(userData, start, stop)]);
+    const [history, sessions, usernames, emails, notes] = await Promise.all([
+        user.getModerationHistory(userData.uid),
+        user.auth.getSessions(userData.uid, req.sessionID),
+        user.getHistory(`user:${userData.uid}:usernames`),
+        user.getHistory(`user:${userData.uid}:emails`),
+        getNotes(userData, start, stop),
+    ]);
 
     userData.history = history;
     userData.sessions = sessions;
@@ -31,7 +41,10 @@ infoController.get = async function (req, res, next) {
         userData.pagination = pagination.create(page, pageCount, req.query);
     }
     userData.title = '[[pages:account/info]]';
-    userData.breadcrumbs = helpers.buildBreadcrumbs([{ text: userData.username, url: `/user/${userData.userslug}` }, { text: '[[user:account_info]]' }]);
+    userData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: userData.username, url: `/user/${userData.userslug}` },
+        { text: '[[user:account_info]]' },
+    ]);
 
     res.render('account/info', userData);
 };
@@ -40,6 +53,9 @@ async function getNotes(userData, start, stop) {
     if (!userData.isAdminOrGlobalModeratorOrModerator) {
         return;
     }
-    const [notes, count] = await Promise.all([user.getModerationNotes(userData.uid, start, stop), db.sortedSetCard(`uid:${userData.uid}:moderation:notes`)]);
+    const [notes, count] = await Promise.all([
+        user.getModerationNotes(userData.uid, start, stop),
+        db.sortedSetCard(`uid:${userData.uid}:moderation:notes`),
+    ]);
     return { notes: notes, count: count };
 }

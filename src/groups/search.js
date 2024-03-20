@@ -37,7 +37,9 @@ module.exports = function (Groups) {
     Groups.sort = function (strategy, groups) {
         switch (strategy) {
             case 'count':
-                groups.sort((a, b) => a.slug > b.slug).sort((a, b) => b.memberCount - a.memberCount);
+                groups
+                    .sort((a, b) => a.slug > b.slug)
+                    .sort((a, b) => b.memberCount - a.memberCount);
                 break;
 
             case 'date':
@@ -54,7 +56,12 @@ module.exports = function (Groups) {
 
     Groups.searchMembers = async function (data) {
         if (!data.query) {
-            const users = await Groups.getOwnersAndMembers(data.groupName, data.uid, 0, 19);
+            const users = await Groups.getOwnersAndMembers(
+                data.groupName,
+                data.uid,
+                0,
+                19
+            );
             return { users: users };
         }
 

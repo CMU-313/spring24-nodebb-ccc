@@ -71,8 +71,12 @@ module.exports = function (User) {
         await batch.processSortedSet(
             'post:queue',
             async ids => {
-                const data = await db.getObjects(ids.map(id => `post:queue:${id}`));
-                const userQueuedIds = data.filter(d => parseInt(d.uid, 10) === parseInt(uid, 10)).map(d => d.id);
+                const data = await db.getObjects(
+                    ids.map(id => `post:queue:${id}`)
+                );
+                const userQueuedIds = data
+                    .filter(d => parseInt(d.uid, 10) === parseInt(uid, 10))
+                    .map(d => d.id);
                 deleteIds = deleteIds.concat(userQueuedIds);
             },
             { batch: 500 }
@@ -81,7 +85,22 @@ module.exports = function (User) {
     }
 
     async function removeFromSortedSets(uid) {
-        await db.sortedSetsRemove(['users:joindate', 'users:postcount', 'users:reputation', 'users:banned', 'users:banned:expire', 'users:flags', 'users:online', 'digest:day:uids', 'digest:week:uids', 'digest:biweek:uids', 'digest:month:uids'], uid);
+        await db.sortedSetsRemove(
+            [
+                'users:joindate',
+                'users:postcount',
+                'users:reputation',
+                'users:banned',
+                'users:banned:expire',
+                'users:flags',
+                'users:online',
+                'digest:day:uids',
+                'digest:week:uids',
+                'digest:biweek:uids',
+                'digest:month:uids',
+            ],
+            uid
+        );
     }
 
     User.deleteAccount = async function (uid) {
@@ -106,7 +125,31 @@ module.exports = function (User) {
         await deleteChats(uid);
         await User.auth.revokeAllSessions(uid);
 
-        const keys = [`uid:${uid}:notifications:read`, `uid:${uid}:notifications:unread`, `uid:${uid}:bookmarks`, `uid:${uid}:tids_read`, `uid:${uid}:tids_unread`, `uid:${uid}:followed_tids`, `uid:${uid}:ignored_tids`, `uid:${uid}:blocked_uids`, `user:${uid}:settings`, `user:${uid}:usernames`, `user:${uid}:emails`, `uid:${uid}:topics`, `uid:${uid}:posts`, `uid:${uid}:chats`, `uid:${uid}:chats:unread`, `uid:${uid}:chat:rooms`, `uid:${uid}:chat:rooms:unread`, `uid:${uid}:upvote`, `uid:${uid}:downvote`, `uid:${uid}:flag:pids`, `uid:${uid}:sessions`, `uid:${uid}:sessionUUID:sessionId`, `invitation:uid:${uid}`];
+        const keys = [
+            `uid:${uid}:notifications:read`,
+            `uid:${uid}:notifications:unread`,
+            `uid:${uid}:bookmarks`,
+            `uid:${uid}:tids_read`,
+            `uid:${uid}:tids_unread`,
+            `uid:${uid}:followed_tids`,
+            `uid:${uid}:ignored_tids`,
+            `uid:${uid}:blocked_uids`,
+            `user:${uid}:settings`,
+            `user:${uid}:usernames`,
+            `user:${uid}:emails`,
+            `uid:${uid}:topics`,
+            `uid:${uid}:posts`,
+            `uid:${uid}:chats`,
+            `uid:${uid}:chats:unread`,
+            `uid:${uid}:chat:rooms`,
+            `uid:${uid}:chat:rooms:unread`,
+            `uid:${uid}:upvote`,
+            `uid:${uid}:downvote`,
+            `uid:${uid}:flag:pids`,
+            `uid:${uid}:sessions`,
+            `uid:${uid}:sessionUUID:sessionId`,
+            `invitation:uid:${uid}`,
+        ];
 
         const bulkRemove = [
             ['username:uid', userData.username],
@@ -116,21 +159,45 @@ module.exports = function (User) {
         ];
         if (userData.email) {
             bulkRemove.push(['email:uid', userData.email.toLowerCase()]);
-            bulkRemove.push(['email:sorted', `${userData.email.toLowerCase()}:${uid}`]);
+            bulkRemove.push([
+                'email:sorted',
+                `${userData.email.toLowerCase()}:${uid}`,
+            ]);
         }
 
         if (userData.fullname) {
-            bulkRemove.push(['fullname:sorted', `${userData.fullname.toLowerCase()}:${uid}`]);
+            bulkRemove.push([
+                'fullname:sorted',
+                `${userData.fullname.toLowerCase()}:${uid}`,
+            ]);
         }
 
-        await Promise.all([db.sortedSetRemoveBulk(bulkRemove), db.decrObjectField('global', 'userCount'), db.deleteAll(keys), db.setRemove('invitation:uids', uid), deleteUserIps(uid), deleteUserFromFollowers(uid), deleteImages(uid), groups.leaveAllGroups(uid), flags.resolveFlag('user', uid, uid), User.reset.cleanByUid(uid)]);
-        await db.deleteAll([`followers:${uid}`, `following:${uid}`, `user:${uid}`]);
+        await Promise.all([
+            db.sortedSetRemoveBulk(bulkRemove),
+            db.decrObjectField('global', 'userCount'),
+            db.deleteAll(keys),
+            db.setRemove('invitation:uids', uid),
+            deleteUserIps(uid),
+            deleteUserFromFollowers(uid),
+            deleteImages(uid),
+            groups.leaveAllGroups(uid),
+            flags.resolveFlag('user', uid, uid),
+            User.reset.cleanByUid(uid),
+        ]);
+        await db.deleteAll([
+            `followers:${uid}`,
+            `following:${uid}`,
+            `user:${uid}`,
+        ]);
         delete deletesInProgress[uid];
         return userData;
     };
 
     async function deleteVotes(uid) {
-        const [upvotedPids, downvotedPids] = await Promise.all([db.getSortedSetRange(`uid:${uid}:upvote`, 0, -1), db.getSortedSetRange(`uid:${uid}:downvote`, 0, -1)]);
+        const [upvotedPids, downvotedPids] = await Promise.all([
+            db.getSortedSetRange(`uid:${uid}:upvote`, 0, -1),
+            db.getSortedSetRange(`uid:${uid}:downvote`, 0, -1),
+        ]);
         const pids = _.uniq(upvotedPids.concat(downvotedPids).filter(Boolean));
         await async.eachSeries(pids, async pid => {
             await posts.unvote(pid, uid);
@@ -138,10 +205,19 @@ module.exports = function (User) {
     }
 
     async function deleteChats(uid) {
-        const roomIds = await db.getSortedSetRange(`uid:${uid}:chat:rooms`, 0, -1);
-        const userKeys = roomIds.map(roomId => `uid:${uid}:chat:room:${roomId}:mids`);
+        const roomIds = await db.getSortedSetRange(
+            `uid:${uid}:chat:rooms`,
+            0,
+            -1
+        );
+        const userKeys = roomIds.map(
+            roomId => `uid:${uid}:chat:room:${roomId}:mids`
+        );
 
-        await Promise.all([messaging.leaveRooms(uid, roomIds), db.deleteAll(userKeys)]);
+        await Promise.all([
+            messaging.leaveRooms(uid, roomIds),
+            db.deleteAll(userKeys),
+        ]);
     }
 
     async function deleteUserIps(uid) {
@@ -154,7 +230,10 @@ module.exports = function (User) {
     }
 
     async function deleteUserFromFollowers(uid) {
-        const [followers, following] = await Promise.all([db.getSortedSetRange(`followers:${uid}`, 0, -1), db.getSortedSetRange(`following:${uid}`, 0, -1)]);
+        const [followers, following] = await Promise.all([
+            db.getSortedSetRange(`followers:${uid}`, 0, -1),
+            db.getSortedSetRange(`following:${uid}`, 0, -1),
+        ]);
 
         async function updateCount(uids, name, fieldName) {
             await async.each(uids, async uid => {
@@ -167,11 +246,18 @@ module.exports = function (User) {
         const followingSets = followers.map(uid => `following:${uid}`);
         const followerSets = following.map(uid => `followers:${uid}`);
 
-        await Promise.all([db.sortedSetsRemove(followerSets.concat(followingSets), uid), updateCount(following, 'followers:', 'followerCount'), updateCount(followers, 'following:', 'followingCount')]);
+        await Promise.all([
+            db.sortedSetsRemove(followerSets.concat(followingSets), uid),
+            updateCount(following, 'followers:', 'followerCount'),
+            updateCount(followers, 'following:', 'followingCount'),
+        ]);
     }
 
     async function deleteImages(uid) {
         const folder = path.join(nconf.get('upload_path'), 'profile');
-        await Promise.all([rimrafAsync(path.join(folder, `${uid}-profilecover*`)), rimrafAsync(path.join(folder, `${uid}-profileavatar*`))]);
+        await Promise.all([
+            rimrafAsync(path.join(folder, `${uid}-profilecover*`)),
+            rimrafAsync(path.join(folder, `${uid}-profileavatar*`)),
+        ]);
     }
 };

@@ -1,6 +1,9 @@
 'use strict';
 
-define('forum/tags', ['forum/infinitescroll', 'alerts'], function (infinitescroll, alerts) {
+define('forum/tags', ['forum/infinitescroll', 'alerts'], function (
+    infinitescroll,
+    alerts
+) {
     const Tags = {};
 
     Tags.init = function () {
@@ -13,12 +16,16 @@ define('forum/tags', ['forum/infinitescroll', 'alerts'], function (infinitescrol
                     return resetSearch();
                 }
 
-                socket.emit('topics.searchAndLoadTags', { query: $('#tag-search').val() }, function (err, results) {
-                    if (err) {
-                        return alerts.error(err);
+                socket.emit(
+                    'topics.searchAndLoadTags',
+                    { query: $('#tag-search').val() },
+                    function (err, results) {
+                        if (err) {
+                            return alerts.error(err);
+                        }
+                        onTagsLoaded(results.tags, true);
                     }
-                    onTagsLoaded(results.tags, true);
-                });
+                );
             }, 250)
         );
 

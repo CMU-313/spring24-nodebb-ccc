@@ -20,11 +20,20 @@ module.exports = {
             async uids => {
                 progress.incr(uids.length);
                 for (const cid of cids) {
-                    const isMembers = await db.isSortedSetMembers(`cid:${cid}:ignorers`, uids);
+                    const isMembers = await db.isSortedSetMembers(
+                        `cid:${cid}:ignorers`,
+                        uids
+                    );
                     uids = uids.filter((uid, index) => isMembers[index]);
                     if (uids.length) {
-                        const states = uids.map(() => categories.watchStates.ignoring);
-                        await db.sortedSetAdd(`cid:${cid}:uid:watch:state`, states, uids);
+                        const states = uids.map(
+                            () => categories.watchStates.ignoring
+                        );
+                        await db.sortedSetAdd(
+                            `cid:${cid}:uid:watch:state`,
+                            states,
+                            uids
+                        );
                     }
                 }
             },

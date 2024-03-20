@@ -1,6 +1,11 @@
 'use strict';
 
-define('forum/ip-blacklist', ['Chart', 'benchpress', 'bootbox', 'alerts'], function (Chart, Benchpress, bootbox, alerts) {
+define('forum/ip-blacklist', [
+    'Chart',
+    'benchpress',
+    'bootbox',
+    'alerts',
+], function (Chart, Benchpress, bootbox, alerts) {
     const Blacklist = {};
 
     Blacklist.init = function () {
@@ -34,7 +39,10 @@ define('forum/ip-blacklist', ['Chart', 'benchpress', 'bootbox', 'alerts'], funct
                         return alerts.error(err);
                     }
 
-                    Benchpress.render('admin/partials/blacklist-validate', data).then(function (html) {
+                    Benchpress.render(
+                        'admin/partials/blacklist-validate',
+                        data
+                    ).then(function (html) {
                         bootbox.alert(html);
                     });
                 }

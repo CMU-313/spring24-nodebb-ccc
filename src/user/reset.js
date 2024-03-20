@@ -32,7 +32,10 @@ UserReset.generate = async function (uid) {
     // Invalidate past tokens (must be done prior)
     await UserReset.cleanByUid(uid);
 
-    await Promise.all([db.setObjectField('reset:uid', code, uid), db.sortedSetAdd('reset:issueDate', Date.now(), code)]);
+    await Promise.all([
+        db.setObjectField('reset:uid', code, uid),
+        db.sortedSetAdd('reset:issueDate', Date.now(), code),
+    ]);
     return code;
 };
 
@@ -73,8 +76,16 @@ UserReset.commit = async function (code, password) {
     if (!uid) {
         throw new Error('[[error:reset-code-not-valid]]');
     }
-    const userData = await db.getObjectFields(`user:${uid}`, ['password', 'passwordExpiry', 'password:shaWrapped']);
-    const ok = await Password.compare(password, userData.password, !!parseInt(userData['password:shaWrapped'], 10));
+    const userData = await db.getObjectFields(`user:${uid}`, [
+        'password',
+        'passwordExpiry',
+        'password:shaWrapped',
+    ]);
+    const ok = await Password.compare(
+        password,
+        userData.password,
+        !!parseInt(userData['password:shaWrapped'], 10)
+    );
     if (ok) {
         throw new Error('[[error:reset-same-password]]');
     }
@@ -85,7 +96,8 @@ UserReset.commit = async function (code, password) {
     };
 
     // don't verify email if password reset is due to expiry
-    const isPasswordExpired = userData.passwordExpiry && userData.passwordExpiry < Date.now();
+    const isPasswordExpired =
+        userData.passwordExpiry && userData.passwordExpiry < Date.now();
     if (!isPasswordExpired) {
         data['email:confirmed'] = 1;
         await groups.join('verified-users', uid);
@@ -118,12 +130,29 @@ UserReset.updateExpiry = async function (uid) {
 };
 
 UserReset.clean = async function () {
-    const [tokens, uids] = await Promise.all([db.getSortedSetRangeByScore('reset:issueDate', 0, -1, '-inf', Date.now() - twoHours), db.getSortedSetRangeByScore('reset:issueDate:uid', 0, -1, '-inf', Date.now() - twoHours)]);
+    const [tokens, uids] = await Promise.all([
+        db.getSortedSetRangeByScore(
+            'reset:issueDate',
+            0,
+            -1,
+            '-inf',
+            Date.now() - twoHours
+        ),
+        db.getSortedSetRangeByScore(
+            'reset:issueDate:uid',
+            0,
+            -1,
+            '-inf',
+            Date.now() - twoHours
+        ),
+    ]);
     if (!tokens.length && !uids.length) {
         return;
     }
 
-    winston.verbose(`[UserReset.clean] Removing ${tokens.length} reset tokens from database`);
+    winston.verbose(
+        `[UserReset.clean] Removing ${tokens.length} reset tokens from database`
+    );
     await cleanTokensAndUids(tokens, uids);
 };
 
@@ -145,14 +174,22 @@ UserReset.cleanByUid = async function (uid) {
     );
 
     if (!tokensToClean.length) {
-        winston.verbose(`[UserReset.cleanByUid] No tokens found for uid (${uid}).`);
+        winston.verbose(
+            `[UserReset.cleanByUid] No tokens found for uid (${uid}).`
+        );
         return;
     }
 
-    winston.verbose(`[UserReset.cleanByUid] Found ${tokensToClean.length} token(s), removing...`);
+    winston.verbose(
+        `[UserReset.cleanByUid] Found ${tokensToClean.length} token(s), removing...`
+    );
     await cleanTokensAndUids(tokensToClean, uid);
 };
 
 async function cleanTokensAndUids(tokens, uids) {
-    await Promise.all([db.deleteObjectFields('reset:uid', tokens), db.sortedSetRemove('reset:issueDate', tokens), db.sortedSetRemove('reset:issueDate:uid', uids)]);
+    await Promise.all([
+        db.deleteObjectFields('reset:uid', tokens),
+        db.sortedSetRemove('reset:issueDate', tokens),
+        db.sortedSetRemove('reset:issueDate:uid', uids),
+    ]);
 }

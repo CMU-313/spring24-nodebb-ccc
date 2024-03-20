@@ -27,7 +27,10 @@ Themes.get = async () => {
             const config = path.join(themePath, theme, 'theme.json');
             const pack = path.join(themePath, theme, 'package.json');
             try {
-                const [configFile, packageFile] = await Promise.all([fs.promises.readFile(config, 'utf8'), fs.promises.readFile(pack, 'utf8')]);
+                const [configFile, packageFile] = await Promise.all([
+                    fs.promises.readFile(config, 'utf8'),
+                    fs.promises.readFile(pack, 'utf8'),
+                ]);
                 const configObj = JSON.parse(configFile);
                 const packageObj = JSON.parse(packageFile);
 
@@ -58,7 +61,9 @@ Themes.get = async () => {
 
 async function getThemes(themePath) {
     let dirs = await fs.promises.readdir(themePath);
-    dirs = dirs.filter(dir => themeNamePattern.test(dir) || dir.startsWith('@'));
+    dirs = dirs.filter(
+        dir => themeNamePattern.test(dir) || dir.startsWith('@')
+    );
     return await Promise.all(
         dirs.map(async dir => {
             try {
@@ -91,12 +96,19 @@ Themes.set = async data => {
             const current = await Meta.configs.get('theme:id');
 
             if (current !== data.id) {
-                const pathToThemeJson = path.join(nconf.get('themes_path'), data.id, 'theme.json');
+                const pathToThemeJson = path.join(
+                    nconf.get('themes_path'),
+                    data.id,
+                    'theme.json'
+                );
                 if (!pathToThemeJson.startsWith(nconf.get('themes_path'))) {
                     throw new Error('[[error:invalid-theme-id]]');
                 }
 
-                let config = await fs.promises.readFile(pathToThemeJson, 'utf8');
+                let config = await fs.promises.readFile(
+                    pathToThemeJson,
+                    'utf8'
+                );
                 config = JSON.parse(config);
 
                 // Re-set the themes path (for when NodeBB is reloaded)
@@ -155,14 +167,25 @@ Themes.setupPaths = async () => {
 Themes.setPath = function (themeObj) {
     // Theme's templates path
     let themePath = nconf.get('base_templates_path');
-    const fallback = path.join(nconf.get('themes_path'), themeObj.id, 'templates');
+    const fallback = path.join(
+        nconf.get('themes_path'),
+        themeObj.id,
+        'templates'
+    );
 
     if (themeObj.templates) {
-        themePath = path.join(nconf.get('themes_path'), themeObj.id, themeObj.templates);
+        themePath = path.join(
+            nconf.get('themes_path'),
+            themeObj.id,
+            themeObj.templates
+        );
     } else if (file.existsSync(fallback)) {
         themePath = fallback;
     }
 
     nconf.set('theme_templates_path', themePath);
-    nconf.set('theme_config', path.join(nconf.get('themes_path'), themeObj.id, 'theme.json'));
+    nconf.set(
+        'theme_config',
+        path.join(nconf.get('themes_path'), themeObj.id, 'theme.json')
+    );
 };

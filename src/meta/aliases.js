@@ -9,8 +9,22 @@ const aliases = {
     'client js bundle': ['clientjs', 'clientscript', 'clientscripts'],
     'admin js bundle': ['adminjs', 'adminscript', 'adminscripts'],
     javascript: ['js'],
-    'client side styles': ['clientcss', 'clientless', 'clientstyles', 'clientstyle'],
-    'admin control panel styles': ['admincss', 'adminless', 'adminstyles', 'adminstyle', 'acpcss', 'acpless', 'acpstyles', 'acpstyle'],
+    'client side styles': [
+        'clientcss',
+        'clientless',
+        'clientstyles',
+        'clientstyle',
+    ],
+    'admin control panel styles': [
+        'admincss',
+        'adminless',
+        'adminstyles',
+        'adminstyle',
+        'acpcss',
+        'acpless',
+        'acpstyles',
+        'acpstyle',
+    ],
     styles: ['css', 'less', 'style'],
     templates: ['tpl'],
     languages: ['lang', 'i18n'],
@@ -29,9 +43,17 @@ function buildTargets() {
 
             return [name, arr.join(', ')];
         })
-        .map(tuple => `     ${chalk.magenta(_.padEnd(`"${tuple[0]}"`, length + 2))}  |  ${tuple[1]}`)
+        .map(
+            tuple =>
+                `     ${chalk.magenta(_.padEnd(`"${tuple[0]}"`, length + 2))}  |  ${tuple[1]}`
+        )
         .join('\n');
-    process.stdout.write('\n\n  Build targets:\n' + `${chalk.green(`\n     ${_.padEnd('Target', length + 2)}  |  Aliases`)}` + `${chalk.blue('\n     ------------------------------------------------------\n')}` + `${output}\n\n`);
+    process.stdout.write(
+        '\n\n  Build targets:\n' +
+            `${chalk.green(`\n     ${_.padEnd('Target', length + 2)}  |  Aliases`)}` +
+            `${chalk.blue('\n     ------------------------------------------------------\n')}` +
+            `${output}\n\n`
+    );
 }
 
 exports.buildTargets = buildTargets;

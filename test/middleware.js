@@ -53,7 +53,10 @@ describe('Middlewares', () => {
                 assert(resMock.locals.privileges);
                 assert.strictEqual(resMock.locals.privileges.isAdmin, true);
                 assert.strictEqual(resMock.locals.privileges.isGmod, false);
-                assert.strictEqual(resMock.locals.privileges.isPrivileged, true);
+                assert.strictEqual(
+                    resMock.locals.privileges.isPrivileged,
+                    true
+                );
                 assert.strictEqual(resMock.locals.privileges.isSelf, true);
                 done();
             });
@@ -67,7 +70,10 @@ describe('Middlewares', () => {
                 assert(resMock.locals.privileges);
                 assert.strictEqual(resMock.locals.privileges.isAdmin, false);
                 assert.strictEqual(resMock.locals.privileges.isGmod, false);
-                assert.strictEqual(resMock.locals.privileges.isPrivileged, false);
+                assert.strictEqual(
+                    resMock.locals.privileges.isPrivileged,
+                    false
+                );
                 assert.strictEqual(resMock.locals.privileges.isSelf, false);
                 done();
             });
@@ -124,21 +130,27 @@ describe('Middlewares', () => {
         });
 
         it('should be absent on non-existent routes, for guests', async () => {
-            const res = await request(`${nconf.get('url')}/${utils.generateUUID()}`, {
-                simple: false,
-                resolveWithFullResponse: true,
-            });
+            const res = await request(
+                `${nconf.get('url')}/${utils.generateUUID()}`,
+                {
+                    simple: false,
+                    resolveWithFullResponse: true,
+                }
+            );
 
             assert.strictEqual(res.statusCode, 404);
             assert(!Object.keys(res.headers).includes('cache-control'));
         });
 
         it('should be set to "private" on non-existent routes, for logged in users', async () => {
-            const res = await request(`${nconf.get('url')}/${utils.generateUUID()}`, {
-                simple: false,
-                resolveWithFullResponse: true,
-                jar,
-            });
+            const res = await request(
+                `${nconf.get('url')}/${utils.generateUUID()}`,
+                {
+                    simple: false,
+                    resolveWithFullResponse: true,
+                    jar,
+                }
+            );
 
             assert.strictEqual(res.statusCode, 404);
             assert(Object.keys(res.headers).includes('cache-control'));
@@ -190,11 +202,14 @@ describe('Middlewares', () => {
         });
 
         it('should be set to "private" on apiv3 routes, for logged-in users', async () => {
-            const res = await request(`${nconf.get('url')}/api/v3/users/${uid}`, {
-                simple: false,
-                resolveWithFullResponse: true,
-                jar,
-            });
+            const res = await request(
+                `${nconf.get('url')}/api/v3/users/${uid}`,
+                {
+                    simple: false,
+                    resolveWithFullResponse: true,
+                    jar,
+                }
+            );
 
             assert.strictEqual(res.statusCode, 200);
             assert(Object.keys(res.headers).includes('cache-control'));

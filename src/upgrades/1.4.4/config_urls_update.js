@@ -8,7 +8,14 @@ module.exports = {
     method: async function () {
         const config = await db.getObject('config');
         if (config) {
-            const keys = ['brand:favicon', 'brand:touchicon', 'og:image', 'brand:logo:url', 'defaultAvatar', 'profile:defaultCovers'];
+            const keys = [
+                'brand:favicon',
+                'brand:touchicon',
+                'og:image',
+                'brand:logo:url',
+                'defaultAvatar',
+                'profile:defaultCovers',
+            ];
 
             keys.forEach(key => {
                 const oldValue = config[key];
@@ -17,7 +24,10 @@ module.exports = {
                     return;
                 }
 
-                config[key] = oldValue.replace(/(?:\/assets)?\/(images|uploads)\//g, '/assets/$1/');
+                config[key] = oldValue.replace(
+                    /(?:\/assets)?\/(images|uploads)\//g,
+                    '/assets/$1/'
+                );
             });
 
             await db.setObject('config', config);

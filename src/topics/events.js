@@ -81,7 +81,11 @@ Events.get = async (tid, uid, reverse = false) => {
         throw new Error('[[error:no-topic]]');
     }
 
-    let eventIds = await db.getSortedSetRangeWithScores(`topic:${tid}:events`, 0, -1);
+    let eventIds = await db.getSortedSetRangeWithScores(
+        `topic:${tid}:events`,
+        0,
+        -1
+    );
     const keys = eventIds.map(obj => `topicEvent:${obj.value}`);
     const timestamps = eventIds.map(obj => obj.score);
     eventIds = eventIds.map(obj => obj.value);
@@ -94,9 +98,18 @@ Events.get = async (tid, uid, reverse = false) => {
 };
 
 async function getUserInfo(uids) {
-    uids = uids.filter((uid, idx) => !isNaN(parseInt(uid, 10)) && uids.indexOf(uid) === idx);
-    const userData = await user.getUsersFields(uids, ['picture', 'username', 'userslug']);
-    const userMap = userData.reduce((memo, cur) => memo.set(cur.uid, cur), new Map());
+    uids = uids.filter(
+        (uid, idx) => !isNaN(parseInt(uid, 10)) && uids.indexOf(uid) === idx
+    );
+    const userData = await user.getUsersFields(uids, [
+        'picture',
+        'username',
+        'userslug',
+    ]);
+    const userMap = userData.reduce(
+        (memo, cur) => memo.set(cur.uid, cur),
+        new Map()
+    );
     userMap.set('system', {
         system: true,
     });
@@ -106,7 +119,13 @@ async function getUserInfo(uids) {
 
 async function getCategoryInfo(cids) {
     const uniqCids = _.uniq(cids);
-    const catData = await categories.getCategoriesFields(uniqCids, ['name', 'slug', 'icon', 'color', 'bgColor']);
+    const catData = await categories.getCategoriesFields(uniqCids, [
+        'name',
+        'slug',
+        'icon',
+        'color',
+        'bgColor',
+    ]);
     return _.zipObject(uniqCids, catData);
 }
 
@@ -114,7 +133,10 @@ async function modifyEvent({ tid, uid, eventIds, timestamps, events }) {
     // Add posts from post queue
     const isPrivileged = await user.isPrivileged(uid);
     if (isPrivileged) {
-        const queuedPosts = await posts.getQueuedPosts({ tid }, { metadata: false });
+        const queuedPosts = await posts.getQueuedPosts(
+            { tid },
+            { metadata: false }
+        );
         events.push(
             ...queuedPosts.map(item => ({
                 type: 'post-queue',
@@ -127,16 +149,27 @@ async function modifyEvent({ tid, uid, eventIds, timestamps, events }) {
         });
     }
 
-    const [users, fromCategories] = await Promise.all([getUserInfo(events.map(event => event.uid).filter(Boolean)), getCategoryInfo(events.map(event => event.fromCid).filter(Boolean))]);
+    const [users, fromCategories] = await Promise.all([
+        getUserInfo(events.map(event => event.uid).filter(Boolean)),
+        getCategoryInfo(events.map(event => event.fromCid).filter(Boolean)),
+    ]);
 
     // Remove backlink events if backlinks are disabled
     if (meta.config.topicBacklinks !== 1) {
         events = events.filter(event => event.type !== 'backlink');
     } else {
         // remove backlinks that we dont have read permission
-        const backlinkPids = events.filter(e => e.type === 'backlink').map(e => e.href.split('/').pop());
-        const pids = await privileges.posts.filter('topics:read', backlinkPids, uid);
-        events = events.filter(e => e.type !== 'backlink' || pids.includes(e.href.split('/').pop()));
+        const backlinkPids = events
+            .filter(e => e.type === 'backlink')
+            .map(e => e.href.split('/').pop());
+        const pids = await privileges.posts.filter(
+            'topics:read',
+            backlinkPids,
+            uid
+        );
+        events = events.filter(
+            e => e.type !== 'backlink' || pids.includes(e.href.split('/').pop())
+        );
     }
 
     // Remove events whose types no longer exist (e.g. plugin uninstalled)
@@ -148,11 +181,16 @@ async function modifyEvent({ tid, uid, eventIds, timestamps, events }) {
         event.timestamp = timestamps[idx];
         event.timestampISO = new Date(timestamps[idx]).toISOString();
         if (event.hasOwnProperty('uid')) {
-            event.user = users.get(event.uid === 'system' ? 'system' : parseInt(event.uid, 10));
+            event.user = users.get(
+                event.uid === 'system' ? 'system' : parseInt(event.uid, 10)
+            );
         }
         if (event.hasOwnProperty('fromCid')) {
             event.fromCategory = fromCategories[event.fromCid];
-            event.text = translator.compile('topic:moved-from-by', event.fromCategory.name);
+            event.text = translator.compile(
+                'topic:moved-from-by',
+                event.fromCategory.name
+            );
         }
 
         Object.assign(event, Events._types[event.type]);
@@ -177,7 +215,10 @@ Events.log = async (tid, payload) => {
 
     const eventId = await db.incrObjectField('global', 'nextTopicEventId');
 
-    await Promise.all([db.setObject(`topicEvent:${eventId}`, payload), db.sortedSetAdd(`topic:${tid}:events`, timestamp, eventId)]);
+    await Promise.all([
+        db.setObject(`topicEvent:${eventId}`, payload),
+        db.sortedSetAdd(`topic:${tid}:events`, timestamp, eventId),
+    ]);
 
     let events = await modifyEvent({
         eventIds: [eventId],
@@ -193,9 +234,15 @@ Events.log = async (tid, payload) => {
 
 Events.purge = async (tid, eventIds = []) => {
     if (eventIds.length) {
-        const isTopicEvent = await db.isSortedSetMembers(`topic:${tid}:events`, eventIds);
+        const isTopicEvent = await db.isSortedSetMembers(
+            `topic:${tid}:events`,
+            eventIds
+        );
         eventIds = eventIds.filter((id, index) => isTopicEvent[index]);
-        await Promise.all([db.sortedSetRemove(`topic:${tid}:events`, eventIds), db.deleteAll(eventIds.map(id => `topicEvent:${id}`))]);
+        await Promise.all([
+            db.sortedSetRemove(`topic:${tid}:events`, eventIds),
+            db.deleteAll(eventIds.map(id => `topicEvent:${id}`)),
+        ]);
     } else {
         const keys = [`topic:${tid}:events`];
         const eventIds = await db.getSortedSetRange(keys[0], 0, -1);

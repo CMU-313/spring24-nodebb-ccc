@@ -1,11 +1,20 @@
 'use strict';
 
-define('topicThumbs', ['api', 'bootbox', 'alerts', 'uploader', 'benchpress', 'translator', 'jquery-ui/widgets/sortable'], function (api, bootbox, alerts, uploader, Benchpress, translator) {
+define('topicThumbs', [
+    'api',
+    'bootbox',
+    'alerts',
+    'uploader',
+    'benchpress',
+    'translator',
+    'jquery-ui/widgets/sortable',
+], function (api, bootbox, alerts, uploader, Benchpress, translator) {
     const Thumbs = {};
 
     Thumbs.get = id => api.get(`/topics/${id}/thumbs`, {});
 
-    Thumbs.getByPid = pid => api.get(`/posts/${pid}`, {}).then(post => Thumbs.get(post.tid));
+    Thumbs.getByPid = pid =>
+        api.get(`/posts/${pid}`, {}).then(post => Thumbs.get(post.tid));
 
     Thumbs.delete = (id, path) =>
         api.del(`/topics/${id}/thumbs`, {
@@ -44,13 +53,17 @@ define('topicThumbs', ['api', 'bootbox', 'alerts', 'uploader', 'benchpress', 'tr
                 .then(
                     results =>
                         new Promise(resolve => {
-                            const thumbs = results.reduce((memo, cur) => memo.concat(cur));
+                            const thumbs = results.reduce((memo, cur) =>
+                                memo.concat(cur)
+                            );
                             numThumbs = thumbs.length;
 
                             resolve(thumbs);
                         })
                 )
-                .then(thumbs => Benchpress.render('modals/topic-thumbs', { thumbs }))
+                .then(thumbs =>
+                    Benchpress.render('modals/topic-thumbs', { thumbs })
+                )
                 .then(html => {
                     if (modal) {
                         translator.translate(html, function (translated) {
@@ -72,7 +85,12 @@ define('topicThumbs', ['api', 'bootbox', 'alerts', 'uploader', 'benchpress', 'tr
                                                 modal,
                                             });
                                             require(['composer'], composer => {
-                                                composer.updateThumbCount(id, $(`[component="composer"][data-uuid="${id}"]`));
+                                                composer.updateThumbCount(
+                                                    id,
+                                                    $(
+                                                        `[component="composer"][data-uuid="${id}"]`
+                                                    )
+                                                );
                                                 resolve();
                                             });
                                         });
@@ -97,21 +115,28 @@ define('topicThumbs', ['api', 'bootbox', 'alerts', 'uploader', 'benchpress', 'tr
 
         modalEl.addEventListener('click', ev => {
             if (ev.target.closest('button[data-action="remove"]')) {
-                bootbox.confirm('[[modules:thumbs.modal.confirm-remove]]', ok => {
-                    if (!ok) {
-                        return;
-                    }
+                bootbox.confirm(
+                    '[[modules:thumbs.modal.confirm-remove]]',
+                    ok => {
+                        if (!ok) {
+                            return;
+                        }
 
-                    const id = ev.target.closest('.media[data-id]').getAttribute('data-id');
-                    const path = ev.target.closest('.media[data-path]').getAttribute('data-path');
-                    api.del(`/topics/${id}/thumbs`, {
-                        path: path,
-                    })
-                        .then(() => {
-                            Thumbs.modal.open(payload);
+                        const id = ev.target
+                            .closest('.media[data-id]')
+                            .getAttribute('data-id');
+                        const path = ev.target
+                            .closest('.media[data-path]')
+                            .getAttribute('data-path');
+                        api.del(`/topics/${id}/thumbs`, {
+                            path: path,
                         })
-                        .catch(alerts.error);
-                });
+                            .then(() => {
+                                Thumbs.modal.open(payload);
+                            })
+                            .catch(alerts.error);
+                    }
+                );
             }
         });
     };
@@ -133,7 +158,9 @@ define('topicThumbs', ['api', 'bootbox', 'alerts', 'uploader', 'benchpress', 'tr
             let path = el.getAttribute('data-path');
             path = path.replace(new RegExp(`^${config.upload_url}`), '');
 
-            api.put(`/topics/${id}/thumbs/order`, { path, order }).catch(alerts.error);
+            api.put(`/topics/${id}/thumbs/order`, { path, order }).catch(
+                alerts.error
+            );
         });
     };
 

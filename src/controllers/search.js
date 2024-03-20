@@ -28,7 +28,12 @@ searchController.search = async function (req, res, next) {
         'search:tags': privileges.global.can('search:tags', req.uid),
     });
     req.query.in = req.query.in || meta.config.searchDefaultIn || 'titlesposts';
-    let allowed = (req.query.in === 'users' && userPrivileges['search:users']) || (req.query.in === 'tags' && userPrivileges['search:tags']) || req.query.in === 'categories' || (['titles', 'titlesposts', 'posts'].includes(req.query.in) && userPrivileges['search:content']);
+    let allowed =
+        (req.query.in === 'users' && userPrivileges['search:users']) ||
+        (req.query.in === 'tags' && userPrivileges['search:tags']) ||
+        req.query.in === 'categories' ||
+        (['titles', 'titlesposts', 'posts'].includes(req.query.in) &&
+            userPrivileges['search:content']);
     ({ allowed } = await plugins.hooks.fire('filter:search.isAllowed', {
         uid: req.uid,
         query: req.query,
@@ -65,9 +70,17 @@ searchController.search = async function (req, res, next) {
         qs: req.query,
     };
 
-    const [searchData, categoriesData] = await Promise.all([search.search(data), buildCategories(req.uid, searchOnly), recordSearch(data)]);
+    const [searchData, categoriesData] = await Promise.all([
+        search.search(data),
+        buildCategories(req.uid, searchOnly),
+        recordSearch(data),
+    ]);
 
-    searchData.pagination = pagination.create(page, searchData.pageCount, req.query);
+    searchData.pagination = pagination.create(
+        page,
+        searchData.pageCount,
+        req.query
+    );
     searchData.multiplePages = searchData.pageCount > 1;
     searchData.search_query = validator.escape(String(req.query.term || ''));
     searchData.term = req.query.term;
@@ -77,9 +90,14 @@ searchController.search = async function (req, res, next) {
     }
 
     searchData.allCategories = categoriesData;
-    searchData.allCategoriesCount = Math.max(10, Math.min(20, categoriesData.length));
+    searchData.allCategoriesCount = Math.max(
+        10,
+        Math.min(20, categoriesData.length)
+    );
 
-    searchData.breadcrumbs = helpers.buildBreadcrumbs([{ text: '[[global:search]]' }]);
+    searchData.breadcrumbs = helpers.buildBreadcrumbs([
+        { text: '[[global:search]]' },
+    ]);
     searchData.expandSearch = !req.query.term;
 
     searchData.showAsPosts = !req.query.showAs || req.query.showAs === 'posts';
@@ -99,7 +117,10 @@ async function recordSearch(data) {
     const { query, searchIn } = data;
     if (query) {
         const cleanedQuery = String(query).trim().toLowerCase().slice(0, 255);
-        if (['titles', 'titlesposts', 'posts'].includes(searchIn) && cleanedQuery.length > 2) {
+        if (
+            ['titles', 'titlesposts', 'posts'].includes(searchIn) &&
+            cleanedQuery.length > 2
+        ) {
             searches[data.uid] = searches[data.uid] || {
                 timeoutId: 0,
                 queries: [],
@@ -111,9 +132,20 @@ async function recordSearch(data) {
             searches[data.uid].timeoutId = setTimeout(async () => {
                 if (searches[data.uid] && searches[data.uid].queries) {
                     const copy = searches[data.uid].queries.slice();
-                    const filtered = searches[data.uid].queries.filter(q => !copy.find(query => query.startsWith(q) && query.length > q.length));
+                    const filtered = searches[data.uid].queries.filter(
+                        q =>
+                            !copy.find(
+                                query =>
+                                    query.startsWith(q) &&
+                                    query.length > q.length
+                            )
+                    );
                     delete searches[data.uid];
-                    await Promise.all(filtered.map(query => db.sortedSetIncrBy('searches:all', 1, query)));
+                    await Promise.all(
+                        filtered.map(query =>
+                            db.sortedSetIncrBy('searches:all', 1, query)
+                        )
+                    );
                 }
             }, 5000);
         }
@@ -125,11 +157,20 @@ async function buildCategories(uid, searchOnly) {
         return [];
     }
 
-    const cids = await categories.getCidsByPrivilege('categories:cid', uid, 'read');
+    const cids = await categories.getCidsByPrivilege(
+        'categories:cid',
+        uid,
+        'read'
+    );
     let categoriesData = await categories.getCategoriesData(cids);
-    categoriesData = categoriesData.filter(category => category && !category.link);
+    categoriesData = categoriesData.filter(
+        category => category && !category.link
+    );
     categoriesData = categories.getTree(categoriesData);
-    categoriesData = categories.buildForSelectCategories(categoriesData, ['text', 'value']);
+    categoriesData = categories.buildForSelectCategories(categoriesData, [
+        'text',
+        'value',
+    ]);
 
     return [
         { value: 'all', text: '[[unread:all_categories]]' },

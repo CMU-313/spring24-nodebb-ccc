@@ -15,21 +15,42 @@ const helpers = require('./helpers');
 const tagsController = module.exports;
 
 tagsController.getTag = async function (req, res) {
-    const tag = validator.escape(utils.cleanUpTag(req.params.tag, meta.config.maximumTagLength));
+    const tag = validator.escape(
+        utils.cleanUpTag(req.params.tag, meta.config.maximumTagLength)
+    );
     const page = parseInt(req.query.page, 10) || 1;
-    const cid = Array.isArray(req.query.cid) || !req.query.cid ? req.query.cid : [req.query.cid];
+    const cid =
+        Array.isArray(req.query.cid) || !req.query.cid
+            ? req.query.cid
+            : [req.query.cid];
 
     const templateData = {
         topics: [],
         tag: tag,
-        breadcrumbs: helpers.buildBreadcrumbs([{ text: '[[tags:tags]]', url: '/tags' }, { text: tag }]),
+        breadcrumbs: helpers.buildBreadcrumbs([
+            { text: '[[tags:tags]]', url: '/tags' },
+            { text: tag },
+        ]),
         title: `[[pages:tag, ${tag}]]`,
     };
-    const [settings, cids, categoryData, isPrivileged] = await Promise.all([user.getSettings(req.uid), cid || categories.getCidsByPrivilege('categories:cid', req.uid, 'topics:read'), helpers.getSelectedCategory(cid), user.isPrivileged(req.uid)]);
+    const [settings, cids, categoryData, isPrivileged] = await Promise.all([
+        user.getSettings(req.uid),
+        cid ||
+            categories.getCidsByPrivilege(
+                'categories:cid',
+                req.uid,
+                'topics:read'
+            ),
+        helpers.getSelectedCategory(cid),
+        user.isPrivileged(req.uid),
+    ]);
     const start = Math.max(0, (page - 1) * settings.topicsPerPage);
     const stop = start + settings.topicsPerPage - 1;
 
-    const [topicCount, tids] = await Promise.all([topics.getTagTopicCount(tag, cids), topics.getTagTidsByCids(tag, cids, start, stop)]);
+    const [topicCount, tids] = await Promise.all([
+        topics.getTagTopicCount(tag, cids),
+        topics.getTagTidsByCids(tag, cids, start, stop),
+    ]);
 
     templateData.topics = await topics.getTopics(tids, req.uid);
     templateData.showSelect = isPrivileged;
@@ -49,7 +70,10 @@ tagsController.getTag = async function (req, res) {
         },
     ];
 
-    const pageCount = Math.max(1, Math.ceil(topicCount / settings.topicsPerPage));
+    const pageCount = Math.max(
+        1,
+        Math.ceil(topicCount / settings.topicsPerPage)
+    );
     templateData.pagination = pagination.create(page, pageCount, req.query);
     helpers.addLinkTags({
         url: `tags/${tag}`,
@@ -63,8 +87,15 @@ tagsController.getTag = async function (req, res) {
 };
 
 tagsController.getTags = async function (req, res) {
-    const cids = await categories.getCidsByPrivilege('categories:cid', req.uid, 'topics:read');
-    const [canSearch, tags] = await Promise.all([privileges.global.can('search:tags', req.uid), topics.getCategoryTagsData(cids, 0, 99)]);
+    const cids = await categories.getCidsByPrivilege(
+        'categories:cid',
+        req.uid,
+        'topics:read'
+    );
+    const [canSearch, tags] = await Promise.all([
+        privileges.global.can('search:tags', req.uid),
+        topics.getCategoryTagsData(cids, 0, 99),
+    ]);
 
     res.render('tags', {
         tags: tags.filter(Boolean),

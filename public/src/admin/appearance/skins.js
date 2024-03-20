@@ -1,6 +1,9 @@
 'use strict';
 
-define('admin/appearance/skins', ['translator', 'alerts'], function (translator, alerts) {
+define('admin/appearance/skins', ['translator', 'alerts'], function (
+    translator,
+    alerts
+) {
     const Skins = {};
 
     Skins.init = function () {
@@ -42,7 +45,11 @@ define('admin/appearance/skins', ['translator', 'alerts'], function (translator,
                             alert_id: 'admin:theme',
                             type: 'info',
                             title: '[[admin/appearance/skins:skin-updated]]',
-                            message: themeId ? '[[admin/appearance/skins:applied-success, ' + themeId + ']]' : '[[admin/appearance/skins:revert-success]]',
+                            message: themeId
+                                ? '[[admin/appearance/skins:applied-success, ' +
+                                  themeId +
+                                  ']]'
+                                : '[[admin/appearance/skins:revert-success]]',
                             timeout: 5000,
                         });
                     }
@@ -75,9 +82,11 @@ define('admin/appearance/skins', ['translator', 'alerts'], function (translator,
                 themeContainer.html(html);
 
                 if (config['theme:src']) {
-                    const skin = config['theme:src'].match(/latest\/(\S+)\/bootstrap.min.css/)[1].replace(/(^|\s)([a-z])/g, function (m, p1, p2) {
-                        return p1 + p2.toUpperCase();
-                    });
+                    const skin = config['theme:src']
+                        .match(/latest\/(\S+)\/bootstrap.min.css/)[1]
+                        .replace(/(^|\s)([a-z])/g, function (m, p1, p2) {
+                            return p1 + p2.toUpperCase();
+                        });
 
                     highlightSelectedTheme(skin);
                 }
@@ -86,31 +95,39 @@ define('admin/appearance/skins', ['translator', 'alerts'], function (translator,
     };
 
     function highlightSelectedTheme(themeId) {
-        translator.translate('[[admin/appearance/skins:select-skin]]  ||  [[admin/appearance/skins:current-skin]]', function (text) {
-            text = text.split('  ||  ');
-            const select = text[0];
-            const current = text[1];
+        translator.translate(
+            '[[admin/appearance/skins:select-skin]]  ||  [[admin/appearance/skins:current-skin]]',
+            function (text) {
+                text = text.split('  ||  ');
+                const select = text[0];
+                const current = text[1];
 
-            $('[data-theme]')
-                .removeClass('selected')
-                .find('[data-action="use"]')
-                .each(function () {
-                    if ($(this).parents('[data-theme]').attr('data-theme')) {
-                        $(this).html(select).removeClass('btn-success').addClass('btn-primary');
-                    }
-                });
+                $('[data-theme]')
+                    .removeClass('selected')
+                    .find('[data-action="use"]')
+                    .each(function () {
+                        if (
+                            $(this).parents('[data-theme]').attr('data-theme')
+                        ) {
+                            $(this)
+                                .html(select)
+                                .removeClass('btn-success')
+                                .addClass('btn-primary');
+                        }
+                    });
 
-            if (!themeId) {
-                return;
+                if (!themeId) {
+                    return;
+                }
+
+                $('[data-theme="' + themeId + '"]')
+                    .addClass('selected')
+                    .find('[data-action="use"]')
+                    .html(current)
+                    .removeClass('btn-primary')
+                    .addClass('btn-success');
             }
-
-            $('[data-theme="' + themeId + '"]')
-                .addClass('selected')
-                .find('[data-action="use"]')
-                .html(current)
-                .removeClass('btn-primary')
-                .addClass('btn-success');
-        });
+        );
     }
 
     return Skins;

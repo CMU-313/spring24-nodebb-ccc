@@ -1,6 +1,10 @@
 'use strict';
 
-define('admin/manage/tags', ['bootbox', 'alerts', 'admin/modules/selectable'], function (bootbox, alerts, selectable) {
+define('admin/manage/tags', [
+    'bootbox',
+    'alerts',
+    'admin/modules/selectable',
+], function (bootbox, alerts, selectable) {
     const Tags = {};
 
     Tags.init = function () {
@@ -73,8 +77,13 @@ define('admin/manage/tags', ['bootbox', 'alerts', 'admin/modules/selectable'], f
                             },
                             function (html) {
                                 $('.tag-list').html(html);
-                                utils.makeNumbersHumanReadable(html.find('.human-readable-number'));
-                                selectable.enable('.tag-management', '.tag-row');
+                                utils.makeNumbersHumanReadable(
+                                    html.find('.human-readable-number')
+                                );
+                                selectable.enable(
+                                    '.tag-management',
+                                    '.tag-row'
+                                );
                             }
                         );
                     }
@@ -103,17 +112,25 @@ define('admin/manage/tags', ['bootbox', 'alerts', 'admin/modules/selectable'], f
                                 tag = $(tag);
                                 data.push({
                                     value: tag.attr('data-tag'),
-                                    newName: modal.find('[data-name="value"]').val(),
+                                    newName: modal
+                                        .find('[data-name="value"]')
+                                        .val(),
                                 });
                             });
 
-                            socket.emit('admin.tags.rename', data, function (err) {
-                                if (err) {
-                                    return alerts.error(err);
+                            socket.emit(
+                                'admin.tags.rename',
+                                data,
+                                function (err) {
+                                    if (err) {
+                                        return alerts.error(err);
+                                    }
+                                    alerts.success(
+                                        '[[admin/manage/tags:alerts.update-success]]'
+                                    );
+                                    ajaxify.refresh();
                                 }
-                                alerts.success('[[admin/manage/tags:alerts.update-success]]');
-                                ajaxify.refresh();
-                            });
+                            );
                         },
                     },
                 },
@@ -128,27 +145,30 @@ define('admin/manage/tags', ['bootbox', 'alerts', 'admin/modules/selectable'], f
                 return;
             }
 
-            bootbox.confirm('[[admin/manage/tags:alerts.confirm-delete]]', function (confirm) {
-                if (!confirm) {
-                    return;
-                }
-                const tags = [];
-                tagsToDelete.each(function (index, el) {
-                    tags.push($(el).attr('data-tag'));
-                });
-                socket.emit(
-                    'admin.tags.deleteTags',
-                    {
-                        tags: tags,
-                    },
-                    function (err) {
-                        if (err) {
-                            return alerts.error(err);
-                        }
-                        tagsToDelete.remove();
+            bootbox.confirm(
+                '[[admin/manage/tags:alerts.confirm-delete]]',
+                function (confirm) {
+                    if (!confirm) {
+                        return;
                     }
-                );
-            });
+                    const tags = [];
+                    tagsToDelete.each(function (index, el) {
+                        tags.push($(el).attr('data-tag'));
+                    });
+                    socket.emit(
+                        'admin.tags.deleteTags',
+                        {
+                            tags: tags,
+                        },
+                        function (err) {
+                            if (err) {
+                                return alerts.error(err);
+                            }
+                            tagsToDelete.remove();
+                        }
+                    );
+                }
+            );
         });
     }
 

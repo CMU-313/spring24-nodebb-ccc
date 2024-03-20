@@ -1,6 +1,30 @@
 'use strict';
 
-define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'components', 'coverPhoto', 'pictureCropper', 'translator', 'api', 'slugify', 'categorySelector', 'bootbox', 'alerts'], function (memberList, iconSelect, components, coverPhoto, pictureCropper, translator, api, slugify, categorySelector, bootbox, alerts) {
+define('forum/groups/details', [
+    'forum/groups/memberlist',
+    'iconSelect',
+    'components',
+    'coverPhoto',
+    'pictureCropper',
+    'translator',
+    'api',
+    'slugify',
+    'categorySelector',
+    'bootbox',
+    'alerts',
+], function (
+    memberList,
+    iconSelect,
+    components,
+    coverPhoto,
+    pictureCropper,
+    translator,
+    api,
+    slugify,
+    categorySelector,
+    bootbox,
+    alerts
+) {
     const Details = {};
     let groupName;
 
@@ -37,8 +61,19 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
                             paramValue: groupName,
                         },
                         function (imageUrlOnServer) {
-                            imageUrlOnServer = (!imageUrlOnServer.startsWith('http') ? config.relative_path : '') + imageUrlOnServer + '?' + Date.now();
-                            components.get('groups/cover').css('background-image', 'url(' + imageUrlOnServer + ')');
+                            imageUrlOnServer =
+                                (!imageUrlOnServer.startsWith('http')
+                                    ? config.relative_path
+                                    : '') +
+                                imageUrlOnServer +
+                                '?' +
+                                Date.now();
+                            components
+                                .get('groups/cover')
+                                .css(
+                                    'background-image',
+                                    'url(' + imageUrlOnServer + ')'
+                                );
                         }
                     );
                 },
@@ -50,7 +85,10 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
 
         handleMemberInvitations();
 
-        components.get('groups/activity').find('.content img:not(.not-responsive)').addClass('img-responsive');
+        components
+            .get('groups/activity')
+            .find('.content img:not(.not-responsive)')
+            .addClass('img-responsive');
 
         detailsPage.on('click', '[data-action]', function () {
             const btnEl = $(this);
@@ -62,7 +100,10 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
 
             switch (action) {
                 case 'toggleOwnership':
-                    api[isOwner ? 'del' : 'put'](`/groups/${ajaxify.data.group.slug}/ownership/${uid}`, {})
+                    api[isOwner ? 'del' : 'put'](
+                        `/groups/${ajaxify.data.group.slug}/ownership/${uid}`,
+                        {}
+                    )
                         .then(() => {
                             ownerFlagEl.toggleClass('invisible');
                         })
@@ -70,17 +111,23 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
                     break;
 
                 case 'kick':
-                    translator.translate('[[groups:details.kick_confirm]]', function (translated) {
-                        bootbox.confirm(translated, function (confirm) {
-                            if (!confirm) {
-                                return;
-                            }
+                    translator.translate(
+                        '[[groups:details.kick_confirm]]',
+                        function (translated) {
+                            bootbox.confirm(translated, function (confirm) {
+                                if (!confirm) {
+                                    return;
+                                }
 
-                            api.del(`/groups/${ajaxify.data.group.slug}/membership/${uid}`, undefined)
-                                .then(() => userRow.slideUp().remove())
-                                .catch(alerts.error);
-                        });
-                    });
+                                api.del(
+                                    `/groups/${ajaxify.data.group.slug}/membership/${uid}`,
+                                    undefined
+                                )
+                                    .then(() => userRow.slideUp().remove())
+                                    .catch(alerts.error);
+                            });
+                        }
+                    );
                     break;
 
                 case 'update':
@@ -92,13 +139,25 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
                     break;
 
                 case 'join':
-                    api.put('/groups/' + ajaxify.data.group.slug + '/membership/' + (uid || app.user.uid), undefined)
+                    api.put(
+                        '/groups/' +
+                            ajaxify.data.group.slug +
+                            '/membership/' +
+                            (uid || app.user.uid),
+                        undefined
+                    )
                         .then(() => ajaxify.refresh())
                         .catch(alerts.error);
                     break;
 
                 case 'leave':
-                    api.del('/groups/' + ajaxify.data.group.slug + '/membership/' + (uid || app.user.uid), undefined)
+                    api.del(
+                        '/groups/' +
+                            ajaxify.data.group.slug +
+                            '/membership/' +
+                            (uid || app.user.uid),
+                        undefined
+                    )
                         .then(() => ajaxify.refresh())
                         .catch(alerts.error);
                     break;
@@ -140,7 +199,9 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
         const previewElText = settingsFormEl.find('.label-text');
         const previewIcon = previewEl.find('i');
         const userTitleEl = settingsFormEl.find('[name="userTitle"]');
-        const userTitleEnabledEl = settingsFormEl.find('[name="userTitleEnabled"]');
+        const userTitleEnabledEl = settingsFormEl.find(
+            '[name="userTitleEnabled"]'
+        );
         const iconValueEl = settingsFormEl.find('[name="icon"]');
 
         labelColorValueEl.on('input', function () {
@@ -160,7 +221,9 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
 
         // If the user title changes, update that too
         userTitleEl.on('keyup', function () {
-            previewElText.translateText(this.value || settingsFormEl.find('#name').val());
+            previewElText.translateText(
+                this.value || settingsFormEl.find('#name').val()
+            );
         });
 
         // Disable user title customisation options if the the user title itself is disabled
@@ -176,15 +239,22 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
             }
         });
 
-        const cidSelector = categorySelector.init($('.member-post-cids-selector [component="category-selector"]'), {
-            onSelect: function (selectedCategory) {
-                let cids = ($('#memberPostCids').val() || '').split(',').map(cid => parseInt(cid, 10));
-                cids.push(selectedCategory.cid);
-                cids = cids.filter((cid, index, array) => array.indexOf(cid) === index);
-                $('#memberPostCids').val(cids.join(','));
-                cidSelector.selectCategory(0);
-            },
-        });
+        const cidSelector = categorySelector.init(
+            $('.member-post-cids-selector [component="category-selector"]'),
+            {
+                onSelect: function (selectedCategory) {
+                    let cids = ($('#memberPostCids').val() || '')
+                        .split(',')
+                        .map(cid => parseInt(cid, 10));
+                    cids.push(selectedCategory.cid);
+                    cids = cids.filter(
+                        (cid, index, array) => array.indexOf(cid) === index
+                    );
+                    $('#memberPostCids').val(cids.join(','));
+                    cidSelector.selectCategory(0);
+                },
+            }
+        );
     };
 
     Details.update = function () {
@@ -211,7 +281,10 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
                 .then(() => {
                     if (settings.name) {
                         let pathname = window.location.pathname;
-                        pathname = pathname.slice(1, pathname.lastIndexOf('/') + 1);
+                        pathname = pathname.slice(
+                            1,
+                            pathname.lastIndexOf('/') + 1
+                        );
                         ajaxify.go(pathname + slugify(settings.name));
                     } else {
                         ajaxify.refresh();
@@ -224,20 +297,34 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
     };
 
     Details.deleteGroup = function () {
-        bootbox.confirm('Are you sure you want to delete the group: ' + utils.escapeHTML(groupName), function (confirm) {
-            if (confirm) {
-                bootbox.prompt('Please enter the name of this group in order to delete it:', function (response) {
-                    if (response === groupName) {
-                        api.del(`/groups/${ajaxify.data.group.slug}`, {})
-                            .then(() => {
-                                alerts.success('[[groups:event.deleted, ' + utils.escapeHTML(groupName) + ']]');
-                                ajaxify.go('groups');
-                            })
-                            .catch(alerts.error);
-                    }
-                });
+        bootbox.confirm(
+            'Are you sure you want to delete the group: ' +
+                utils.escapeHTML(groupName),
+            function (confirm) {
+                if (confirm) {
+                    bootbox.prompt(
+                        'Please enter the name of this group in order to delete it:',
+                        function (response) {
+                            if (response === groupName) {
+                                api.del(
+                                    `/groups/${ajaxify.data.group.slug}`,
+                                    {}
+                                )
+                                    .then(() => {
+                                        alerts.success(
+                                            '[[groups:event.deleted, ' +
+                                                utils.escapeHTML(groupName) +
+                                                ']]'
+                                        );
+                                        ajaxify.go('groups');
+                                    })
+                                    .catch(alerts.error);
+                            }
+                        }
+                    );
+                }
             }
-        });
+        );
     };
 
     function handleMemberInvitations() {
@@ -264,50 +351,58 @@ define('forum/groups/details', ['forum/groups/memberlist', 'iconSelect', 'compon
             });
         });
 
-        $('[component="groups/members/bulk-invite-button"]').on('click', function () {
-            const usernames = $('[component="groups/members/bulk-invite"]').val();
-            if (!usernames) {
-                return false;
-            }
-            socket.emit(
-                'groups.issueMassInvite',
-                {
-                    usernames: usernames,
-                    groupName: ajaxify.data.group.name,
-                },
-                function (err) {
-                    if (err) {
-                        return alerts.error(err);
-                    }
-                    ajaxify.refresh();
+        $('[component="groups/members/bulk-invite-button"]').on(
+            'click',
+            function () {
+                const usernames = $(
+                    '[component="groups/members/bulk-invite"]'
+                ).val();
+                if (!usernames) {
+                    return false;
                 }
-            );
-            return false;
-        });
-    }
-
-    function removeCover() {
-        translator.translate('[[groups:remove_group_cover_confirm]]', function (translated) {
-            bootbox.confirm(translated, function (confirm) {
-                if (!confirm) {
-                    return;
-                }
-
                 socket.emit(
-                    'groups.cover.remove',
+                    'groups.issueMassInvite',
                     {
+                        usernames: usernames,
                         groupName: ajaxify.data.group.name,
                     },
                     function (err) {
-                        if (!err) {
-                            ajaxify.refresh();
-                        } else {
-                            alerts.error(err);
+                        if (err) {
+                            return alerts.error(err);
                         }
+                        ajaxify.refresh();
                     }
                 );
-            });
-        });
+                return false;
+            }
+        );
+    }
+
+    function removeCover() {
+        translator.translate(
+            '[[groups:remove_group_cover_confirm]]',
+            function (translated) {
+                bootbox.confirm(translated, function (confirm) {
+                    if (!confirm) {
+                        return;
+                    }
+
+                    socket.emit(
+                        'groups.cover.remove',
+                        {
+                            groupName: ajaxify.data.group.name,
+                        },
+                        function (err) {
+                            if (!err) {
+                                ajaxify.refresh();
+                            } else {
+                                alerts.error(err);
+                            }
+                        }
+                    );
+                });
+            }
+        );
     }
 
     return Details;

@@ -82,7 +82,9 @@ module.exports = function (module) {
             return [];
         }
 
-        const simple = params.weights.filter(w => w === 1).length === 1 && params.limit !== 0;
+        const simple =
+            params.weights.filter(w => w === 1).length === 1 &&
+            params.limit !== 0;
         if (params.counts.minCount < 25000 && simple) {
             return await intersectSingle(params);
         } else if (simple) {
@@ -112,7 +114,9 @@ module.exports = function (module) {
         if (params.withScores) {
             project.score = 1;
         }
-        const otherSets = params.sets.filter(s => s !== params.counts.smallestSet);
+        const otherSets = params.sets.filter(
+            s => s !== params.counts.smallestSet
+        );
         // move sortSet to the end of array
         otherSets.push(otherSets.splice(otherSets.indexOf(sortSet), 1)[0]);
         for (let i = 0; i < otherSets.length; i++) {
@@ -124,7 +128,11 @@ module.exports = function (module) {
             cursor.batchSize(items.length + 1);
             // at the last step sort by sortSet
             if (i === otherSets.length - 1) {
-                cursor.project(project).sort({ score: params.sort }).skip(params.start).limit(params.limit);
+                cursor
+                    .project(project)
+                    .sort({ score: params.sort })
+                    .skip(params.start)
+                    .limit(params.limit);
             } else {
                 cursor.project({ _id: 0, value: 1 });
             }
@@ -143,7 +151,11 @@ module.exports = function (module) {
         }
         const sortSet = params.sets[params.weights.indexOf(1)];
         const batchSize = 10000;
-        const cursor = await module.client.collection('objects').find({ _key: sortSet }, { projection: project }).sort({ score: params.sort }).batchSize(batchSize);
+        const cursor = await module.client
+            .collection('objects')
+            .find({ _key: sortSet }, { projection: project })
+            .sort({ score: params.sort })
+            .batchSize(batchSize);
 
         const otherSets = params.sets.filter(s => s !== sortSet);
         let inters = [];
@@ -178,7 +190,9 @@ module.exports = function (module) {
                     return new Set(data.map(i => i.value));
                 })
             );
-            inters = inters.concat(items.filter(item => members.every(arr => arr.has(item.value))));
+            inters = inters.concat(
+                items.filter(item => members.every(arr => arr.has(item.value)))
+            );
             if (inters.length >= params.stop) {
                 done = true;
                 inters = inters.slice(params.start, params.stop + 1);
@@ -245,7 +259,10 @@ module.exports = function (module) {
         }
         pipeline.push({ $project: project });
 
-        let data = await module.client.collection('objects').aggregate(pipeline).toArray();
+        let data = await module.client
+            .collection('objects')
+            .aggregate(pipeline)
+            .toArray();
         if (!params.withScores) {
             data = data.map(item => item.value);
         }

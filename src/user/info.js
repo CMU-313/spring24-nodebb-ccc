@@ -11,7 +11,11 @@ const utils = require('../utils');
 module.exports = function (User) {
     User.getLatestBanInfo = async function (uid) {
         // Simply retrieves the last record of the user's ban, even if they've been unbanned since then.
-        const record = await db.getSortedSetRevRange(`uid:${uid}:bans:timestamp`, 0, 0);
+        const record = await db.getSortedSetRevRange(
+            `uid:${uid}:bans:timestamp`,
+            0,
+            0
+        );
         if (!record.length) {
             throw new Error('no-ban-info');
         }
@@ -30,7 +34,15 @@ module.exports = function (User) {
     };
 
     User.getModerationHistory = async function (uid) {
-        let [flags, bans, mutes] = await Promise.all([db.getSortedSetRevRangeWithScores(`flags:byTargetUid:${uid}`, 0, 19), db.getSortedSetRevRange(`uid:${uid}:bans:timestamp`, 0, 19), db.getSortedSetRevRange(`uid:${uid}:mutes:timestamp`, 0, 19)]);
+        let [flags, bans, mutes] = await Promise.all([
+            db.getSortedSetRevRangeWithScores(
+                `flags:byTargetUid:${uid}`,
+                0,
+                19
+            ),
+            db.getSortedSetRevRange(`uid:${uid}:bans:timestamp`, 0, 19),
+            db.getSortedSetRevRange(`uid:${uid}:mutes:timestamp`, 0, 19),
+        ]);
 
         // Get pids from flag objects
         const keys = flags.map(flagObj => `flag:${flagObj.value}`);
@@ -48,7 +60,11 @@ module.exports = function (User) {
             return memo;
         }, []);
 
-        [flags, bans, mutes] = await Promise.all([getFlagMetadata(flags), formatBanMuteData(bans, '[[user:info.banned-no-reason]]'), formatBanMuteData(mutes, '[[user:info.muted-no-reason]]')]);
+        [flags, bans, mutes] = await Promise.all([
+            getFlagMetadata(flags),
+            formatBanMuteData(bans, '[[user:info.banned-no-reason]]'),
+            formatBanMuteData(mutes, '[[user:info.muted-no-reason]]'),
+        ]);
 
         return {
             flags: flags,
@@ -93,20 +109,33 @@ module.exports = function (User) {
     async function formatBanMuteData(keys, noReasonLangKey) {
         const data = await db.getObjects(keys);
         const uids = data.map(d => d.fromUid);
-        const usersData = await User.getUsersFields(uids, ['uid', 'username', 'userslug', 'picture']);
+        const usersData = await User.getUsersFields(uids, [
+            'uid',
+            'username',
+            'userslug',
+            'picture',
+        ]);
         return data.map((banObj, index) => {
             banObj.user = usersData[index];
             banObj.until = parseInt(banObj.expire, 10);
             banObj.untilReadable = new Date(banObj.until).toString();
-            banObj.timestampReadable = new Date(parseInt(banObj.timestamp, 10)).toString();
+            banObj.timestampReadable = new Date(
+                parseInt(banObj.timestamp, 10)
+            ).toString();
             banObj.timestampISO = utils.toISOString(banObj.timestamp);
-            banObj.reason = validator.escape(String(banObj.reason || '')) || noReasonLangKey;
+            banObj.reason =
+                validator.escape(String(banObj.reason || '')) ||
+                noReasonLangKey;
             return banObj;
         });
     }
 
     User.getModerationNotes = async function (uid, start, stop) {
-        const noteIds = await db.getSortedSetRevRange(`uid:${uid}:moderation:notes`, start, stop);
+        const noteIds = await db.getSortedSetRevRange(
+            `uid:${uid}:moderation:notes`,
+            start,
+            stop
+        );
         const keys = noteIds.map(id => `uid:${uid}:moderation:note:${id}`);
         const notes = await db.getObjects(keys);
         const uids = [];
@@ -120,7 +149,12 @@ module.exports = function (User) {
             return note;
         });
 
-        const userData = await User.getUsersFields(uids, ['uid', 'username', 'userslug', 'picture']);
+        const userData = await User.getUsersFields(uids, [
+            'uid',
+            'username',
+            'userslug',
+            'picture',
+        ]);
         noteData.forEach((note, index) => {
             if (note) {
                 note.user = userData[index];
@@ -130,7 +164,14 @@ module.exports = function (User) {
     };
 
     User.appendModerationNote = async ({ uid, noteData }) => {
-        await db.sortedSetAdd(`uid:${uid}:moderation:notes`, noteData.timestamp, noteData.timestamp);
-        await db.setObject(`uid:${uid}:moderation:note:${noteData.timestamp}`, noteData);
+        await db.sortedSetAdd(
+            `uid:${uid}:moderation:notes`,
+            noteData.timestamp,
+            noteData.timestamp
+        );
+        await db.setObject(
+            `uid:${uid}:moderation:note:${noteData.timestamp}`,
+            noteData
+        );
     };
 };

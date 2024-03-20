@@ -67,7 +67,9 @@ module.exports = function (Posts) {
 
         const isReacting = true;
 
-        const [postData] = await Promise.all([Posts.getPostFields(pid, ['pid', 'uid', 'reactions'])]);
+        const [postData] = await Promise.all([
+            Posts.getPostFields(pid, ['pid', 'uid', 'reactions']),
+        ]);
         console.log('setting post fields!');
         console.log(`postData: ${postData}`);
         await Posts.setPostField(pid, 'reactions', postData.reactions + 1);

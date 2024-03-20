@@ -284,7 +284,8 @@ const utils = {
             })
             .replace(/&([^;\W]+;?)/g, function (m, e) {
                 const ee = e.replace(/;$/, '');
-                const target = HTMLEntities[e] || (e.match(/;$/) && HTMLEntities[ee]);
+                const target =
+                    HTMLEntities[e] || (e.match(/;$/) && HTMLEntities[ee]);
 
                 if (typeof target === 'number') {
                     return String.fromCharCode(target);
@@ -298,7 +299,15 @@ const utils = {
     // https://github.com/jprichardson/string.js/blob/master/lib/string.js
     stripHTMLTags: function (str, tags) {
         const pattern = (tags || ['']).join('|');
-        return String(str).replace(new RegExp('<(\\/)?(' + (pattern || '[^\\s>]+') + ')(\\s+[^<>]*?)?\\s*(\\/)?>', 'gi'), '');
+        return String(str).replace(
+            new RegExp(
+                '<(\\/)?(' +
+                    (pattern || '[^\\s>]+') +
+                    ')(\\s+[^<>]*?)?\\s*(\\/)?>',
+                'gi'
+            ),
+            ''
+        );
     },
 
     cleanUpTag: function (tag, maxLength) {
@@ -323,11 +332,21 @@ const utils = {
     },
 
     isEmailValid: function (email) {
-        return typeof email === 'string' && email.length && email.indexOf('@') !== -1 && email.indexOf(',') === -1 && email.indexOf(';') === -1;
+        return (
+            typeof email === 'string' &&
+            email.length &&
+            email.indexOf('@') !== -1 &&
+            email.indexOf(',') === -1 &&
+            email.indexOf(';') === -1
+        );
     },
 
     isUserNameValid: function (name) {
-        return name && name !== '' && /^['" \-+.*[\]0-9\u00BF-\u1FFF\u2C00-\uD7FF\w]+$/.test(name);
+        return (
+            name &&
+            name !== '' &&
+            /^['" \-+.*[\]0-9\u00BF-\u1FFF\u2C00-\uD7FF\w]+$/.test(name)
+        );
     },
 
     isPasswordValid: function (password) {
@@ -403,7 +422,9 @@ const utils = {
     },
 
     extensionToMimeType: function (extension) {
-        return utils.extensionMimeTypeMap.hasOwnProperty(extension) ? utils.extensionMimeTypeMap[extension] : '*';
+        return utils.extensionMimeTypeMap.hasOwnProperty(extension)
+            ? utils.extensionMimeTypeMap[extension]
+            : '*';
     },
 
     isPromise: function (object) {
@@ -596,7 +617,121 @@ const utils = {
         'wbr',
     ],
 
-    stripTags: ['abbr', 'acronym', 'address', 'applet', 'area', 'article', 'aside', 'audio', 'base', 'basefont', 'bdi', 'bdo', 'big', 'blink', 'body', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'command', 'datalist', 'dd', 'del', 'details', 'dfn', 'dialog', 'dir', 'div', 'dl', 'dt', 'em', 'embed', 'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'frame', 'frameset', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hr', 'html', 'iframe', 'input', 'ins', 'kbd', 'keygen', 'label', 'legend', 'li', 'link', 'map', 'mark', 'marquee', 'menu', 'meta', 'meter', 'nav', 'noframes', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output', 'param', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'script', 'section', 'select', 'source', 'span', 'strike', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'track', 'tt', 'u', 'ul', 'const', 'video', 'wbr'],
+    stripTags: [
+        'abbr',
+        'acronym',
+        'address',
+        'applet',
+        'area',
+        'article',
+        'aside',
+        'audio',
+        'base',
+        'basefont',
+        'bdi',
+        'bdo',
+        'big',
+        'blink',
+        'body',
+        'button',
+        'canvas',
+        'caption',
+        'center',
+        'cite',
+        'code',
+        'col',
+        'colgroup',
+        'command',
+        'datalist',
+        'dd',
+        'del',
+        'details',
+        'dfn',
+        'dialog',
+        'dir',
+        'div',
+        'dl',
+        'dt',
+        'em',
+        'embed',
+        'fieldset',
+        'figcaption',
+        'figure',
+        'font',
+        'footer',
+        'form',
+        'frame',
+        'frameset',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'head',
+        'header',
+        'hr',
+        'html',
+        'iframe',
+        'input',
+        'ins',
+        'kbd',
+        'keygen',
+        'label',
+        'legend',
+        'li',
+        'link',
+        'map',
+        'mark',
+        'marquee',
+        'menu',
+        'meta',
+        'meter',
+        'nav',
+        'noframes',
+        'noscript',
+        'object',
+        'ol',
+        'optgroup',
+        'option',
+        'output',
+        'param',
+        'pre',
+        'progress',
+        'q',
+        'rp',
+        'rt',
+        'ruby',
+        's',
+        'samp',
+        'script',
+        'section',
+        'select',
+        'source',
+        'span',
+        'strike',
+        'style',
+        'sub',
+        'summary',
+        'sup',
+        'table',
+        'tbody',
+        'td',
+        'textarea',
+        'tfoot',
+        'th',
+        'thead',
+        'time',
+        'title',
+        'tr',
+        'track',
+        'tt',
+        'u',
+        'ul',
+        'const',
+        'video',
+        'wbr',
+    ],
 
     escapeRegexChars: function (text) {
         return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -616,7 +751,12 @@ const utils = {
     isAndroidBrowser: function () {
         // http://stackoverflow.com/questions/9286355/how-to-detect-only-the-native-android-browser
         const nua = navigator.userAgent;
-        return nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 && nua.indexOf('AppleWebKit') > -1 && !(nua.indexOf('Chrome') > -1);
+        return (
+            nua.indexOf('Mozilla/5.0') > -1 &&
+            nua.indexOf('Android ') > -1 &&
+            nua.indexOf('AppleWebKit') > -1 &&
+            !(nua.indexOf('Chrome') > -1)
+        );
     },
 
     isTouchDevice: function () {
@@ -662,7 +802,20 @@ const utils = {
 
     getDaysArray: function (from, amount) {
         const currentDay = new Date(parseInt(from, 10) || Date.now()).getTime();
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const months = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+        ];
         const labels = [];
         let tmpDate;
 
@@ -683,7 +836,18 @@ const utils = {
 
         const rect = el.getBoundingClientRect();
 
-        return rect.top >= 0 && rect.left >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) /* or $(window).height() */ && rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */;
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <=
+                (window.innerHeight ||
+                    document.documentElement
+                        .clientHeight) /* or $(window).height() */ &&
+            rect.right <=
+                (window.innerWidth ||
+                    document.documentElement
+                        .clientWidth) /* or $(window).width() */
+        );
     },
 
     // get all the url params in a single key/value hash
@@ -691,7 +855,10 @@ const utils = {
         let url;
         if (options.url && !options.url.startsWith('http')) {
             // relative path passed in
-            options.url = options.url.replace(new RegExp(`/?${config.relative_path.slice(1)}/`, 'g'), '');
+            options.url = options.url.replace(
+                new RegExp(`/?${config.relative_path.slice(1)}/`, 'g'),
+                ''
+            );
             url = new URL(document.location);
             url.pathname = options.url;
         } else {
@@ -799,7 +966,9 @@ const utils = {
                 // Otherwise need to check if protocol and host match
                 targetLocation.protocol === referenceLocation.protocol &&
                 // Subfolder installs need this additional check
-                (relative_path.length > 0 ? targetLocation.pathname.indexOf(relative_path) === 0 : true))
+                (relative_path.length > 0
+                    ? targetLocation.pathname.indexOf(relative_path) === 0
+                    : true))
         );
     },
 

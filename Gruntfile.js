@@ -14,7 +14,10 @@ let worker;
 
 env.NODE_ENV = env.NODE_ENV || 'development';
 
-const configFile = path.resolve(__dirname, nconf.any(['config', 'CONFIG']) || 'config.json');
+const configFile = path.resolve(
+    __dirname,
+    nconf.any(['config', 'CONFIG']) || 'config.json'
+);
 const prestart = require('./src/prestart');
 
 prestart.loadConfig(configFile);
@@ -53,60 +56,121 @@ module.exports = function (grunt) {
         const styleUpdated_Client = pluginList
             .map(p => `node_modules/${p}/*.less`)
             .concat(pluginList.map(p => `node_modules/${p}/*.css`))
-            .concat(pluginList.map(p => `node_modules/${p}/+(public|static|less)/**/*.less`))
-            .concat(pluginList.map(p => `node_modules/${p}/+(public|static)/**/*.css`));
+            .concat(
+                pluginList.map(
+                    p => `node_modules/${p}/+(public|static|less)/**/*.less`
+                )
+            )
+            .concat(
+                pluginList.map(
+                    p => `node_modules/${p}/+(public|static)/**/*.css`
+                )
+            );
 
         const styleUpdated_Admin = pluginList
             .map(p => `node_modules/${p}/*.less`)
             .concat(pluginList.map(p => `node_modules/${p}/*.css`))
-            .concat(pluginList.map(p => `node_modules/${p}/+(public|static|less)/**/*.less`))
-            .concat(pluginList.map(p => `node_modules/${p}/+(public|static)/**/*.css`));
+            .concat(
+                pluginList.map(
+                    p => `node_modules/${p}/+(public|static|less)/**/*.less`
+                )
+            )
+            .concat(
+                pluginList.map(
+                    p => `node_modules/${p}/+(public|static)/**/*.css`
+                )
+            );
 
-        const clientUpdated = pluginList.map(p => `node_modules/${p}/+(public|static)/**/*.js`);
-        const serverUpdated = pluginList.map(p => `node_modules/${p}/*.js`).concat(pluginList.map(p => `node_modules/${p}/+(lib|src)/**/*.js`));
+        const clientUpdated = pluginList.map(
+            p => `node_modules/${p}/+(public|static)/**/*.js`
+        );
+        const serverUpdated = pluginList
+            .map(p => `node_modules/${p}/*.js`)
+            .concat(
+                pluginList.map(p => `node_modules/${p}/+(lib|src)/**/*.js`)
+            );
 
-        const templatesUpdated = pluginList.map(p => `node_modules/${p}/+(public|static|templates)/**/*.tpl`);
-        const langUpdated = pluginList.map(p => `node_modules/${p}/+(public|static|languages)/**/*.json`);
+        const templatesUpdated = pluginList.map(
+            p => `node_modules/${p}/+(public|static|templates)/**/*.tpl`
+        );
+        const langUpdated = pluginList.map(
+            p => `node_modules/${p}/+(public|static|languages)/**/*.json`
+        );
 
         grunt.config(['watch'], {
             styleUpdated_Client: {
-                files: ['public/less/**/*.less', 'themes/**/*.less', ...styleUpdated_Client],
+                files: [
+                    'public/less/**/*.less',
+                    'themes/**/*.less',
+                    ...styleUpdated_Client,
+                ],
                 options: {
                     interval: 1000,
                 },
             },
             styleUpdated_Admin: {
-                files: ['public/less/**/*.less', 'themes/**/*.less', ...styleUpdated_Admin],
+                files: [
+                    'public/less/**/*.less',
+                    'themes/**/*.less',
+                    ...styleUpdated_Admin,
+                ],
                 options: {
                     interval: 1000,
                 },
             },
             clientUpdated: {
-                files: ['public/src/**/*.js', 'public/vendor/**/*.js', ...clientUpdated, 'node_modules/benchpressjs/build/benchpress.js'],
+                files: [
+                    'public/src/**/*.js',
+                    'public/vendor/**/*.js',
+                    ...clientUpdated,
+                    'node_modules/benchpressjs/build/benchpress.js',
+                ],
                 options: {
                     interval: 1000,
                 },
             },
             serverUpdated: {
-                files: ['app.js', 'install/*.js', 'src/**/*.js', 'public/src/modules/translator.common.js', 'public/src/modules/helpers.common.js', 'public/src/utils.common.js', serverUpdated, '!src/upgrades/**'],
+                files: [
+                    'app.js',
+                    'install/*.js',
+                    'src/**/*.js',
+                    'public/src/modules/translator.common.js',
+                    'public/src/modules/helpers.common.js',
+                    'public/src/utils.common.js',
+                    serverUpdated,
+                    '!src/upgrades/**',
+                ],
                 options: {
                     interval: 1000,
                 },
             },
             typescriptUpdated: {
-                files: ['install/*.ts', 'src/**/*.ts', 'public/src/**/*.ts', 'public/vendor/**/*.ts'],
+                files: [
+                    'install/*.ts',
+                    'src/**/*.ts',
+                    'public/src/**/*.ts',
+                    'public/vendor/**/*.ts',
+                ],
                 options: {
                     interval: 1000,
                 },
             },
             templatesUpdated: {
-                files: ['src/views/**/*.tpl', 'themes/**/*.tpl', ...templatesUpdated],
+                files: [
+                    'src/views/**/*.tpl',
+                    'themes/**/*.tpl',
+                    ...templatesUpdated,
+                ],
                 options: {
                     interval: 1000,
                 },
             },
             langUpdated: {
-                files: ['public/language/en-GB/*.json', 'public/language/en-GB/**/*.json', ...langUpdated],
+                files: [
+                    'public/language/en-GB/*.json',
+                    'public/language/en-GB/**/*.json',
+                    ...langUpdated,
+                ],
                 options: {
                     interval: 1000,
                 },
@@ -147,7 +211,10 @@ module.exports = function (grunt) {
             compiling = 'clientCSS';
         } else if (target === 'styleUpdated_Admin') {
             compiling = 'acpCSS';
-        } else if (target === 'clientUpdated' || target === 'typescriptUpdated') {
+        } else if (
+            target === 'clientUpdated' ||
+            target === 'typescriptUpdated'
+        ) {
             compiling = 'js';
         } else if (target === 'templatesUpdated') {
             compiling = 'tpl';
@@ -160,13 +227,17 @@ module.exports = function (grunt) {
             return run();
         }
 
-        require('./src/meta/build').build([compiling], { webpack: false }, err => {
-            if (err) {
-                winston.error(err.stack);
+        require('./src/meta/build').build(
+            [compiling],
+            { webpack: false },
+            err => {
+                if (err) {
+                    winston.error(err.stack);
+                }
+                if (worker) {
+                    worker.send({ compiling: compiling });
+                }
             }
-            if (worker) {
-                worker.send({ compiling: compiling });
-            }
-        });
+        );
     });
 };

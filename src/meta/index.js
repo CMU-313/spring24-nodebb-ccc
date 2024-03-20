@@ -32,7 +32,10 @@ Meta.userOrGroupExists = async function (slug) {
     const user = require('../user');
     const groups = require('../groups');
     slug = slugify(slug);
-    const [userExists, groupExists] = await Promise.all([user.existsBySlug(slug), groups.existsBySlug(slug)]);
+    const [userExists, groupExists] = await Promise.all([
+        user.existsBySlug(slug),
+        groups.existsBySlug(slug),
+    ]);
     return userExists || groupExists;
 };
 
@@ -55,7 +58,9 @@ function restart() {
             action: 'restart',
         });
     } else {
-        winston.error('[meta.restart] Could not restart, are you sure NodeBB was started with `./nodebb start`?');
+        winston.error(
+            '[meta.restart] Could not restart, are you sure NodeBB was started with `./nodebb start`?'
+        );
     }
 }
 

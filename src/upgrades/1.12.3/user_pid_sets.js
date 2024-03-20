@@ -15,15 +15,30 @@ module.exports = {
             'posts:pid',
             async pids => {
                 progress.incr(pids.length);
-                const postData = await posts.getPostsFields(pids, ['pid', 'uid', 'tid', 'upvotes', 'downvotes', 'timestamp']);
+                const postData = await posts.getPostsFields(pids, [
+                    'pid',
+                    'uid',
+                    'tid',
+                    'upvotes',
+                    'downvotes',
+                    'timestamp',
+                ]);
                 const tids = postData.map(p => p.tid);
                 const topicData = await topics.getTopicsFields(tids, ['cid']);
                 const bulk = [];
                 postData.forEach((p, index) => {
                     if (p && p.uid && p.pid && p.tid && p.timestamp) {
-                        bulk.push([`cid:${topicData[index].cid}:uid:${p.uid}:pids`, p.timestamp, p.pid]);
+                        bulk.push([
+                            `cid:${topicData[index].cid}:uid:${p.uid}:pids`,
+                            p.timestamp,
+                            p.pid,
+                        ]);
                         if (p.votes > 0) {
-                            bulk.push([`cid:${topicData[index].cid}:uid:${p.uid}:pids:votes`, p.votes, p.pid]);
+                            bulk.push([
+                                `cid:${topicData[index].cid}:uid:${p.uid}:pids:votes`,
+                                p.votes,
+                                p.pid,
+                            ]);
                         }
                     }
                 });

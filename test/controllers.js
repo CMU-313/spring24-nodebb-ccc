@@ -187,26 +187,34 @@ describe('Controllers', () => {
         });
 
         it('should load category', done => {
-            meta.configs.set('homePageRoute', 'category/1/test-category', err => {
-                assert.ifError(err);
-
-                request(nconf.get('url'), (err, res, body) => {
+            meta.configs.set(
+                'homePageRoute',
+                'category/1/test-category',
+                err => {
                     assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert(body);
-                    done();
-                });
-            });
+
+                    request(nconf.get('url'), (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert(body);
+                        done();
+                    });
+                }
+            );
         });
 
         it('should not load breadcrumbs on home page route', done => {
-            request(`${nconf.get('url')}/api`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                assert(!body.breadcrumbs);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    assert(!body.breadcrumbs);
+                    done();
+                }
+            );
         });
 
         it('should redirect to custom', done => {
@@ -223,30 +231,38 @@ describe('Controllers', () => {
         });
 
         it('should 404 if custom does not exist', done => {
-            meta.configs.set('homePageRoute', 'this-route-does-not-exist', err => {
-                assert.ifError(err);
-
-                request(nconf.get('url'), (err, res, body) => {
+            meta.configs.set(
+                'homePageRoute',
+                'this-route-does-not-exist',
+                err => {
                     assert.ifError(err);
-                    assert.equal(res.statusCode, 404);
-                    assert(body);
-                    done();
-                });
-            });
+
+                    request(nconf.get('url'), (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 404);
+                        assert(body);
+                        done();
+                    });
+                }
+            );
         });
 
         it('api should work with hook', done => {
             meta.configs.set('homePageRoute', 'mycustompage', err => {
                 assert.ifError(err);
 
-                request(`${nconf.get('url')}/api`, { json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert.equal(body.works, true);
-                    assert.equal(body.template.mycustompage, true);
+                request(
+                    `${nconf.get('url')}/api`,
+                    { json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert.equal(body.works, true);
+                        assert.equal(body.template.mycustompage, true);
 
-                    done();
-                });
+                        done();
+                    }
+                );
             });
         });
 
@@ -267,7 +283,11 @@ describe('Controllers', () => {
         });
 
         after(() => {
-            plugins.hooks.unregister('myTestPlugin', 'action:homepage.get:custom', hookMethod);
+            plugins.hooks.unregister(
+                'myTestPlugin',
+                'action:homepage.get:custom',
+                hookMethod
+            );
             fs.unlinkSync(tplPath);
             fs.unlinkSync(tplPath.replace(/\.tpl$/, '.js'));
         });
@@ -341,7 +361,10 @@ describe('Controllers', () => {
                     (err, res, body) => {
                         assert.ifError(err);
                         assert.equal(res.statusCode, 200);
-                        assert.strictEqual(body.next, `${nconf.get('relative_path')}/register/complete`);
+                        assert.strictEqual(
+                            body.next,
+                            `${nconf.get('relative_path')}/register/complete`
+                        );
                         request(
                             `${nconf.get('url')}/api/register/complete`,
                             {
@@ -392,28 +415,37 @@ describe('Controllers', () => {
             });
 
             it('email interstitial should still apply if empty email entered and requireEmailAddress is enabled', async () => {
-                let res = await requestAsync(`${nconf.get('url')}/register/complete`, {
-                    method: 'post',
-                    jar,
-                    json: true,
-                    followRedirect: false,
-                    simple: false,
-                    resolveWithFullResponse: true,
-                    headers: {
-                        'x-csrf-token': token,
-                    },
-                    form: {
-                        email: '',
-                    },
-                });
+                let res = await requestAsync(
+                    `${nconf.get('url')}/register/complete`,
+                    {
+                        method: 'post',
+                        jar,
+                        json: true,
+                        followRedirect: false,
+                        simple: false,
+                        resolveWithFullResponse: true,
+                        headers: {
+                            'x-csrf-token': token,
+                        },
+                        form: {
+                            email: '',
+                        },
+                    }
+                );
 
-                assert.strictEqual(res.headers.location, `${nconf.get('relative_path')}/register/complete`);
+                assert.strictEqual(
+                    res.headers.location,
+                    `${nconf.get('relative_path')}/register/complete`
+                );
 
-                res = await requestAsync(`${nconf.get('url')}/api/register/complete`, {
-                    jar,
-                    json: true,
-                    resolveWithFullResponse: true,
-                });
+                res = await requestAsync(
+                    `${nconf.get('url')}/api/register/complete`,
+                    {
+                        jar,
+                        json: true,
+                        resolveWithFullResponse: true,
+                    }
+                );
                 assert.strictEqual(res.statusCode, 200);
                 assert(res.body.errors.length);
                 assert(res.body.errors.includes('[[error:invalid-email]]'));
@@ -422,14 +454,19 @@ describe('Controllers', () => {
             it('gdpr interstitial should still apply if email requirement is disabled', async () => {
                 meta.config.requireEmailAddress = 0;
 
-                const res = await requestAsync(`${nconf.get('url')}/api/register/complete`, {
-                    jar,
-                    json: true,
-                    resolveWithFullResponse: true,
-                });
+                const res = await requestAsync(
+                    `${nconf.get('url')}/api/register/complete`,
+                    {
+                        jar,
+                        json: true,
+                        resolveWithFullResponse: true,
+                    }
+                );
 
                 assert(!res.body.errors.includes('[[error:invalid-email]]'));
-                assert(!res.body.errors.includes('[[error:gdpr_consent_denied]]'));
+                assert(
+                    !res.body.errors.includes('[[error:gdpr_consent_denied]]')
+                );
             });
 
             it('should error if userData is falsy', async () => {
@@ -449,7 +486,10 @@ describe('Controllers', () => {
                         req: { uid: uid },
                         interstitials: [],
                     });
-                    assert.strictEqual(result.interstitials[0].template, 'partials/email_update');
+                    assert.strictEqual(
+                        result.interstitials[0].template,
+                        'partials/email_update'
+                    );
                     await result.interstitials[0].callback(
                         { uid },
                         {
@@ -521,7 +561,11 @@ describe('Controllers', () => {
 
             it('should remove current email', async () => {
                 const uid = await user.create({ username: 'interstiuser5' });
-                await user.setUserField(uid, 'email', 'interstiuser5@nodebb.org');
+                await user.setUserField(
+                    uid,
+                    'email',
+                    'interstiuser5@nodebb.org'
+                );
                 await user.email.confirmByUid(uid);
 
                 const result = await user.interstitials.email({
@@ -543,9 +587,16 @@ describe('Controllers', () => {
 
             it('should require a password (if one is set) for email change', async () => {
                 try {
-                    const [username, password] = [utils.generateUUID().slice(0, 10), utils.generateUUID()];
+                    const [username, password] = [
+                        utils.generateUUID().slice(0, 10),
+                        utils.generateUUID(),
+                    ];
                     const uid = await user.create({ username, password });
-                    await user.setUserField(uid, 'email', `${username}@nodebb.org`);
+                    await user.setUserField(
+                        uid,
+                        'email',
+                        `${username}@nodebb.org`
+                    );
                     await user.email.confirmByUid(uid);
 
                     const result = await user.interstitials.email({
@@ -561,15 +612,25 @@ describe('Controllers', () => {
                         }
                     );
                 } catch (err) {
-                    assert.strictEqual(err.message, '[[error:invalid-password]]');
+                    assert.strictEqual(
+                        err.message,
+                        '[[error:invalid-password]]'
+                    );
                 }
             });
 
             it('should require a password (if one is set) for email clearing', async () => {
                 try {
-                    const [username, password] = [utils.generateUUID().slice(0, 10), utils.generateUUID()];
+                    const [username, password] = [
+                        utils.generateUUID().slice(0, 10),
+                        utils.generateUUID(),
+                    ];
                     const uid = await user.create({ username, password });
-                    await user.setUserField(uid, 'email', `${username}@nodebb.org`);
+                    await user.setUserField(
+                        uid,
+                        'email',
+                        `${username}@nodebb.org`
+                    );
                     await user.email.confirmByUid(uid);
 
                     const result = await user.interstitials.email({
@@ -585,12 +646,18 @@ describe('Controllers', () => {
                         }
                     );
                 } catch (err) {
-                    assert.strictEqual(err.message, '[[error:invalid-password]]');
+                    assert.strictEqual(
+                        err.message,
+                        '[[error:invalid-password]]'
+                    );
                 }
             });
 
             it('should successfully issue validation request if the correct password is passed in', async () => {
-                const [username, password] = [utils.generateUUID().slice(0, 10), utils.generateUUID()];
+                const [username, password] = [
+                    utils.generateUUID().slice(0, 10),
+                    utils.generateUUID(),
+                ];
                 const uid = await user.create({ username, password });
                 await user.setUserField(uid, 'email', `${username}@nodebb.org`);
                 await user.email.confirmByUid(uid);
@@ -609,7 +676,10 @@ describe('Controllers', () => {
                     }
                 );
 
-                const pending = await user.email.isValidationPending(uid, `${username}@nodebb.com`);
+                const pending = await user.email.isValidationPending(
+                    uid,
+                    `${username}@nodebb.com`
+                );
                 assert.strictEqual(pending, true);
                 await user.setUserField(uid, 'email', `${username}@nodebb.com`);
                 await user.email.confirmByUid(uid);
@@ -633,24 +703,30 @@ describe('Controllers', () => {
             });
 
             it('registration should succeed once gdpr prompts are agreed to', async () => {
-                const res = await requestAsync(`${nconf.get('url')}/register/complete`, {
-                    method: 'post',
-                    jar,
-                    json: true,
-                    followRedirect: false,
-                    simple: false,
-                    resolveWithFullResponse: true,
-                    headers: {
-                        'x-csrf-token': token,
-                    },
-                    form: {
-                        gdpr_agree_data: 'on',
-                        gdpr_agree_email: 'on',
-                    },
-                });
+                const res = await requestAsync(
+                    `${nconf.get('url')}/register/complete`,
+                    {
+                        method: 'post',
+                        jar,
+                        json: true,
+                        followRedirect: false,
+                        simple: false,
+                        resolveWithFullResponse: true,
+                        headers: {
+                            'x-csrf-token': token,
+                        },
+                        form: {
+                            gdpr_agree_data: 'on',
+                            gdpr_agree_email: 'on',
+                        },
+                    }
+                );
 
                 assert.strictEqual(res.statusCode, 302);
-                assert.strictEqual(res.headers.location, `${nconf.get('relative_path')}/`);
+                assert.strictEqual(
+                    res.headers.location,
+                    `${nconf.get('relative_path')}/`
+                );
             });
         });
     });
@@ -665,21 +741,27 @@ describe('Controllers', () => {
     });
 
     it('should load /manifest.webmanifest', done => {
-        request(`${nconf.get('url')}/manifest.webmanifest`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/manifest.webmanifest`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should load /outgoing?url=<url>', done => {
-        request(`${nconf.get('url')}/outgoing?url=http://youtube.com`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/outgoing?url=http://youtube.com`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should 404 on /outgoing with no url', done => {
@@ -692,12 +774,15 @@ describe('Controllers', () => {
     });
 
     it('should 404 on /outgoing with javascript: protocol', done => {
-        request(`${nconf.get('url')}/outgoing?url=javascript:alert(1);`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 404);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/outgoing?url=javascript:alert(1);`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 404);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should 404 on /outgoing with invalid url', done => {
@@ -829,12 +914,15 @@ describe('Controllers', () => {
     });
 
     it('should load category recent posts rss feed', done => {
-        request(`${nconf.get('url')}/category/${cid}/recentposts.rss`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/category/${cid}/recentposts.rss`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should load user topics rss feed', done => {
@@ -892,21 +980,27 @@ describe('Controllers', () => {
     });
 
     it('should load sitemap/categories.xml', done => {
-        request(`${nconf.get('url')}/sitemap/categories.xml`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/sitemap/categories.xml`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should load sitemap/topics/1.xml', done => {
-        request(`${nconf.get('url')}/sitemap/topics.1.xml`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/sitemap/topics.1.xml`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should load robots.txt', done => {
@@ -919,12 +1013,15 @@ describe('Controllers', () => {
     });
 
     it('should load theme screenshot', done => {
-        request(`${nconf.get('url')}/css/previews/nodebb-theme-persona`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/css/previews/nodebb-theme-persona`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should load users page', done => {
@@ -937,33 +1034,47 @@ describe('Controllers', () => {
     });
 
     it('should load users page', done => {
-        request(`${nconf.get('url')}/users?section=online`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/users?section=online`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should error if guests do not have search privilege', done => {
-        request(`${nconf.get('url')}/api/users?query=bar&section=sort-posts`, { json: true }, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 500);
-            assert(body);
-            assert.equal(body.error, '[[error:no-privileges]]');
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/users?query=bar&section=sort-posts`,
+            { json: true },
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 500);
+                assert(body);
+                assert.equal(body.error, '[[error:no-privileges]]');
+                done();
+            }
+        );
     });
 
     it('should load users search page', done => {
         privileges.global.give(['groups:search:users'], 'guests', err => {
             assert.ifError(err);
-            request(`${nconf.get('url')}/users?query=bar&section=sort-posts`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                privileges.global.rescind(['groups:search:users'], 'guests', done);
-            });
+            request(
+                `${nconf.get('url')}/users?query=bar&section=sort-posts`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    privileges.global.rescind(
+                        ['groups:search:users'],
+                        'guests',
+                        done
+                    );
+                }
+            );
         });
     });
 
@@ -996,13 +1107,20 @@ describe('Controllers', () => {
                         },
                         err => {
                             assert.ifError(err);
-                            request(`${nconf.get('url')}/api/groups/group-details`, { json: true }, (err, res, body) => {
-                                assert.ifError(err);
-                                assert.equal(res.statusCode, 200);
-                                assert(body);
-                                assert.equal(body.posts[0].content, 'test topic content');
-                                done();
-                            });
+                            request(
+                                `${nconf.get('url')}/api/groups/group-details`,
+                                { json: true },
+                                (err, res, body) => {
+                                    assert.ifError(err);
+                                    assert.equal(res.statusCode, 200);
+                                    assert(body);
+                                    assert.equal(
+                                        body.posts[0].content,
+                                        'test topic content'
+                                    );
+                                    done();
+                                }
+                            );
                         }
                     );
                 });
@@ -1011,12 +1129,15 @@ describe('Controllers', () => {
     });
 
     it('should load group members page', done => {
-        request(`${nconf.get('url')}/groups/group-details/members`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/groups/group-details/members`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should 404 when trying to load group members of hidden group', done => {
@@ -1029,22 +1150,28 @@ describe('Controllers', () => {
             },
             err => {
                 assert.ifError(err);
-                request(`${nconf.get('url')}/groups/hidden-group/members`, (err, res) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 404);
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/groups/hidden-group/members`,
+                    (err, res) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 404);
+                        done();
+                    }
+                );
             }
         );
     });
 
     it('should get recent posts', done => {
-        request(`${nconf.get('url')}/api/recent/posts/month`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/recent/posts/month`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should get post data', done => {
@@ -1057,21 +1184,27 @@ describe('Controllers', () => {
     });
 
     it('should get topic data', done => {
-        request(`${nconf.get('url')}/api/v3/topics/${tid}`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/v3/topics/${tid}`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     it('should get category data', done => {
-        request(`${nconf.get('url')}/api/v3/categories/${cid}`, (err, res, body) => {
-            assert.ifError(err);
-            assert.equal(res.statusCode, 200);
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/v3/categories/${cid}`,
+            (err, res, body) => {
+                assert.ifError(err);
+                assert.equal(res.statusCode, 200);
+                assert(body);
+                done();
+            }
+        );
     });
 
     describe('revoke session', () => {
@@ -1195,13 +1328,17 @@ describe('Controllers', () => {
         });
 
         it('should return {} if there are no widgets', done => {
-            request(`${nconf.get('url')}/api/category/${cid}`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body.widgets);
-                assert.equal(Object.keys(body.widgets).length, 0);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/category/${cid}`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body.widgets);
+                    assert.equal(Object.keys(body.widgets).length, 0);
+                    done();
+                }
+            );
         });
 
         it('should render templates', done => {
@@ -1219,13 +1356,17 @@ describe('Controllers', () => {
         it('should reset templates', done => {
             widgets.resetTemplates(['categories', 'category'], err => {
                 assert.ifError(err);
-                request(`${nconf.get('url')}/api/categories`, { json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert(body.widgets);
-                    assert.equal(Object.keys(body.widgets).length, 0);
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/api/categories`,
+                    { json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert(body.widgets);
+                        assert.equal(Object.keys(body.widgets).length, 0);
+                        done();
+                    }
+                );
             });
         });
     });
@@ -1250,35 +1391,47 @@ describe('Controllers', () => {
         });
 
         it('should render tags page', done => {
-            request(`${nconf.get('url')}/api/tags`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                assert(Array.isArray(body.tags));
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/tags`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    assert(Array.isArray(body.tags));
+                    done();
+                }
+            );
         });
 
         it('should render tag page with no topics', done => {
-            request(`${nconf.get('url')}/api/tags/notag`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                assert(Array.isArray(body.topics));
-                assert.equal(body.topics.length, 0);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/tags/notag`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    assert(Array.isArray(body.topics));
+                    assert.equal(body.topics.length, 0);
+                    done();
+                }
+            );
         });
 
         it('should render tag page with 1 topic', done => {
-            request(`${nconf.get('url')}/api/tags/nodebb`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                assert(Array.isArray(body.topics));
-                assert.equal(body.topics.length, 1);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/tags/nodebb`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    assert(Array.isArray(body.topics));
+                    assert.equal(body.topics.length, 1);
+                    done();
+                }
+            );
         });
     });
 
@@ -1293,41 +1446,57 @@ describe('Controllers', () => {
         });
 
         it('should return 503 in maintenance mode', done => {
-            request(`${nconf.get('url')}/recent`, { json: true }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 503);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/recent`,
+                { json: true },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 503);
+                    done();
+                }
+            );
         });
 
         it('should return 503 in maintenance mode', done => {
-            request(`${nconf.get('url')}/api/recent`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 503);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/recent`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 503);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should return 200 in maintenance mode', done => {
-            request(`${nconf.get('url')}/api/login`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/login`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should return 200 if guests are allowed', done => {
             const oldValue = meta.config.groupsExemptFromMaintenanceMode;
             meta.config.groupsExemptFromMaintenanceMode.push('guests');
-            request(`${nconf.get('url')}/api/recent`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.strictEqual(res.statusCode, 200);
-                assert(body);
-                meta.config.groupsExemptFromMaintenanceMode = oldValue;
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/recent`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.strictEqual(res.statusCode, 200);
+                    assert(body);
+                    meta.config.groupsExemptFromMaintenanceMode = oldValue;
+                    done();
+                }
+            );
         });
     });
 
@@ -1340,265 +1509,392 @@ describe('Controllers', () => {
         });
 
         it('should redirect to account page with logged in user', done => {
-            request(`${nconf.get('url')}/api/login`, { jar: jar, json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(res.headers['x-redirect'], '/user/foo');
-                assert.equal(body, '/user/foo');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/login`,
+                { jar: jar, json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(res.headers['x-redirect'], '/user/foo');
+                    assert.equal(body, '/user/foo');
+                    done();
+                }
+            );
         });
 
         it('should 404 if uid is not a number', done => {
-            request(`${nconf.get('url')}/api/uid/test`, { json: true }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 404);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/uid/test`,
+                { json: true },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 404);
+                    done();
+                }
+            );
         });
 
         it('should redirect to userslug', done => {
-            request(`${nconf.get('url')}/api/uid/${fooUid}`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(res.headers['x-redirect'], '/user/foo');
-                assert.equal(body, '/user/foo');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/uid/${fooUid}`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(res.headers['x-redirect'], '/user/foo');
+                    assert.equal(body, '/user/foo');
+                    done();
+                }
+            );
         });
 
         it('should redirect to userslug and keep query params', done => {
-            request(`${nconf.get('url')}/api/uid/${fooUid}/topics?foo=bar`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(res.headers['x-redirect'], '/user/foo/topics?foo=bar');
-                assert.equal(body, '/user/foo/topics?foo=bar');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/uid/${fooUid}/topics?foo=bar`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(
+                        res.headers['x-redirect'],
+                        '/user/foo/topics?foo=bar'
+                    );
+                    assert.equal(body, '/user/foo/topics?foo=bar');
+                    done();
+                }
+            );
         });
 
         it('should 404 if user does not exist', done => {
-            request(`${nconf.get('url')}/api/uid/123123`, { json: true }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 404);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/uid/123123`,
+                { json: true },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 404);
+                    done();
+                }
+            );
         });
 
         describe('/me/*', () => {
             it('should redirect to user profile', done => {
-                request(`${nconf.get('url')}/me`, { jar: jar, json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert(body.includes('"template":{"name":"account/profile","account/profile":true}'));
-                    assert(body.includes('"username":"foo"'));
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/me`,
+                    { jar: jar, json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert(
+                            body.includes(
+                                '"template":{"name":"account/profile","account/profile":true}'
+                            )
+                        );
+                        assert(body.includes('"username":"foo"'));
+                        done();
+                    }
+                );
             });
             it('api should redirect to /user/[userslug]/bookmarks', done => {
-                request(`${nconf.get('url')}/api/me/bookmarks`, { jar: jar, json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert.equal(res.headers['x-redirect'], '/user/foo/bookmarks');
-                    assert.equal(body, '/user/foo/bookmarks');
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/api/me/bookmarks`,
+                    { jar: jar, json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert.equal(
+                            res.headers['x-redirect'],
+                            '/user/foo/bookmarks'
+                        );
+                        assert.equal(body, '/user/foo/bookmarks');
+                        done();
+                    }
+                );
             });
             it('api should redirect to /user/[userslug]/edit/username', done => {
-                request(`${nconf.get('url')}/api/me/edit/username`, { jar: jar, json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert.equal(res.headers['x-redirect'], '/user/foo/edit/username');
-                    assert.equal(body, '/user/foo/edit/username');
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/api/me/edit/username`,
+                    { jar: jar, json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert.equal(
+                            res.headers['x-redirect'],
+                            '/user/foo/edit/username'
+                        );
+                        assert.equal(body, '/user/foo/edit/username');
+                        done();
+                    }
+                );
             });
             it('should redirect to login if user is not logged in', done => {
-                request(`${nconf.get('url')}/me/bookmarks`, { json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert(body.includes('Login to your account'), body.slice(0, 500));
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/me/bookmarks`,
+                    { json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert(
+                            body.includes('Login to your account'),
+                            body.slice(0, 500)
+                        );
+                        done();
+                    }
+                );
             });
         });
 
         it('should 401 if user is not logged in', done => {
-            request(`${nconf.get('url')}/api/admin`, { json: true }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 401);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/admin`,
+                { json: true },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 401);
+                    done();
+                }
+            );
         });
 
         it('should 403 if user is not admin', done => {
-            request(`${nconf.get('url')}/api/admin`, { jar: jar, json: true }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 403);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/admin`,
+                { jar: jar, json: true },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 403);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/posts', done => {
-            request(`${nconf.get('url')}/api/user/foo/posts`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/posts`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should 401 if not logged in', done => {
-            request(`${nconf.get('url')}/api/user/foo/bookmarks`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 401);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/bookmarks`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 401);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/bookmarks', done => {
-            request(`${nconf.get('url')}/api/user/foo/bookmarks`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/bookmarks`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/upvoted', done => {
-            request(`${nconf.get('url')}/api/user/foo/upvoted`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/upvoted`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/downvoted', done => {
-            request(`${nconf.get('url')}/api/user/foo/downvoted`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/downvoted`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/best', done => {
-            request(`${nconf.get('url')}/api/user/foo/best`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/best`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/controversial', done => {
-            request(`${nconf.get('url')}/api/user/foo/controversial`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/controversial`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/watched', done => {
-            request(`${nconf.get('url')}/api/user/foo/watched`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/watched`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/ignored', done => {
-            request(`${nconf.get('url')}/api/user/foo/ignored`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/ignored`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/topics', done => {
-            request(`${nconf.get('url')}/api/user/foo/topics`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/topics`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/blocks', done => {
-            request(`${nconf.get('url')}/api/user/foo/blocks`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/blocks`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/consent', done => {
-            request(`${nconf.get('url')}/api/user/foo/consent`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/consent`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/sessions', done => {
-            request(`${nconf.get('url')}/api/user/foo/sessions`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/sessions`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/categories', done => {
-            request(`${nconf.get('url')}/api/user/foo/categories`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/categories`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load /user/foo/uploads', done => {
-            request(`${nconf.get('url')}/api/user/foo/uploads`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/uploads`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should export users posts', done => {
-            request(`${nconf.get('url')}/api/user/foo/export/posts`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/export/posts`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should export users uploads', done => {
-            request(`${nconf.get('url')}/api/user/foo/export/uploads`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/export/uploads`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should export users profile', done => {
-            request(`${nconf.get('url')}/api/user/foo/export/profile`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/export/profile`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load notifications page', done => {
@@ -1626,7 +1922,11 @@ describe('Controllers', () => {
                         setTimeout(next, 2500);
                     },
                     function (next) {
-                        request(`${nconf.get('url')}/api/notifications`, { jar: jar, json: true }, next);
+                        request(
+                            `${nconf.get('url')}/api/notifications`,
+                            { jar: jar, json: true },
+                            next
+                        );
                     },
                     function (res, body, next) {
                         assert.equal(res.statusCode, 200);
@@ -1635,7 +1935,10 @@ describe('Controllers', () => {
                         assert.equal(notif.bodyShort, notifData.bodyShort);
                         assert.equal(notif.bodyLong, notifData.bodyLong);
                         assert.equal(notif.pid, notifData.pid);
-                        assert.equal(notif.path, nconf.get('relative_path') + notifData.path);
+                        assert.equal(
+                            notif.path,
+                            nconf.get('relative_path') + notifData.path
+                        );
                         assert.equal(notif.nid, notifData.nid);
                         next();
                     },
@@ -1645,46 +1948,61 @@ describe('Controllers', () => {
         });
 
         it('should 404 if user does not exist', done => {
-            request(`${nconf.get('url')}/api/user/email/doesnotexist`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 404);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/email/doesnotexist`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 404);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load user by uid', done => {
-            request(`${nconf.get('url')}/api/user/uid/${fooUid}`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/uid/${fooUid}`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should load user by username', done => {
-            request(`${nconf.get('url')}/api/user/username/foo`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/username/foo`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should NOT load user by email (by default)', async () => {
-            const res = await requestAsync(`${nconf.get('url')}/api/user/email/foo@test.com`, {
-                resolveWithFullResponse: true,
-                simple: false,
-            });
+            const res = await requestAsync(
+                `${nconf.get('url')}/api/user/email/foo@test.com`,
+                {
+                    resolveWithFullResponse: true,
+                    simple: false,
+                }
+            );
 
             assert.strictEqual(res.statusCode, 404);
         });
 
         it('should load user by email if user has elected to show their email', async () => {
             await user.setSetting(fooUid, 'showemail', 1);
-            const res = await requestAsync(`${nconf.get('url')}/api/user/email/foo@test.com`, {
-                resolveWithFullResponse: true,
-            });
+            const res = await requestAsync(
+                `${nconf.get('url')}/api/user/email/foo@test.com`,
+                {
+                    resolveWithFullResponse: true,
+                }
+            );
             assert.strictEqual(res.statusCode, 200);
             assert(res.body);
             await user.setSetting(fooUid, 'showemail', 0);
@@ -1693,18 +2011,27 @@ describe('Controllers', () => {
         it('should return 401 if user does not have view:users privilege', done => {
             privileges.global.rescind(['groups:view:users'], 'guests', err => {
                 assert.ifError(err);
-                request(`${nconf.get('url')}/api/user/foo`, { json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 401);
-                    assert.deepEqual(body, {
-                        response: {},
-                        status: {
-                            code: 'not-authorised',
-                            message: 'A valid login session was not found. Please log in and try again.',
-                        },
-                    });
-                    privileges.global.give(['groups:view:users'], 'guests', done);
-                });
+                request(
+                    `${nconf.get('url')}/api/user/foo`,
+                    { json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 401);
+                        assert.deepEqual(body, {
+                            response: {},
+                            status: {
+                                code: 'not-authorised',
+                                message:
+                                    'A valid login session was not found. Please log in and try again.',
+                            },
+                        });
+                        privileges.global.give(
+                            ['groups:view:users'],
+                            'guests',
+                            done
+                        );
+                    }
+                );
             });
         });
 
@@ -1714,56 +2041,84 @@ describe('Controllers', () => {
                 helpers.loginUser('regularJoe', 'barbar', (err, data) => {
                     assert.ifError(err);
                     const { jar } = data;
-                    request(`${nconf.get('url')}/api/user/foo/info`, { jar: jar, json: true }, (err, res) => {
-                        assert.ifError(err);
-                        assert.equal(res.statusCode, 403);
-                        request(`${nconf.get('url')}/api/user/foo/edit`, { jar: jar, json: true }, (err, res) => {
+                    request(
+                        `${nconf.get('url')}/api/user/foo/info`,
+                        { jar: jar, json: true },
+                        (err, res) => {
                             assert.ifError(err);
                             assert.equal(res.statusCode, 403);
-                            done();
-                        });
-                    });
+                            request(
+                                `${nconf.get('url')}/api/user/foo/edit`,
+                                { jar: jar, json: true },
+                                (err, res) => {
+                                    assert.ifError(err);
+                                    assert.equal(res.statusCode, 403);
+                                    done();
+                                }
+                            );
+                        }
+                    );
                 });
             });
         });
 
         it('should load correct user', done => {
-            request(`${nconf.get('url')}/api/user/FOO`, { jar: jar, json: true }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/FOO`,
+                { jar: jar, json: true },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    done();
+                }
+            );
         });
 
         it('should redirect', done => {
-            request(`${nconf.get('url')}/user/FOO`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/user/FOO`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should 404 if user does not exist', done => {
-            request(`${nconf.get('url')}/api/user/doesnotexist`, { jar: jar }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 404);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/doesnotexist`,
+                { jar: jar },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 404);
+                    done();
+                }
+            );
         });
 
         it('should not increase profile view if you visit your own profile', done => {
-            request(`${nconf.get('url')}/api/user/foo`, { jar: jar }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                setTimeout(() => {
-                    user.getUserField(fooUid, 'profileviews', (err, viewcount) => {
-                        assert.ifError(err);
-                        assert(viewcount === 0);
-                        done();
-                    });
-                }, 500);
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo`,
+                { jar: jar },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    setTimeout(() => {
+                        user.getUserField(
+                            fooUid,
+                            'profileviews',
+                            (err, viewcount) => {
+                                assert.ifError(err);
+                                assert(viewcount === 0);
+                                done();
+                            }
+                        );
+                    }, 500);
+                }
+            );
         });
 
         it('should not increase profile view if a guest visits a profile', done => {
@@ -1771,11 +2126,15 @@ describe('Controllers', () => {
                 assert.ifError(err);
                 assert.equal(res.statusCode, 200);
                 setTimeout(() => {
-                    user.getUserField(fooUid, 'profileviews', (err, viewcount) => {
-                        assert.ifError(err);
-                        assert(viewcount === 0);
-                        done();
-                    });
+                    user.getUserField(
+                        fooUid,
+                        'profileviews',
+                        (err, viewcount) => {
+                            assert.ifError(err);
+                            assert(viewcount === 0);
+                            done();
+                        }
+                    );
                 }, 500);
             });
         });
@@ -1784,42 +2143,62 @@ describe('Controllers', () => {
             helpers.loginUser('regularJoe', 'barbar', (err, data) => {
                 assert.ifError(err);
                 const { jar } = data;
-                request(`${nconf.get('url')}/api/user/foo`, { jar: jar }, (err, res) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    setTimeout(() => {
-                        user.getUserField(fooUid, 'profileviews', (err, viewcount) => {
-                            assert.ifError(err);
-                            assert(viewcount > 0);
-                            done();
-                        });
-                    }, 500);
-                });
+                request(
+                    `${nconf.get('url')}/api/user/foo`,
+                    { jar: jar },
+                    (err, res) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        setTimeout(() => {
+                            user.getUserField(
+                                fooUid,
+                                'profileviews',
+                                (err, viewcount) => {
+                                    assert.ifError(err);
+                                    assert(viewcount > 0);
+                                    done();
+                                }
+                            );
+                        }, 500);
+                    }
+                );
             });
         });
 
         it('should parse about me', done => {
-            user.setUserFields(fooUid, { picture: '/path/to/picture', aboutme: 'hi i am a bot' }, err => {
-                assert.ifError(err);
-                request(`${nconf.get('url')}/api/user/foo`, { json: true }, (err, res, body) => {
+            user.setUserFields(
+                fooUid,
+                { picture: '/path/to/picture', aboutme: 'hi i am a bot' },
+                err => {
                     assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert.equal(body.aboutme, 'hi i am a bot');
-                    assert.equal(body.picture, '/path/to/picture');
-                    done();
-                });
-            });
+                    request(
+                        `${nconf.get('url')}/api/user/foo`,
+                        { json: true },
+                        (err, res, body) => {
+                            assert.ifError(err);
+                            assert.equal(res.statusCode, 200);
+                            assert.equal(body.aboutme, 'hi i am a bot');
+                            assert.equal(body.picture, '/path/to/picture');
+                            done();
+                        }
+                    );
+                }
+            );
         });
 
         it('should not return reputation if reputation is disabled', done => {
             meta.config['reputation:disabled'] = 1;
-            request(`${nconf.get('url')}/api/user/foo`, { json: true }, (err, res, body) => {
-                meta.config['reputation:disabled'] = 0;
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(!body.hasOwnProperty('reputation'));
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo`,
+                { json: true },
+                (err, res, body) => {
+                    meta.config['reputation:disabled'] = 0;
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(!body.hasOwnProperty('reputation'));
+                    done();
+                }
+            );
         });
 
         it('should only return posts that are not deleted', done => {
@@ -1864,13 +2243,17 @@ describe('Controllers', () => {
                         posts.delete(pidToDelete, fooUid, next);
                     },
                     function (next) {
-                        request(`${nconf.get('url')}/api/user/foo`, { json: true }, (err, res, body) => {
-                            assert.ifError(err);
-                            assert.equal(res.statusCode, 200);
-                            const contents = body.posts.map(p => p.content);
-                            assert(!contents.includes('1st reply'));
-                            done();
-                        });
+                        request(
+                            `${nconf.get('url')}/api/user/foo`,
+                            { json: true },
+                            (err, res, body) => {
+                                assert.ifError(err);
+                                assert.equal(res.statusCode, 200);
+                                const contents = body.posts.map(p => p.content);
+                                assert(!contents.includes('1st reply'));
+                                done();
+                            }
+                        );
                     },
                 ],
                 done
@@ -1888,13 +2271,20 @@ describe('Controllers', () => {
                         assert.ifError(err);
                         groups.join('selectedGroup', uid, err => {
                             assert.ifError(err);
-                            request(`${nconf.get('url')}/api/user/groupie`, { json: true }, (err, res, body) => {
-                                assert.ifError(err);
-                                assert.equal(res.statusCode, 200);
-                                assert(Array.isArray(body.selectedGroup));
-                                assert.equal(body.selectedGroup[0].name, 'selectedGroup');
-                                done();
-                            });
+                            request(
+                                `${nconf.get('url')}/api/user/groupie`,
+                                { json: true },
+                                (err, res, body) => {
+                                    assert.ifError(err);
+                                    assert.equal(res.statusCode, 200);
+                                    assert(Array.isArray(body.selectedGroup));
+                                    assert.equal(
+                                        body.selectedGroup[0].name,
+                                        'selectedGroup'
+                                    );
+                                    done();
+                                }
+                            );
                         });
                     });
                 }
@@ -1904,28 +2294,39 @@ describe('Controllers', () => {
         it('should 404 if user does not exist', done => {
             groups.join('administrators', fooUid, err => {
                 assert.ifError(err);
-                request(`${nconf.get('url')}/api/user/doesnotexist/edit`, { jar: jar, json: true }, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 404);
-                    groups.leave('administrators', fooUid, done);
-                });
+                request(
+                    `${nconf.get('url')}/api/user/doesnotexist/edit`,
+                    { jar: jar, json: true },
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 404);
+                        groups.leave('administrators', fooUid, done);
+                    }
+                );
             });
         });
 
         it('should render edit/password', done => {
-            request(`${nconf.get('url')}/api/user/foo/edit/password`, { jar: jar, json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/edit/password`,
+                { jar: jar, json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    done();
+                }
+            );
         });
 
         it('should render edit/email', async () => {
-            const res = await requestAsync(`${nconf.get('url')}/api/user/foo/edit/email`, {
-                jar,
-                json: true,
-                resolveWithFullResponse: true,
-            });
+            const res = await requestAsync(
+                `${nconf.get('url')}/api/user/foo/edit/email`,
+                {
+                    jar,
+                    json: true,
+                    resolveWithFullResponse: true,
+                }
+            );
 
             assert.strictEqual(res.statusCode, 200);
             assert.strictEqual(res.body, '/register/complete');
@@ -1939,11 +2340,15 @@ describe('Controllers', () => {
         });
 
         it('should render edit/username', done => {
-            request(`${nconf.get('url')}/api/user/foo/edit/username`, { jar: jar, json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/edit/username`,
+                { jar: jar, json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    done();
+                }
+            );
         });
     });
 
@@ -1954,31 +2359,46 @@ describe('Controllers', () => {
         before(async () => {
             uid = await user.create({ username: 'follower' });
             await apiUser.follow({ uid: uid }, { uid: fooUid });
-            const isFollowing = await socketUser.isFollowing({ uid: uid }, { uid: fooUid });
+            const isFollowing = await socketUser.isFollowing(
+                { uid: uid },
+                { uid: fooUid }
+            );
             assert(isFollowing);
         });
 
         it('should get followers page', done => {
-            request(`${nconf.get('url')}/api/user/foo/followers`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(body.users[0].username, 'follower');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/foo/followers`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(body.users[0].username, 'follower');
+                    done();
+                }
+            );
         });
 
         it('should get following page', done => {
-            request(`${nconf.get('url')}/api/user/follower/following`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(body.users[0].username, 'foo');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/follower/following`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(body.users[0].username, 'foo');
+                    done();
+                }
+            );
         });
 
         it('should return empty after unfollow', async () => {
             await apiUser.unfollow({ uid: uid }, { uid: fooUid });
-            const { res, body } = await helpers.request('get', `/api/user/foo/followers`, { json: true });
+            const { res, body } = await helpers.request(
+                'get',
+                `/api/user/foo/followers`,
+                { json: true }
+            );
             assert.equal(res.statusCode, 200);
             assert.equal(body.users.length, 0);
         });
@@ -1999,24 +2419,45 @@ describe('Controllers', () => {
         });
 
         it('should 403 if user does not have read privilege', done => {
-            privileges.categories.rescind(['groups:topics:read'], category.cid, 'registered-users', err => {
-                assert.ifError(err);
-                request(`${nconf.get('url')}/api/post/${pid}`, { jar: jar }, (err, res) => {
+            privileges.categories.rescind(
+                ['groups:topics:read'],
+                category.cid,
+                'registered-users',
+                err => {
                     assert.ifError(err);
-                    assert.equal(res.statusCode, 403);
-                    privileges.categories.give(['groups:topics:read'], category.cid, 'registered-users', done);
-                });
-            });
+                    request(
+                        `${nconf.get('url')}/api/post/${pid}`,
+                        { jar: jar },
+                        (err, res) => {
+                            assert.ifError(err);
+                            assert.equal(res.statusCode, 403);
+                            privileges.categories.give(
+                                ['groups:topics:read'],
+                                category.cid,
+                                'registered-users',
+                                done
+                            );
+                        }
+                    );
+                }
+            );
         });
 
         it('should return correct post path', done => {
-            request(`${nconf.get('url')}/api/post/${pid}`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(res.headers['x-redirect'], '/topic/1/test-topic-title/1');
-                assert.equal(body, '/topic/1/test-topic-title/1');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/post/${pid}`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(
+                        res.headers['x-redirect'],
+                        '/topic/1/test-topic-title/1'
+                    );
+                    assert.equal(body, '/topic/1/test-topic-title/1');
+                    done();
+                }
+            );
         });
     });
 
@@ -2034,33 +2475,52 @@ describe('Controllers', () => {
                 }
 
                 assert.ok(parsed.cookies);
-                assert.equal(translator.escape('[[global:cookies.message]]'), parsed.cookies.message);
-                assert.equal(translator.escape('[[global:cookies.accept]]'), parsed.cookies.dismiss);
-                assert.equal(translator.escape('[[global:cookies.learn_more]]'), parsed.cookies.link);
+                assert.equal(
+                    translator.escape('[[global:cookies.message]]'),
+                    parsed.cookies.message
+                );
+                assert.equal(
+                    translator.escape('[[global:cookies.accept]]'),
+                    parsed.cookies.dismiss
+                );
+                assert.equal(
+                    translator.escape('[[global:cookies.learn_more]]'),
+                    parsed.cookies.link
+                );
 
                 done();
             });
         });
 
         it('response should be parseable when entries have apostrophes', done => {
-            meta.configs.set('cookieConsentMessage', "Julian's Message", err => {
-                assert.ifError(err);
-
-                request(`${nconf.get('url')}/api/config`, (err, res, body) => {
-                    let parsed;
+            meta.configs.set(
+                'cookieConsentMessage',
+                "Julian's Message",
+                err => {
                     assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
 
-                    try {
-                        parsed = JSON.parse(body);
-                    } catch (e) {
-                        assert.ifError(e);
-                    }
+                    request(
+                        `${nconf.get('url')}/api/config`,
+                        (err, res, body) => {
+                            let parsed;
+                            assert.ifError(err);
+                            assert.equal(res.statusCode, 200);
 
-                    assert.equal('Julian&#x27;s Message', parsed.cookies.message);
-                    done();
-                });
-            });
+                            try {
+                                parsed = JSON.parse(body);
+                            } catch (e) {
+                                assert.ifError(e);
+                            }
+
+                            assert.equal(
+                                'Julian&#x27;s Message',
+                                parsed.cookies.message
+                            );
+                            done();
+                        }
+                    );
+                }
+            );
         });
     });
 
@@ -2090,12 +2550,15 @@ describe('Controllers', () => {
         });
 
         it('should handle category malformed uri', done => {
-            request(`${nconf.get('url')}/category/1/a%AFc`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/category/1/a%AFc`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should handle malformed uri ', done => {
@@ -2108,16 +2571,21 @@ describe('Controllers', () => {
         });
 
         it('should handle malformed uri in api', done => {
-            request(`${nconf.get('url')}/api/user/a%AFc`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 400);
-                assert.equal(body.error, '[[global:400.title]]');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/user/a%AFc`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 400);
+                    assert.equal(body.error, '[[global:400.title]]');
+                    done();
+                }
+            );
         });
 
         it('should handle CSRF error', done => {
-            plugins.loadedHooks['filter:router.page'] = plugins.loadedHooks['filter:router.page'] || [];
+            plugins.loadedHooks['filter:router.page'] =
+                plugins.loadedHooks['filter:router.page'] || [];
             plugins.loadedHooks['filter:router.page'].push({
                 method: function (req, res, next) {
                     const err = new Error('csrf-error');
@@ -2135,7 +2603,8 @@ describe('Controllers', () => {
         });
 
         it('should handle black-list error', done => {
-            plugins.loadedHooks['filter:router.page'] = plugins.loadedHooks['filter:router.page'] || [];
+            plugins.loadedHooks['filter:router.page'] =
+                plugins.loadedHooks['filter:router.page'] || [];
             plugins.loadedHooks['filter:router.page'].push({
                 method: function (req, res, next) {
                     const err = new Error('blacklist error message');
@@ -2154,7 +2623,8 @@ describe('Controllers', () => {
         });
 
         it('should handle page redirect through error', done => {
-            plugins.loadedHooks['filter:router.page'] = plugins.loadedHooks['filter:router.page'] || [];
+            plugins.loadedHooks['filter:router.page'] =
+                plugins.loadedHooks['filter:router.page'] || [];
             plugins.loadedHooks['filter:router.page'].push({
                 method: function (req, res, next) {
                     const err = new Error('redirect');
@@ -2174,7 +2644,8 @@ describe('Controllers', () => {
         });
 
         it('should handle api page redirect through error', done => {
-            plugins.loadedHooks['filter:router.page'] = plugins.loadedHooks['filter:router.page'] || [];
+            plugins.loadedHooks['filter:router.page'] =
+                plugins.loadedHooks['filter:router.page'] || [];
             plugins.loadedHooks['filter:router.page'].push({
                 method: function (req, res, next) {
                     const err = new Error('redirect');
@@ -2185,17 +2656,22 @@ describe('Controllers', () => {
                 },
             });
 
-            request(`${nconf.get('url')}/api/users`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(res.headers['x-redirect'], '/api/popular');
-                assert(body, '/api/popular');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/users`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(res.headers['x-redirect'], '/api/popular');
+                    assert(body, '/api/popular');
+                    done();
+                }
+            );
         });
 
         it('should handle error page', done => {
-            plugins.loadedHooks['filter:router.page'] = plugins.loadedHooks['filter:router.page'] || [];
+            plugins.loadedHooks['filter:router.page'] =
+                plugins.loadedHooks['filter:router.page'] || [];
             plugins.loadedHooks['filter:router.page'].push({
                 method: function (req, res, next) {
                     const err = new Error('regular error');
@@ -2228,11 +2704,14 @@ describe('Controllers', () => {
         });
 
         it('should return 404 if topic index is not a number', done => {
-            request(`${nconf.get('url')}/api/category/${category.slug}/invalidtopicindex`, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 404);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/category/${category.slug}/invalidtopicindex`,
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 404);
+                    done();
+                }
+            );
         });
 
         it('should 404 if category does not exist', done => {
@@ -2246,65 +2725,95 @@ describe('Controllers', () => {
         it('should 404 if category is disabled', done => {
             categories.create({ name: 'disabled' }, (err, category) => {
                 assert.ifError(err);
-                categories.setCategoryField(category.cid, 'disabled', 1, err => {
-                    assert.ifError(err);
-                    request(`${nconf.get('url')}/api/category/${category.slug}`, (err, res) => {
+                categories.setCategoryField(
+                    category.cid,
+                    'disabled',
+                    1,
+                    err => {
                         assert.ifError(err);
-                        assert.equal(res.statusCode, 404);
-                        done();
-                    });
-                });
+                        request(
+                            `${nconf.get('url')}/api/category/${category.slug}`,
+                            (err, res) => {
+                                assert.ifError(err);
+                                assert.equal(res.statusCode, 404);
+                                done();
+                            }
+                        );
+                    }
+                );
             });
         });
 
         it('should return 401 if not allowed to read', done => {
             categories.create({ name: 'hidden' }, (err, category) => {
                 assert.ifError(err);
-                privileges.categories.rescind(['groups:read'], category.cid, 'guests', err => {
-                    assert.ifError(err);
-                    request(`${nconf.get('url')}/api/category/${category.slug}`, (err, res) => {
+                privileges.categories.rescind(
+                    ['groups:read'],
+                    category.cid,
+                    'guests',
+                    err => {
                         assert.ifError(err);
-                        assert.equal(res.statusCode, 401);
-                        done();
-                    });
-                });
+                        request(
+                            `${nconf.get('url')}/api/category/${category.slug}`,
+                            (err, res) => {
+                                assert.ifError(err);
+                                assert.equal(res.statusCode, 401);
+                                done();
+                            }
+                        );
+                    }
+                );
             });
         });
 
         it('should redirect if topic index is negative', done => {
-            request(`${nconf.get('url')}/api/category/${category.slug}/-10`, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.ok(res.headers['x-redirect']);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/category/${category.slug}/-10`,
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.ok(res.headers['x-redirect']);
+                    done();
+                }
+            );
         });
 
         it('should 404 if page is not found', done => {
             user.setSetting(fooUid, 'usePagination', 1, err => {
                 assert.ifError(err);
-                request(`${nconf.get('url')}/api/category/${category.slug}?page=100`, { jar: jar, json: true }, (err, res) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 404);
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/api/category/${category.slug}?page=100`,
+                    { jar: jar, json: true },
+                    (err, res) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 404);
+                        done();
+                    }
+                );
             });
         });
 
         it('should load page 1 if req.query.page is not sent', done => {
-            request(`${nconf.get('url')}/api/category/${category.slug}`, { jar: jar, json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(body.pagination.currentPage, 1);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/category/${category.slug}`,
+                { jar: jar, json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(body.pagination.currentPage, 1);
+                    done();
+                }
+            );
         });
 
         it('should sort topics by most posts', done => {
             async.waterfall(
                 [
                     function (next) {
-                        categories.create({ name: 'most-posts-category' }, next);
+                        categories.create(
+                            { name: 'most-posts-category' },
+                            next
+                        );
                     },
                     function (category, next) {
                         async.waterfall(
@@ -2342,14 +2851,27 @@ describe('Controllers', () => {
                                     );
                                 },
                                 function (postData, next) {
-                                    request(`${nconf.get('url')}/api/category/${category.slug}?sort=most_posts`, { jar: jar, json: true }, (err, res, body) => {
-                                        assert.ifError(err);
-                                        assert.equal(res.statusCode, 200);
-                                        assert.equal(body.topics[0].title, 'topic 2');
-                                        assert.equal(body.topics[0].postcount, 2);
-                                        assert.equal(body.topics[1].postcount, 1);
-                                        next();
-                                    });
+                                    request(
+                                        `${nconf.get('url')}/api/category/${category.slug}?sort=most_posts`,
+                                        { jar: jar, json: true },
+                                        (err, res, body) => {
+                                            assert.ifError(err);
+                                            assert.equal(res.statusCode, 200);
+                                            assert.equal(
+                                                body.topics[0].title,
+                                                'topic 2'
+                                            );
+                                            assert.equal(
+                                                body.topics[0].postcount,
+                                                2
+                                            );
+                                            assert.equal(
+                                                body.topics[1].postcount,
+                                                1
+                                            );
+                                            next();
+                                        }
+                                    );
                                 },
                             ],
                             err => {
@@ -2408,21 +2930,38 @@ describe('Controllers', () => {
                                     );
                                 },
                                 function (data, next) {
-                                    request(`${nconf.get('url')}/api/category/${category.slug}?tag=node&author=foo`, { jar: jar, json: true }, (err, res, body) => {
-                                        assert.ifError(err);
-                                        assert.equal(res.statusCode, 200);
-                                        assert.equal(body.topics[0].title, 'topic 2');
-                                        next();
-                                    });
+                                    request(
+                                        `${nconf.get('url')}/api/category/${category.slug}?tag=node&author=foo`,
+                                        { jar: jar, json: true },
+                                        (err, res, body) => {
+                                            assert.ifError(err);
+                                            assert.equal(res.statusCode, 200);
+                                            assert.equal(
+                                                body.topics[0].title,
+                                                'topic 2'
+                                            );
+                                            next();
+                                        }
+                                    );
                                 },
                                 function (next) {
-                                    request(`${nconf.get('url')}/api/category/${category.slug}?tag[]=java&tag[]=cpp`, { jar: jar, json: true }, (err, res, body) => {
-                                        assert.ifError(err);
-                                        assert.equal(res.statusCode, 200);
-                                        assert.equal(body.topics[0].title, 'topic 3');
-                                        assert.equal(body.topics[1].title, 'topic 1');
-                                        next();
-                                    });
+                                    request(
+                                        `${nconf.get('url')}/api/category/${category.slug}?tag[]=java&tag[]=cpp`,
+                                        { jar: jar, json: true },
+                                        (err, res, body) => {
+                                            assert.ifError(err);
+                                            assert.equal(res.statusCode, 200);
+                                            assert.equal(
+                                                body.topics[0].title,
+                                                'topic 3'
+                                            );
+                                            assert.equal(
+                                                body.topics[1].title,
+                                                'topic 1'
+                                            );
+                                            next();
+                                        }
+                                    );
                                 },
                             ],
                             err => {
@@ -2441,30 +2980,52 @@ describe('Controllers', () => {
             async.waterfall(
                 [
                     function (next) {
-                        categories.create({ name: 'redirect', link: 'https://nodebb.org' }, next);
+                        categories.create(
+                            { name: 'redirect', link: 'https://nodebb.org' },
+                            next
+                        );
                     },
                     function (_category, next) {
                         category = _category;
                         cid = category.cid;
-                        request(`${nconf.get('url')}/api/category/${category.slug}`, { jar: jar, json: true }, (err, res, body) => {
-                            assert.ifError(err);
-                            assert.equal(res.statusCode, 200);
-                            assert.equal(res.headers['x-redirect'], 'https://nodebb.org');
-                            assert.equal(body, 'https://nodebb.org');
-                            next();
-                        });
+                        request(
+                            `${nconf.get('url')}/api/category/${category.slug}`,
+                            { jar: jar, json: true },
+                            (err, res, body) => {
+                                assert.ifError(err);
+                                assert.equal(res.statusCode, 200);
+                                assert.equal(
+                                    res.headers['x-redirect'],
+                                    'https://nodebb.org'
+                                );
+                                assert.equal(body, 'https://nodebb.org');
+                                next();
+                            }
+                        );
                     },
                     function (next) {
-                        categories.setCategoryField(cid, 'link', '/recent', next);
+                        categories.setCategoryField(
+                            cid,
+                            'link',
+                            '/recent',
+                            next
+                        );
                     },
                     function (next) {
-                        request(`${nconf.get('url')}/api/category/${category.slug}`, { jar: jar, json: true }, (err, res, body) => {
-                            assert.ifError(err);
-                            assert.equal(res.statusCode, 200);
-                            assert.equal(res.headers['x-redirect'], '/recent');
-                            assert.equal(body, '/recent');
-                            next();
-                        });
+                        request(
+                            `${nconf.get('url')}/api/category/${category.slug}`,
+                            { jar: jar, json: true },
+                            (err, res, body) => {
+                                assert.ifError(err);
+                                assert.equal(res.statusCode, 200);
+                                assert.equal(
+                                    res.headers['x-redirect'],
+                                    '/recent'
+                                );
+                                assert.equal(body, '/recent');
+                                next();
+                            }
+                        );
                     },
                 ],
                 done
@@ -2523,12 +3084,20 @@ describe('Controllers', () => {
                                     );
                                 },
                                 function (data, next) {
-                                    request(`${nconf.get('url')}/api/category/${parentCategory.slug}`, { jar: jar, json: true }, (err, res, body) => {
-                                        assert.ifError(err);
-                                        assert.equal(res.statusCode, 200);
-                                        assert.equal(body.children[0].posts[0].content, 'topic 1 OP');
-                                        next();
-                                    });
+                                    request(
+                                        `${nconf.get('url')}/api/category/${parentCategory.slug}`,
+                                        { jar: jar, json: true },
+                                        (err, res, body) => {
+                                            assert.ifError(err);
+                                            assert.equal(res.statusCode, 200);
+                                            assert.equal(
+                                                body.children[0].posts[0]
+                                                    .content,
+                                                'topic 1 OP'
+                                            );
+                                            next();
+                                        }
+                                    );
                                 },
                             ],
                             err => {
@@ -2545,7 +3114,10 @@ describe('Controllers', () => {
             async.waterfall(
                 [
                     function (next) {
-                        categories.create({ name: 'category with 2 pages' }, next);
+                        categories.create(
+                            { name: 'category with 2 pages' },
+                            next
+                        );
                     },
                     function (category, next) {
                         const titles = [];
@@ -2564,7 +3136,8 @@ describe('Controllers', () => {
                                                     uid: fooUid,
                                                     cid: category.cid,
                                                     title: title,
-                                                    content: 'does not really matter',
+                                                    content:
+                                                        'does not really matter',
                                                 },
                                                 next
                                             );
@@ -2576,13 +3149,23 @@ describe('Controllers', () => {
                                     user.getSettings(fooUid, next);
                                 },
                                 function (settings, next) {
-                                    request(`${nconf.get('url')}/api/category/${category.slug}`, { jar: jar, json: true }, (err, res, body) => {
-                                        assert.ifError(err);
-                                        assert.equal(res.statusCode, 200);
-                                        assert.equal(body.topics.length, settings.topicsPerPage);
-                                        assert.equal(body.pagination.pageCount, 2);
-                                        next();
-                                    });
+                                    request(
+                                        `${nconf.get('url')}/api/category/${category.slug}`,
+                                        { jar: jar, json: true },
+                                        (err, res, body) => {
+                                            assert.ifError(err);
+                                            assert.equal(res.statusCode, 200);
+                                            assert.equal(
+                                                body.topics.length,
+                                                settings.topicsPerPage
+                                            );
+                                            assert.equal(
+                                                body.pagination.pageCount,
+                                                2
+                                            );
+                                            next();
+                                        }
+                                    );
                                 },
                             ],
                             err => {
@@ -2597,7 +3180,12 @@ describe('Controllers', () => {
 
         it('should load categories', async () => {
             const helpers = require('../src/controllers/helpers');
-            const data = await helpers.getCategories('cid:0:children', 1, 'topics:read', 0);
+            const data = await helpers.getCategories(
+                'cid:0:children',
+                1,
+                'topics:read',
+                0
+            );
             assert(data.categories.length > 0);
             assert.strictEqual(data.selectedCategory, null);
             assert.deepStrictEqual(data.selectedCids, []);
@@ -2605,14 +3193,24 @@ describe('Controllers', () => {
 
         it('should load categories by states', async () => {
             const helpers = require('../src/controllers/helpers');
-            const data = await helpers.getCategoriesByStates(1, 1, Object.values(categories.watchStates), 'topics:read');
+            const data = await helpers.getCategoriesByStates(
+                1,
+                1,
+                Object.values(categories.watchStates),
+                'topics:read'
+            );
             assert.deepStrictEqual(data.selectedCategory.cid, 1);
             assert.deepStrictEqual(data.selectedCids, [1]);
         });
 
         it('should load categories by states', async () => {
             const helpers = require('../src/controllers/helpers');
-            const data = await helpers.getCategoriesByStates(1, 0, [categories.watchStates.ignoring], 'topics:read');
+            const data = await helpers.getCategoriesByStates(
+                1,
+                0,
+                [categories.watchStates.ignoring],
+                'topics:read'
+            );
             assert(data.categories.length === 0);
             assert.deepStrictEqual(data.selectedCategory, null);
             assert.deepStrictEqual(data.selectedCids, []);
@@ -2626,57 +3224,81 @@ describe('Controllers', () => {
         });
 
         it('should load unread page', done => {
-            request(`${nconf.get('url')}/api/unread`, { jar: jar }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/unread`,
+                { jar: jar },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    done();
+                }
+            );
         });
 
         it('should 404 if filter is invalid', done => {
-            request(`${nconf.get('url')}/api/unread/doesnotexist`, { jar: jar }, (err, res) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 404);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/unread/doesnotexist`,
+                { jar: jar },
+                (err, res) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 404);
+                    done();
+                }
+            );
         });
 
         it('should return total unread count', done => {
-            request(`${nconf.get('url')}/api/unread/total?filter=new`, { jar: jar }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(body, 0);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/unread/total?filter=new`,
+                { jar: jar },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(body, 0);
+                    done();
+                }
+            );
         });
 
         it('should redirect if page is out of bounds', done => {
-            request(`${nconf.get('url')}/api/unread?page=-1`, { jar: jar, json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert.equal(res.headers['x-redirect'], '/unread?page=1');
-                assert.equal(body, '/unread?page=1');
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/unread?page=-1`,
+                { jar: jar, json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert.equal(res.headers['x-redirect'], '/unread?page=1');
+                    assert.equal(body, '/unread?page=1');
+                    done();
+                }
+            );
         });
     });
 
     describe('admin middlewares', () => {
         it('should redirect to login', done => {
-            request(`${nconf.get('url')}//api/admin/advanced/database`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 401);
-                done();
-            });
+            request(
+                `${nconf.get('url')}//api/admin/advanced/database`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 401);
+                    done();
+                }
+            );
         });
 
         it('should redirect to login', done => {
-            request(`${nconf.get('url')}//admin/advanced/database`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body.includes('Login to your account'));
-                done();
-            });
+            request(
+                `${nconf.get('url')}//admin/advanced/database`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body.includes('Login to your account'));
+                    done();
+                }
+            );
         });
     });
 
@@ -2691,14 +3313,21 @@ describe('Controllers', () => {
         });
 
         it('should load the composer route', done => {
-            request(`${nconf.get('url')}/api/compose?cid=1`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body.title);
-                assert(body.template);
-                assert.equal(body.url, `${nconf.get('relative_path')}/compose`);
-                done();
-            });
+            request(
+                `${nconf.get('url')}/api/compose?cid=1`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body.title);
+                    assert(body.template);
+                    assert.equal(
+                        body.url,
+                        `${nconf.get('relative_path')}/compose`
+                    );
+                    done();
+                }
+            );
         });
 
         it('should load the composer route if disabled by plugin', done => {
@@ -2712,16 +3341,27 @@ describe('Controllers', () => {
                 method: hookMethod,
             });
 
-            request(`${nconf.get('url')}/api/compose?cid=1`, { json: true }, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 200);
-                assert(body.title);
-                assert.strictEqual(body.template.name, '');
-                assert.strictEqual(body.url, `${nconf.get('relative_path')}/compose`);
+            request(
+                `${nconf.get('url')}/api/compose?cid=1`,
+                { json: true },
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 200);
+                    assert(body.title);
+                    assert.strictEqual(body.template.name, '');
+                    assert.strictEqual(
+                        body.url,
+                        `${nconf.get('relative_path')}/compose`
+                    );
 
-                plugins.hooks.unregister('myTestPlugin', 'filter:composer.build', hookMethod);
-                done();
-            });
+                    plugins.hooks.unregister(
+                        'myTestPlugin',
+                        'filter:composer.build',
+                        hookMethod
+                    );
+                    done();
+                }
+            );
         });
 
         it('should error with invalid data', done => {
@@ -2804,39 +3444,55 @@ describe('Controllers', () => {
     describe('test routes', () => {
         if (process.env.NODE_ENV === 'development') {
             it('should load debug route', done => {
-                request(`${nconf.get('url')}/debug/test`, {}, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 404);
-                    assert(body);
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/debug/test`,
+                    {},
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 404);
+                        assert(body);
+                        done();
+                    }
+                );
             });
 
             it('should load redoc read route', done => {
-                request(`${nconf.get('url')}/debug/spec/read`, {}, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert(body);
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/debug/spec/read`,
+                    {},
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert(body);
+                        done();
+                    }
+                );
             });
 
             it('should load redoc write route', done => {
-                request(`${nconf.get('url')}/debug/spec/write`, {}, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 200);
-                    assert(body);
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/debug/spec/write`,
+                    {},
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 200);
+                        assert(body);
+                        done();
+                    }
+                );
             });
 
             it('should load 404 for invalid type', done => {
-                request(`${nconf.get('url')}/debug/spec/doesnotexist`, {}, (err, res, body) => {
-                    assert.ifError(err);
-                    assert.equal(res.statusCode, 404);
-                    assert(body);
-                    done();
-                });
+                request(
+                    `${nconf.get('url')}/debug/spec/doesnotexist`,
+                    {},
+                    (err, res, body) => {
+                        assert.ifError(err);
+                        assert.equal(res.statusCode, 404);
+                        assert(body);
+                        done();
+                    }
+                );
             });
         }
     });

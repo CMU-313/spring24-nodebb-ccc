@@ -42,13 +42,28 @@ module.exports = function (Topics) {
             }
         });
 
-        const [allPostData, callerSettings] = await Promise.all([posts.getPostsFields(teaserPids, ['pid', 'uid', 'timestamp', 'tid', 'content']), user.getSettings(uid)]);
+        const [allPostData, callerSettings] = await Promise.all([
+            posts.getPostsFields(teaserPids, [
+                'pid',
+                'uid',
+                'timestamp',
+                'tid',
+                'content',
+            ]),
+            user.getSettings(uid),
+        ]);
         let postData = allPostData.filter(post => post && post.pid);
         postData = await handleBlocks(uid, postData);
         postData = postData.filter(Boolean);
         const uids = _.uniq(postData.map(post => post.uid));
-        const sortNewToOld = callerSettings.topicPostSort === 'newest_to_oldest';
-        const usersData = await user.getUsersFields(uids, ['uid', 'username', 'userslug', 'picture']);
+        const sortNewToOld =
+            callerSettings.topicPostSort === 'newest_to_oldest';
+        const usersData = await user.getUsersFields(uids, [
+            'uid',
+            'username',
+            'userslug',
+            'picture',
+        ]);
 
         const users = {};
         usersData.forEach(user => {
@@ -67,7 +82,10 @@ module.exports = function (Topics) {
         });
         await Promise.all(postData.map(p => posts.parsePost(p)));
 
-        const { tags } = await plugins.hooks.fire('filter:teasers.configureStripTags', { tags: utils.stripTags.slice(0) });
+        const { tags } = await plugins.hooks.fire(
+            'filter:teasers.configureStripTags',
+            { tags: utils.stripTags.slice(0) }
+        );
 
         const teasers = topics.map((topic, index) => {
             if (!topic) {
@@ -76,9 +94,16 @@ module.exports = function (Topics) {
 
             const topicPost = tidToPost[topic.tid];
             if (topicPost) {
-                topicPost.index = calcTeaserIndex(teaserPost, counts[index], sortNewToOld);
+                topicPost.index = calcTeaserIndex(
+                    teaserPost,
+                    counts[index],
+                    sortNewToOld
+                );
                 if (topicPost.content) {
-                    topicPost.content = utils.stripHTMLTags(replaceImgWithAltText(topicPost.content), tags);
+                    topicPost.content = utils.stripHTMLTags(
+                        replaceImgWithAltText(topicPost.content),
+                        tags
+                    );
                 }
             }
             return topicPost;
@@ -115,7 +140,10 @@ module.exports = function (Topics) {
         return await Promise.all(
             teasers.map(async postData => {
                 if (blockedUids.includes(parseInt(postData.uid, 10))) {
-                    return await getPreviousNonBlockedPost(postData, blockedUids);
+                    return await getPreviousNonBlockedPost(
+                        postData,
+                        blockedUids
+                    );
                 }
                 return postData;
             })
@@ -138,13 +166,26 @@ module.exports = function (Topics) {
 
         do {
             /* eslint-disable no-await-in-loop */
-            let pids = await db.getSortedSetRevRange(`tid:${postData.tid}:posts`, start, stop);
+            let pids = await db.getSortedSetRevRange(
+                `tid:${postData.tid}:posts`,
+                start,
+                stop
+            );
             if (!pids.length) {
                 checkedAllReplies = true;
-                const mainPid = await Topics.getTopicField(postData.tid, 'mainPid');
+                const mainPid = await Topics.getTopicField(
+                    postData.tid,
+                    'mainPid'
+                );
                 pids = [mainPid];
             }
-            const prevPosts = await posts.getPostsFields(pids, ['pid', 'uid', 'timestamp', 'tid', 'content']);
+            const prevPosts = await posts.getPostsFields(pids, [
+                'pid',
+                'uid',
+                'timestamp',
+                'tid',
+                'content',
+            ]);
             isBlocked = prevPosts.every(checkBlocked);
             start += postsPerIteration;
             stop = start + postsPerIteration - 1;
@@ -157,7 +198,12 @@ module.exports = function (Topics) {
         if (!Array.isArray(tids) || !tids.length) {
             return [];
         }
-        const topics = await Topics.getTopicsFields(tids, ['tid', 'postcount', 'teaserPid', 'mainPid']);
+        const topics = await Topics.getTopicsFields(tids, [
+            'tid',
+            'postcount',
+            'teaserPid',
+            'mainPid',
+        ]);
         return await Topics.getTeasers(topics, uid);
     };
 

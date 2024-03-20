@@ -37,19 +37,27 @@ usersController.search = async function (req, res) {
 
     const section = req.query.section || 'joindate';
 
-    searchData.pagination = pagination.create(req.query.page, searchData.pageCount, req.query);
+    searchData.pagination = pagination.create(
+        req.query.page,
+        searchData.pageCount,
+        req.query
+    );
     searchData[`section_${section}`] = true;
     searchData.displayUserSearch = true;
     await render(req, res, searchData);
 };
 
 usersController.getOnlineUsers = async function (req, res) {
-    const [userData, guests] = await Promise.all([usersController.getUsers('users:online', req.uid, req.query), require('../socket.io/admin/rooms').getTotalGuestCount()]);
+    const [userData, guests] = await Promise.all([
+        usersController.getUsers('users:online', req.uid, req.query),
+        require('../socket.io/admin/rooms').getTotalGuestCount(),
+    ]);
 
     let hiddenCount = 0;
     if (!userData.isAdminOrGlobalMod) {
         userData.users = userData.users.filter(user => {
-            const showUser = user && (user.uid === req.uid || user.userStatus !== 'offline');
+            const showUser =
+                user && (user.uid === req.uid || user.userStatus !== 'offline');
             if (!showUser) {
                 hiddenCount += 1;
             }
@@ -142,7 +150,12 @@ usersController.getUsers = async function (set, uid, query) {
     const start = Math.max(0, page - 1) * resultsPerPage;
     const stop = start + resultsPerPage - 1;
 
-    const [isAdmin, isGlobalMod, canSearch, usersData] = await Promise.all([user.isAdministrator(uid), user.isGlobalModerator(uid), privileges.global.can('search:users', uid), usersController.getUsersAndCount(set, uid, start, stop)]);
+    const [isAdmin, isGlobalMod, canSearch, usersData] = await Promise.all([
+        user.isAdministrator(uid),
+        user.isGlobalModerator(uid),
+        privileges.global.can('search:users', uid),
+        usersController.getUsersAndCount(set, uid, start, stop),
+    ]);
     const pageCount = Math.ceil(usersData.count / resultsPerPage);
     return {
         users: usersData.users,
@@ -161,7 +174,11 @@ usersController.getUsers = async function (set, uid, query) {
 usersController.getUsersAndCount = async function (set, uid, start, stop) {
     async function getCount() {
         if (set === 'users:online') {
-            return await db.sortedSetCount('users:online', Date.now() - 86400000, '+inf');
+            return await db.sortedSetCount(
+                'users:online',
+                Date.now() - 86400000,
+                '+inf'
+            );
         } else if (set === 'users:banned' || set === 'users:flags') {
             return await db.sortedSetCard(set);
         }
@@ -170,7 +187,13 @@ usersController.getUsersAndCount = async function (set, uid, start, stop) {
     async function getUsers() {
         if (set === 'users:online') {
             const count = parseInt(stop, 10) === -1 ? stop : stop - start + 1;
-            const data = await db.getSortedSetRevRangeByScoreWithScores(set, start, count, '+inf', Date.now() - 86400000);
+            const data = await db.getSortedSetRevRangeByScoreWithScores(
+                set,
+                start,
+                count,
+                '+inf',
+                Date.now() - 86400000
+            );
             const uids = data.map(d => d.value);
             const scores = data.map(d => d.score);
             const [userStatus, userData] = await Promise.all([
@@ -203,7 +226,9 @@ async function render(req, res, data) {
     const { registrationType } = meta.config;
 
     data.maximumInvites = meta.config.maximumInvites;
-    data.inviteOnly = registrationType === 'invite-only' || registrationType === 'admin-invite-only';
+    data.inviteOnly =
+        registrationType === 'invite-only' ||
+        registrationType === 'admin-invite-only';
     data.adminInviteOnly = registrationType === 'admin-invite-only';
     data.invites = await user.getInvitesNumber(req.uid);
 
@@ -212,7 +237,9 @@ async function render(req, res, data) {
         data.showInviteButton = await privileges.users.isAdministrator(req.uid);
     } else if (req.loggedIn) {
         const canInvite = await privileges.users.hasInvitePrivilege(req.uid);
-        data.showInviteButton = canInvite && (!data.maximumInvites || data.invites < data.maximumInvites);
+        data.showInviteButton =
+            canInvite &&
+            (!data.maximumInvites || data.invites < data.maximumInvites);
     }
 
     data['reputation:disabled'] = meta.config['reputation:disabled'];

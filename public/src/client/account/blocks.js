@@ -1,6 +1,11 @@
 'use strict';
 
-define('forum/account/blocks', ['forum/account/header', 'api', 'hooks', 'alerts'], function (header, api, hooks, alerts) {
+define('forum/account/blocks', [
+    'forum/account/header',
+    'api',
+    'hooks',
+    'alerts',
+], function (header, api, hooks, alerts) {
     const Blocks = {};
 
     Blocks.init = function () {
@@ -60,10 +65,17 @@ define('forum/account/blocks', ['forum/account/header', 'api', 'hooks', 'alerts'
 
         $.get(config.relative_path + '/api/' + ajaxify.currentPage)
             .done(function (payload) {
-                app.parseAndTranslate('account/blocks', 'users', payload, function (html) {
-                    $('#users-container').html(html);
-                    $('#users-container').siblings('div.alert')[html.length ? 'hide' : 'show']();
-                });
+                app.parseAndTranslate(
+                    'account/blocks',
+                    'users',
+                    payload,
+                    function (html) {
+                        $('#users-container').html(html);
+                        $('#users-container')
+                            .siblings('div.alert')
+                            [html.length ? 'hide' : 'show']();
+                    }
+                );
                 hooks.fire('action:user.blocks.toggle', { data: payload });
             })
             .fail(function () {

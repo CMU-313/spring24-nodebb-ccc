@@ -5,9 +5,13 @@ define('forum/chats/recent', ['alerts'], function (alerts) {
 
     recent.init = function () {
         require(['forum/chats'], function (Chats) {
-            $('[component="chat/recent"]').on('click', '[component="chat/recent/room"]', function () {
-                Chats.switchChat($(this).attr('data-roomid'));
-            });
+            $('[component="chat/recent"]').on(
+                'click',
+                '[component="chat/recent/room"]',
+                function () {
+                    Chats.switchChat($(this).attr('data-roomid'));
+                }
+            );
 
             $('[component="chat/recent"]').on('scroll', function () {
                 const $this = $(this);

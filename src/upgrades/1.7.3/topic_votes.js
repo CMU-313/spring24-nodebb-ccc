@@ -15,20 +15,34 @@ module.exports = {
                 await Promise.all(
                     tids.map(async tid => {
                         progress.incr();
-                        const topicData = await db.getObjectFields(`topic:${tid}`, ['mainPid', 'cid', 'pinned']);
+                        const topicData = await db.getObjectFields(
+                            `topic:${tid}`,
+                            ['mainPid', 'cid', 'pinned']
+                        );
                         if (topicData.mainPid && topicData.cid) {
-                            const postData = await db.getObject(`post:${topicData.mainPid}`);
+                            const postData = await db.getObject(
+                                `post:${topicData.mainPid}`
+                            );
                             if (postData) {
-                                const upvotes = parseInt(postData.upvotes, 10) || 0;
-                                const downvotes = parseInt(postData.downvotes, 10) || 0;
+                                const upvotes =
+                                    parseInt(postData.upvotes, 10) || 0;
+                                const downvotes =
+                                    parseInt(postData.downvotes, 10) || 0;
                                 const data = {
                                     upvotes: upvotes,
                                     downvotes: downvotes,
                                 };
                                 const votes = upvotes - downvotes;
-                                await Promise.all([db.setObject(`topic:${tid}`, data), db.sortedSetAdd('topics:votes', votes, tid)]);
+                                await Promise.all([
+                                    db.setObject(`topic:${tid}`, data),
+                                    db.sortedSetAdd('topics:votes', votes, tid),
+                                ]);
                                 if (parseInt(topicData.pinned, 10) !== 1) {
-                                    await db.sortedSetAdd(`cid:${topicData.cid}:tids:votes`, votes, tid);
+                                    await db.sortedSetAdd(
+                                        `cid:${topicData.cid}:tids:votes`,
+                                        votes,
+                                        tid
+                                    );
                                 }
                             }
                         }

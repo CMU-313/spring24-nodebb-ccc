@@ -27,7 +27,9 @@ Object.defineProperty(Minifier, 'maxThreads', {
     set: function (val) {
         maxThreads = val;
         if (!process.env.minifier_child) {
-            winston.verbose(`[minifier] utilizing a maximum of ${maxThreads} additional threads`);
+            winston.verbose(
+                `[minifier] utilizing a maximum of ${maxThreads} additional threads`
+            );
         }
     },
     configurable: true,
@@ -141,7 +143,11 @@ async function executeAction(action, fork) {
 
 actions.concat = async function concat(data) {
     if (data.files && data.files.length) {
-        const files = await async.mapLimit(data.files, 1000, async ref => await fs.promises.readFile(ref.srcPath, 'utf8'));
+        const files = await async.mapLimit(
+            data.files,
+            1000,
+            async ref => await fs.promises.readFile(ref.srcPath, 'utf8')
+        );
         const output = files.join('\n;');
         await fs.promises.writeFile(data.destPath, output);
     }
@@ -167,14 +173,18 @@ actions.minifyJS_batch = async function minifyJS_batch(data) {
 };
 
 actions.minifyJS = async function minifyJS(data) {
-    const filesToMinify = await async.mapLimit(data.files, 1000, async fileObj => {
-        const source = await fs.promises.readFile(fileObj.srcPath, 'utf8');
-        return {
-            srcPath: fileObj.srcPath,
-            filename: fileObj.filename,
-            source: source,
-        };
-    });
+    const filesToMinify = await async.mapLimit(
+        data.files,
+        1000,
+        async fileObj => {
+            const source = await fs.promises.readFile(fileObj.srcPath, 'utf8');
+            return {
+                srcPath: fileObj.srcPath,
+                filename: fileObj.filename,
+                source: source,
+            };
+        }
+    );
     await minifyAndSave({
         files: filesToMinify,
         destPath: data.destPath,
@@ -200,9 +210,14 @@ async function minifyAndSave(data) {
     });
 
     if (minified.error) {
-        throw new Error(`Error minifying ${minified.error.filename}\n${minified.error.stack}`);
+        throw new Error(
+            `Error minifying ${minified.error.filename}\n${minified.error.stack}`
+        );
     }
-    await Promise.all([fs.promises.writeFile(data.destPath, minified.code), fs.promises.writeFile(`${data.destPath}.map`, minified.map)]);
+    await Promise.all([
+        fs.promises.writeFile(data.destPath, minified.code),
+        fs.promises.writeFile(`${data.destPath}.map`, minified.map),
+    ]);
 }
 
 Minifier.js = {};

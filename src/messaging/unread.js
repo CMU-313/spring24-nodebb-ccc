@@ -17,7 +17,9 @@ module.exports = function (Messaging) {
             return;
         }
         const unreadCount = await Messaging.getUnreadCount(uid);
-        sockets.in(`uid_${uid}`).emit('event:unread.updateChatCount', unreadCount);
+        sockets
+            .in(`uid_${uid}`)
+            .emit('event:unread.updateChatCount', unreadCount);
     };
 
     Messaging.markRead = async (uid, roomId) => {

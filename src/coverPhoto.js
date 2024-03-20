@@ -32,7 +32,9 @@ function getCover(type, id) {
             id %= covers.length;
         }
         if (covers[id]) {
-            coverPhoto = covers[id].startsWith('http') ? covers[id] : relative_path + covers[id];
+            coverPhoto = covers[id].startsWith('http')
+                ? covers[id]
+                : relative_path + covers[id];
         }
         return coverPhoto;
     }

@@ -15,8 +15,17 @@ module.exports = {
             'users:joindate',
             async uids => {
                 progress.incr(uids.length);
-                const userData = await user.getUsersFields(uids, ['uid', 'fullname']);
-                const bulkAdd = userData.filter(u => u.uid && u.fullname).map(u => ['fullname:sorted', 0, `${String(u.fullname).slice(0, 255).toLowerCase()}:${u.uid}`]);
+                const userData = await user.getUsersFields(uids, [
+                    'uid',
+                    'fullname',
+                ]);
+                const bulkAdd = userData
+                    .filter(u => u.uid && u.fullname)
+                    .map(u => [
+                        'fullname:sorted',
+                        0,
+                        `${String(u.fullname).slice(0, 255).toLowerCase()}:${u.uid}`,
+                    ]);
                 await db.sortedSetAddBulk(bulkAdd);
             },
             {

@@ -12,13 +12,16 @@ const plugins = require('../src/plugins');
 describe('Plugins', () => {
     it('should load plugin data', done => {
         const pluginId = 'nodebb-plugin-markdown';
-        plugins.loadPlugin(path.join(nconf.get('base_dir'), `node_modules/${pluginId}`), err => {
-            assert.ifError(err);
-            assert(plugins.libraries[pluginId]);
-            assert(plugins.loadedHooks['static:app.load']);
+        plugins.loadPlugin(
+            path.join(nconf.get('base_dir'), `node_modules/${pluginId}`),
+            err => {
+                assert.ifError(err);
+                assert(plugins.libraries[pluginId]);
+                assert(plugins.loadedHooks['static:app.load']);
 
-            done();
-        });
+                done();
+            }
+        );
     });
 
     it('should return true if hook has listeners', done => {
@@ -212,7 +215,16 @@ describe('Plugins', () => {
     it('should get plugin data from nbbpm', done => {
         plugins.get('nodebb-plugin-markdown', (err, data) => {
             assert.ifError(err);
-            const keys = ['id', 'name', 'url', 'description', 'latest', 'installed', 'active', 'latest'];
+            const keys = [
+                'id',
+                'name',
+                'url',
+                'description',
+                'latest',
+                'installed',
+                'active',
+                'latest',
+            ];
             assert.equal(data.name, 'nodebb-plugin-markdown');
             assert.equal(data.id, 'nodebb-plugin-markdown');
             keys.forEach(key => {
@@ -225,7 +237,16 @@ describe('Plugins', () => {
     it('should get a list of plugins', done => {
         plugins.list((err, data) => {
             assert.ifError(err);
-            const keys = ['id', 'name', 'url', 'description', 'latest', 'installed', 'active', 'latest'];
+            const keys = [
+                'id',
+                'name',
+                'url',
+                'description',
+                'latest',
+                'installed',
+                'active',
+                'latest',
+            ];
             assert(Array.isArray(data));
             keys.forEach(key => {
                 assert(data[0].hasOwnProperty(key));
@@ -236,11 +257,18 @@ describe('Plugins', () => {
 
     it('should show installed plugins', done => {
         const { nodeModulesPath } = plugins;
-        plugins.nodeModulesPath = path.join(__dirname, './mocks/plugin_modules');
+        plugins.nodeModulesPath = path.join(
+            __dirname,
+            './mocks/plugin_modules'
+        );
 
         plugins.showInstalled((err, pluginsData) => {
             assert.ifError(err);
-            const paths = pluginsData.map(plugin => path.relative(plugins.nodeModulesPath, plugin.path).replace(/\\/g, '/'));
+            const paths = pluginsData.map(plugin =>
+                path
+                    .relative(plugins.nodeModulesPath, plugin.path)
+                    .replace(/\\/g, '/')
+            );
             assert(paths.indexOf('nodebb-plugin-xyz') > -1);
             assert(paths.indexOf('@nodebb/nodebb-plugin-abc') > -1);
 
@@ -277,12 +305,23 @@ describe('Plugins', () => {
 
                 assert.equal(pluginData.name, pluginName);
                 assert.equal(pluginData.id, pluginName);
-                assert.equal(pluginData.url, 'https://github.com/barisusakli/nodebb-plugin-imgur#readme');
-                assert.equal(pluginData.description, 'A Plugin that uploads images to imgur');
+                assert.equal(
+                    pluginData.url,
+                    'https://github.com/barisusakli/nodebb-plugin-imgur#readme'
+                );
+                assert.equal(
+                    pluginData.description,
+                    'A Plugin that uploads images to imgur'
+                );
                 assert.equal(pluginData.active, false);
                 assert.equal(pluginData.installed, true);
 
-                const packageFile = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+                const packageFile = JSON.parse(
+                    fs.readFileSync(
+                        path.join(__dirname, '../package.json'),
+                        'utf8'
+                    )
+                );
                 assert(packageFile.dependencies[pluginName]);
 
                 done();
@@ -305,11 +344,18 @@ describe('Plugins', () => {
             plugins.upgrade(pluginName, 'latest', (err, isActive) => {
                 assert.ifError(err);
                 assert(isActive);
-                plugins.loadPluginInfo(path.join(nconf.get('base_dir'), 'node_modules', pluginName), (err, pluginInfo) => {
-                    assert.ifError(err);
-                    assert.equal(pluginInfo.version, latest);
-                    done();
-                });
+                plugins.loadPluginInfo(
+                    path.join(
+                        nconf.get('base_dir'),
+                        'node_modules',
+                        pluginName
+                    ),
+                    (err, pluginInfo) => {
+                        assert.ifError(err);
+                        assert.equal(pluginInfo.version, latest);
+                        done();
+                    }
+                );
             });
         });
 
@@ -320,7 +366,12 @@ describe('Plugins', () => {
                 assert.equal(pluginData.installed, false);
                 assert.equal(pluginData.active, false);
 
-                const packageFile = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+                const packageFile = JSON.parse(
+                    fs.readFileSync(
+                        path.join(__dirname, '../package.json'),
+                        'utf8'
+                    )
+                );
                 assert(!packageFile.dependencies[pluginName]);
 
                 done();
@@ -330,12 +381,15 @@ describe('Plugins', () => {
 
     describe('static assets', () => {
         it('should 404 if resource does not exist', done => {
-            request.get(`${nconf.get('url')}/plugins/doesnotexist/should404.tpl`, (err, res, body) => {
-                assert.ifError(err);
-                assert.equal(res.statusCode, 404);
-                assert(body);
-                done();
-            });
+            request.get(
+                `${nconf.get('url')}/plugins/doesnotexist/should404.tpl`,
+                (err, res, body) => {
+                    assert.ifError(err);
+                    assert.equal(res.statusCode, 404);
+                    assert(body);
+                    done();
+                }
+            );
         });
 
         it('should 404 if resource does not exist', done => {
@@ -360,7 +414,10 @@ describe('Plugins', () => {
     });
 
     describe('plugin state set in configuration', () => {
-        const activePlugins = ['nodebb-plugin-markdown', 'nodebb-plugin-mentions'];
+        const activePlugins = [
+            'nodebb-plugin-markdown',
+            'nodebb-plugin-mentions',
+        ];
         const inactivePlugin = 'nodebb-plugin-emoji';
         beforeEach(done => {
             nconf.set('plugins:active', activePlugins);
@@ -390,13 +447,25 @@ describe('Plugins', () => {
         it('should get a list of plugins from configuration', done => {
             plugins.list((err, data) => {
                 assert.ifError(err);
-                const keys = ['id', 'name', 'url', 'description', 'latest', 'installed', 'active', 'latest'];
+                const keys = [
+                    'id',
+                    'name',
+                    'url',
+                    'description',
+                    'latest',
+                    'installed',
+                    'active',
+                    'latest',
+                ];
                 assert(Array.isArray(data));
                 keys.forEach(key => {
                     assert(data[0].hasOwnProperty(key));
                 });
                 data.forEach(pluginData => {
-                    assert.equal(pluginData.active, activePlugins.includes(pluginData.id));
+                    assert.equal(
+                        pluginData.active,
+                        activePlugins.includes(pluginData.id)
+                    );
                 });
                 done();
             });
@@ -415,23 +484,27 @@ describe('Plugins', () => {
         });
 
         it('should not deactivate a plugin if active plugins are set in configuration', done => {
-            assert.rejects(plugins.toggleActive(activePlugins[0]), Error).then(() => {
-                plugins.isActive(activePlugins[0], (err, isActive) => {
-                    assert.ifError(err);
-                    assert(isActive);
-                    done();
+            assert
+                .rejects(plugins.toggleActive(activePlugins[0]), Error)
+                .then(() => {
+                    plugins.isActive(activePlugins[0], (err, isActive) => {
+                        assert.ifError(err);
+                        assert(isActive);
+                        done();
+                    });
                 });
-            });
         });
 
         it('should not activate a plugin if active plugins are set in configuration', done => {
-            assert.rejects(plugins.toggleActive(inactivePlugin), Error).then(() => {
-                plugins.isActive(inactivePlugin, (err, isActive) => {
-                    assert.ifError(err);
-                    assert(!isActive);
-                    done();
+            assert
+                .rejects(plugins.toggleActive(inactivePlugin), Error)
+                .then(() => {
+                    plugins.isActive(inactivePlugin, (err, isActive) => {
+                        assert.ifError(err);
+                        assert(!isActive);
+                        done();
+                    });
                 });
-            });
         });
     });
 });

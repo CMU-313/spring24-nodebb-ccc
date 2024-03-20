@@ -84,7 +84,11 @@ Tags.parse = async (req, data, meta, link) => {
         defaultLinks.push({
             rel: 'search',
             type: 'application/opensearchdescription+xml',
-            title: utils.escapeHTML(String(Meta.config.title || Meta.config.browserTitle || 'NodeBB')),
+            title: utils.escapeHTML(
+                String(
+                    Meta.config.title || Meta.config.browserTitle || 'NodeBB'
+                )
+            ),
             href: `${relative_path}/osd.xml`,
         });
     }
@@ -203,7 +207,9 @@ Tags.parse = async (req, data, meta, link) => {
     await addSiteOGImage(meta);
 
     addIfNotExists(meta, 'property', 'og:title', Meta.config.title || 'NodeBB');
-    const ogUrl = url + (req.originalUrl !== '/' ? stripRelativePath(req.originalUrl) : '');
+    const ogUrl =
+        url +
+        (req.originalUrl !== '/' ? stripRelativePath(req.originalUrl) : '');
     addIfNotExists(meta, 'property', 'og:url', ogUrl);
     addIfNotExists(meta, 'name', 'description', Meta.config.description);
     addIfNotExists(meta, 'property', 'og:description', Meta.config.description);

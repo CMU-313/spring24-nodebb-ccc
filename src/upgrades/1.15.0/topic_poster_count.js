@@ -20,7 +20,10 @@ module.exports = {
                 const bulkSet = [];
                 for (let i = 0; i < tids.length; i++) {
                     if (counts[i] > 0) {
-                        bulkSet.push([`topic:${tids[i]}`, { postercount: counts[i] }]);
+                        bulkSet.push([
+                            `topic:${tids[i]}`,
+                            { postercount: counts[i] },
+                        ]);
                     }
                 }
                 await db.setObjectBulk(bulkSet);

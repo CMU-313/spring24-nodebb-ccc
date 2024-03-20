@@ -26,11 +26,23 @@ module.exports = {
                     // privilege events we're missing type field
                     if (!eventData.type && eventData.privilege) {
                         eventData.type = 'privilege-change';
-                        await db.setObjectField(`event:${eid}`, 'type', 'privilege-change');
-                        await db.sortedSetAdd(`events:time:${eventData.type}`, eventData.timestamp, eid);
+                        await db.setObjectField(
+                            `event:${eid}`,
+                            'type',
+                            'privilege-change'
+                        );
+                        await db.sortedSetAdd(
+                            `events:time:${eventData.type}`,
+                            eventData.timestamp,
+                            eid
+                        );
                         return;
                     }
-                    await db.sortedSetAdd(`events:time:${eventData.type || ''}`, eventData.timestamp, eid);
+                    await db.sortedSetAdd(
+                        `events:time:${eventData.type || ''}`,
+                        eventData.timestamp,
+                        eid
+                    );
                 }
             },
             {

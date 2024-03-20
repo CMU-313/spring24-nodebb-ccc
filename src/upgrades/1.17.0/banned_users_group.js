@@ -11,7 +11,10 @@ module.exports = {
     timestamp: Date.UTC(2020, 11, 13),
     method: async function () {
         const { progress } = this;
-        const timestamp = await db.getObjectField('group:administrators', 'timestamp');
+        const timestamp = await db.getObjectField(
+            'group:administrators',
+            'timestamp'
+        );
         const bannedExists = await groups.exists('banned-users');
         if (!bannedExists) {
             await groups.create({
@@ -36,7 +39,15 @@ module.exports = {
                     uids
                 );
 
-                await db.sortedSetRemove(['group:registered-users:members', 'group:verified-users:members', 'group:unverified-users:members', 'group:Global Moderators:members'], uids);
+                await db.sortedSetRemove(
+                    [
+                        'group:registered-users:members',
+                        'group:verified-users:members',
+                        'group:unverified-users:members',
+                        'group:Global Moderators:members',
+                    ],
+                    uids
+                );
             },
             {
                 batch: 500,
@@ -44,15 +55,45 @@ module.exports = {
             }
         );
 
-        const bannedCount = await db.sortedSetCard('group:banned-users:members');
-        const registeredCount = await db.sortedSetCard('group:registered-users:members');
-        const verifiedCount = await db.sortedSetCard('group:verified-users:members');
-        const unverifiedCount = await db.sortedSetCard('group:unverified-users:members');
-        const globalModCount = await db.sortedSetCard('group:Global Moderators:members');
-        await db.setObjectField('group:banned-users', 'memberCount', bannedCount);
-        await db.setObjectField('group:registered-users', 'memberCount', registeredCount);
-        await db.setObjectField('group:verified-users', 'memberCount', verifiedCount);
-        await db.setObjectField('group:unverified-users', 'memberCount', unverifiedCount);
-        await db.setObjectField('group:Global Moderators', 'memberCount', globalModCount);
+        const bannedCount = await db.sortedSetCard(
+            'group:banned-users:members'
+        );
+        const registeredCount = await db.sortedSetCard(
+            'group:registered-users:members'
+        );
+        const verifiedCount = await db.sortedSetCard(
+            'group:verified-users:members'
+        );
+        const unverifiedCount = await db.sortedSetCard(
+            'group:unverified-users:members'
+        );
+        const globalModCount = await db.sortedSetCard(
+            'group:Global Moderators:members'
+        );
+        await db.setObjectField(
+            'group:banned-users',
+            'memberCount',
+            bannedCount
+        );
+        await db.setObjectField(
+            'group:registered-users',
+            'memberCount',
+            registeredCount
+        );
+        await db.setObjectField(
+            'group:verified-users',
+            'memberCount',
+            verifiedCount
+        );
+        await db.setObjectField(
+            'group:unverified-users',
+            'memberCount',
+            unverifiedCount
+        );
+        await db.setObjectField(
+            'group:Global Moderators',
+            'memberCount',
+            globalModCount
+        );
     },
 };

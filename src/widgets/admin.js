@@ -8,7 +8,10 @@ const index = require('./index');
 const admin = module.exports;
 
 admin.get = async function () {
-    const [areas, availableWidgets] = await Promise.all([admin.getAreas(), getAvailableWidgets()]);
+    const [areas, availableWidgets] = await Promise.all([
+        admin.getAreas(),
+        getAvailableWidgets(),
+    ]);
 
     return {
         templates: buildTemplatesFromAreas(areas),
@@ -35,10 +38,15 @@ admin.getAreas = async function () {
         },
     ];
 
-    const areas = await plugins.hooks.fire('filter:widgets.getAreas', defaultAreas);
+    const areas = await plugins.hooks.fire(
+        'filter:widgets.getAreas',
+        defaultAreas
+    );
 
     areas.push({ name: 'Draft Zone', template: 'global', location: 'drafts' });
-    const areaData = await Promise.all(areas.map(area => index.getArea(area.template, area.location)));
+    const areaData = await Promise.all(
+        areas.map(area => index.getArea(area.template, area.location))
+    );
     areas.forEach((area, i) => {
         area.data = areaData[i];
     });
@@ -46,7 +54,10 @@ admin.getAreas = async function () {
 };
 
 async function getAvailableWidgets() {
-    const [availableWidgets, adminTemplate] = await Promise.all([plugins.hooks.fire('filter:widgets.getWidgets', []), renderAdminTemplate()]);
+    const [availableWidgets, adminTemplate] = await Promise.all([
+        plugins.hooks.fire('filter:widgets.getWidgets', []),
+        renderAdminTemplate(),
+    ]);
     availableWidgets.forEach(w => {
         w.content += adminTemplate;
     });
@@ -54,7 +65,11 @@ async function getAvailableWidgets() {
 }
 
 async function renderAdminTemplate() {
-    const groupsData = await groups.getNonPrivilegeGroups('groups:createtime', 0, -1);
+    const groupsData = await groups.getNonPrivilegeGroups(
+        'groups:createtime',
+        0,
+        -1
+    );
     groupsData.sort((a, b) => b.system - a.system);
     return await webserver.app.renderAsync('admin/partials/widget-settings', {
         groups: groupsData,

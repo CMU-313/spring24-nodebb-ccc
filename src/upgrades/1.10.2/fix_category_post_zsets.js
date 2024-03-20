@@ -25,7 +25,11 @@ module.exports = {
                 );
 
                 await db.sortedSetRemove(keys, pids);
-                const bulkAdd = postData.map((p, i) => [`cid:${categoryData[i].cid}:pids`, p.score, p.value]);
+                const bulkAdd = postData.map((p, i) => [
+                    `cid:${categoryData[i].cid}:pids`,
+                    p.score,
+                    p.value,
+                ]);
                 await db.sortedSetAddBulk(bulkAdd);
                 progress.incr(postData.length);
             },

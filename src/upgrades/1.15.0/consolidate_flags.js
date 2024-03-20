@@ -13,7 +13,14 @@ module.exports = {
 
         let flags = await db.getSortedSetRange('flags:datetime', 0, -1);
         flags = flags.map(flagId => `flag:${flagId}`);
-        flags = await db.getObjectsFields(flags, ['flagId', 'type', 'targetId', 'uid', 'description', 'datetime']);
+        flags = await db.getObjectsFields(flags, [
+            'flagId',
+            'type',
+            'targetId',
+            'uid',
+            'description',
+            'datetime',
+        ]);
         progress.total = flags.length;
 
         await batch.processArray(
@@ -26,17 +33,46 @@ module.exports = {
                         const methods = [];
                         switch (flagObj.type) {
                             case 'post':
-                                methods.push(posts.setPostField.bind(posts, flagObj.targetId, 'flagId', flagObj.flagId));
+                                methods.push(
+                                    posts.setPostField.bind(
+                                        posts,
+                                        flagObj.targetId,
+                                        'flagId',
+                                        flagObj.flagId
+                                    )
+                                );
                                 break;
 
                             case 'user':
-                                methods.push(user.setUserField.bind(user, flagObj.targetId, 'flagId', flagObj.flagId));
+                                methods.push(
+                                    user.setUserField.bind(
+                                        user,
+                                        flagObj.targetId,
+                                        'flagId',
+                                        flagObj.flagId
+                                    )
+                                );
                                 break;
                         }
 
-                        methods.push(db.sortedSetAdd.bind(db, `flag:${flagObj.flagId}:reports`, flagObj.datetime, String(flagObj.description).slice(0, 250)), db.sortedSetAdd.bind(db, `flag:${flagObj.flagId}:reporters`, flagObj.datetime, flagObj.uid));
+                        methods.push(
+                            db.sortedSetAdd.bind(
+                                db,
+                                `flag:${flagObj.flagId}:reports`,
+                                flagObj.datetime,
+                                String(flagObj.description).slice(0, 250)
+                            ),
+                            db.sortedSetAdd.bind(
+                                db,
+                                `flag:${flagObj.flagId}:reporters`,
+                                flagObj.datetime,
+                                flagObj.uid
+                            )
+                        );
 
-                        await Promise.all(methods.map(async method => method()));
+                        await Promise.all(
+                            methods.map(async method => method())
+                        );
                     })
                 );
             },

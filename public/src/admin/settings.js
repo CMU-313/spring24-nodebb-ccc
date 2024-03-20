@@ -1,6 +1,12 @@
 'use strict';
 
-define('admin/settings', ['uploader', 'mousetrap', 'hooks', 'alerts', 'settings'], function (uploader, mousetrap, hooks, alerts, settings) {
+define('admin/settings', [
+    'uploader',
+    'mousetrap',
+    'hooks',
+    'alerts',
+    'settings',
+], function (uploader, mousetrap, hooks, alerts, settings) {
     const Settings = {};
 
     Settings.populateTOC = function () {
@@ -12,10 +18,14 @@ define('admin/settings', ['uploader', 'mousetrap', 'hooks', 'alerts', 'settings'
                 const anchor = header.toLowerCase().replace(/ /g, '-').trim();
 
                 $(this).prepend('<a name="' + anchor + '"></a>');
-                $('.section-content ul').append('<li><a href="#' + anchor + '">' + header + '</a></li>');
+                $('.section-content ul').append(
+                    '<li><a href="#' + anchor + '">' + header + '</a></li>'
+                );
             });
 
-            const scrollTo = $('a[name="' + window.location.hash.replace('#', '') + '"]');
+            const scrollTo = $(
+                'a[name="' + window.location.hash.replace('#', '') + '"]'
+            );
             if (scrollTo.length) {
                 $('html, body').animate(
                     {
@@ -45,7 +55,13 @@ define('admin/settings', ['uploader', 'mousetrap', 'hooks', 'alerts', 'settings'
             app.flags = app.flags || {};
             app.flags._unsaved = true;
         });
-        const defaultInputs = ['text', 'hidden', 'password', 'textarea', 'number'];
+        const defaultInputs = [
+            'text',
+            'hidden',
+            'password',
+            'textarea',
+            'number',
+        ];
         for (x = 0; x < numFields; x += 1) {
             field = fields.eq(x);
             key = field.attr('data-field');
@@ -54,8 +70,15 @@ define('admin/settings', ['uploader', 'mousetrap', 'hooks', 'alerts', 'settings'
                 if (field.is('input') && inputType === 'checkbox') {
                     const checked = parseInt(app.config[key], 10) === 1;
                     field.prop('checked', checked);
-                    field.parents('.mdl-switch').toggleClass('is-checked', checked);
-                } else if (field.is('textarea') || field.is('select') || (field.is('input') && defaultInputs.indexOf(inputType) !== -1)) {
+                    field
+                        .parents('.mdl-switch')
+                        .toggleClass('is-checked', checked);
+                } else if (
+                    field.is('textarea') ||
+                    field.is('select') ||
+                    (field.is('input') &&
+                        defaultInputs.indexOf(inputType) !== -1)
+                ) {
                     field.val(app.config[key]);
                 }
             }
@@ -68,7 +91,9 @@ define('admin/settings', ['uploader', 'mousetrap', 'hooks', 'alerts', 'settings'
         saveBtn.off('click').on('click', function (e) {
             e.preventDefault();
 
-            const ok = settings.check(document.querySelectorAll('#content [data-field]'));
+            const ok = settings.check(
+                document.querySelectorAll('#content [data-field]')
+            );
             if (!ok) {
                 return;
             }
@@ -134,7 +159,9 @@ define('admin/settings', ['uploader', 'mousetrap', 'hooks', 'alerts', 'settings'
                         description: uploadBtn.attr('data-description'),
                         route: uploadBtn.attr('data-route'),
                         params: {},
-                        showHelp: uploadBtn.attr('data-help') ? uploadBtn.attr('data-help') === 1 : undefined,
+                        showHelp: uploadBtn.attr('data-help')
+                            ? uploadBtn.attr('data-help') === 1
+                            : undefined,
                         accept: uploadBtn.attr('data-accept'),
                     },
                     function (image) {

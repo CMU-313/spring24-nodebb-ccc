@@ -9,11 +9,17 @@ const activePlugins = require('./build/active_plugins.json');
 let relativePath = nconf.get('relative_path');
 if (relativePath === undefined) {
     nconf.file({
-        file: path.resolve(__dirname, nconf.any(['config', 'CONFIG']) || 'config.json'),
+        file: path.resolve(
+            __dirname,
+            nconf.any(['config', 'CONFIG']) || 'config.json'
+        ),
     });
 
     const urlObject = url.parse(nconf.get('url'));
-    relativePath = urlObject.pathname !== '/' ? urlObject.pathname.replace(/\/+$/, '') : '';
+    relativePath =
+        urlObject.pathname !== '/'
+            ? urlObject.pathname.replace(/\/+$/, '')
+            : '';
 }
 
 module.exports = {
@@ -29,7 +35,9 @@ module.exports = {
         publicPath: `${relativePath}/assets/`,
         clean: {
             keep(asset) {
-                return asset === 'installer.min.js' || !asset.endsWith('.min.js');
+                return (
+                    asset === 'installer.min.js' || !asset.endsWith('.min.js')
+                );
             },
         },
     },
@@ -39,7 +47,12 @@ module.exports = {
     },
     resolve: {
         symlinks: false,
-        modules: ['build/public/src/modules', 'build/public/src', 'node_modules', ...activePlugins.map(p => `node_modules/${p}/node_modules`)],
+        modules: [
+            'build/public/src/modules',
+            'build/public/src',
+            'node_modules',
+            ...activePlugins.map(p => `node_modules/${p}/node_modules`),
+        ],
         extensions: ['.js', '.json', '.wasm', '.mjs'],
         alias: {
             assets: path.resolve(__dirname, 'build/public'),
@@ -50,8 +63,14 @@ module.exports = {
             Chart: path.resolve(__dirname, 'node_modules/chart.js'),
             Sortable: path.resolve(__dirname, 'node_modules/sortablejs'),
             cropper: path.resolve(__dirname, 'node_modules/cropperjs'),
-            'jquery-ui/widgets': path.resolve(__dirname, 'node_modules/jquery-ui/ui/widgets'),
-            'ace/ace': path.resolve(__dirname, 'build/public/src/modules/ace-editor.js'),
+            'jquery-ui/widgets': path.resolve(
+                __dirname,
+                'node_modules/jquery-ui/ui/widgets'
+            ),
+            'ace/ace': path.resolve(
+                __dirname,
+                'build/public/src/modules/ace-editor.js'
+            ),
         },
     },
     module: {

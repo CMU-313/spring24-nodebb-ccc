@@ -12,13 +12,17 @@ define('admin/settings/social', ['alerts'], function (alerts) {
                 }
             });
 
-            socket.emit('admin.social.savePostSharingNetworks', networks, function (err) {
-                if (err) {
-                    return alerts.error(err);
-                }
+            socket.emit(
+                'admin.social.savePostSharingNetworks',
+                networks,
+                function (err) {
+                    if (err) {
+                        return alerts.error(err);
+                    }
 
-                alerts.success('[[admin/settings/social:save-success]]');
-            });
+                    alerts.success('[[admin/settings/social:save-success]]');
+                }
+            );
         });
     };
 

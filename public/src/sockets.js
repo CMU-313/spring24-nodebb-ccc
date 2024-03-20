@@ -56,7 +56,13 @@ app = window.app || {};
         }
 
         const reconnectEl = $('#reconnect');
-        $('#reconnect-alert').removeClass('alert-danger pointer').addClass('alert-warning').find('p').translateText(`[[global:reconnecting-message, ${config.siteTitle}]]`);
+        $('#reconnect-alert')
+            .removeClass('alert-danger pointer')
+            .addClass('alert-warning')
+            .find('p')
+            .translateText(
+                `[[global:reconnecting-message, ${config.siteTitle}]]`
+            );
 
         reconnectEl.html('<i class="fa fa-spinner fa-spin"></i>');
         socket.connect();
@@ -71,7 +77,12 @@ app = window.app || {};
             const reconnectEl = $('#reconnect');
             reconnectEl.html('<i class="fa fa-plug text-danger"></i>');
 
-            $('#reconnect-alert').removeClass('alert-warning').addClass('alert-danger pointer').find('p').translateText('[[error:socket-reconnect-failed]]').one('click', app.reconnect);
+            $('#reconnect-alert')
+                .removeClass('alert-warning')
+                .addClass('alert-danger pointer')
+                .find('p')
+                .translateText('[[error:socket-reconnect-failed]]')
+                .one('click', app.reconnect);
 
             $(window).one('focus', app.reconnect);
         });
@@ -102,12 +113,20 @@ app = window.app || {};
             });
         });
         socket.on('event:deprecated_call', function (data) {
-            console.warn('[socket.io] ', data.eventName, 'is now deprecated in favour of', data.replacement);
+            console.warn(
+                '[socket.io] ',
+                data.eventName,
+                'is now deprecated in favour of',
+                data.replacement
+            );
         });
 
         socket.removeAllListeners('event:nodebb.ready');
         socket.on('event:nodebb.ready', function (data) {
-            if (data.hostname === app.upstreamHost && (!app.cacheBuster || app.cacheBuster !== data['cache-buster'])) {
+            if (
+                data.hostname === app.upstreamHost &&
+                (!app.cacheBuster || app.cacheBuster !== data['cache-buster'])
+            ) {
                 app.cacheBuster = data['cache-buster'];
                 require(['alerts'], function (alerts) {
                     alerts.alert({
@@ -209,7 +228,13 @@ app = window.app || {};
 
     function onEventBanned(data) {
         require(['bootbox', 'translator'], function (bootbox, translator) {
-            const message = data.until ? translator.compile('error:user-banned-reason-until', new Date(data.until).toLocaleString(), data.reason) : '[[error:user-banned-reason, ' + data.reason + ']]';
+            const message = data.until
+                ? translator.compile(
+                      'error:user-banned-reason-until',
+                      new Date(data.until).toLocaleString(),
+                      data.reason
+                  )
+                : '[[error:user-banned-reason, ' + data.reason + ']]';
             translator.translate(message, function (message) {
                 bootbox.alert({
                     title: '[[error:user-banned]]',
@@ -236,7 +261,15 @@ app = window.app || {};
         });
     }
 
-    if (config.socketioOrigins && config.socketioOrigins !== '*:*' && config.socketioOrigins.indexOf(location.hostname) === -1) {
-        console.error('You are accessing the forum from an unknown origin. This will likely result in websockets failing to connect. \n' + 'To fix this, set the `"url"` value in `config.json` to the URL at which you access the site. \n' + 'For more information, see this FAQ topic: https://community.nodebb.org/topic/13388');
+    if (
+        config.socketioOrigins &&
+        config.socketioOrigins !== '*:*' &&
+        config.socketioOrigins.indexOf(location.hostname) === -1
+    ) {
+        console.error(
+            'You are accessing the forum from an unknown origin. This will likely result in websockets failing to connect. \n' +
+                'To fix this, set the `"url"` value in `config.json` to the URL at which you access the site. \n' +
+                'For more information, see this FAQ topic: https://community.nodebb.org/topic/13388'
+        );
     }
 })();

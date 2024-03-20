@@ -39,8 +39,14 @@ async function notifyUids(uid, uids, type, result) {
 
     const watchStates = await getWatchStates(watchStateUids, tid, cid);
 
-    const categoryWatchStates = _.zipObject(watchStateUids, watchStates.categoryWatchStates);
-    const topicFollowState = _.zipObject(watchStateUids, watchStates.topicFollowed);
+    const categoryWatchStates = _.zipObject(
+        watchStateUids,
+        watchStates.categoryWatchStates
+    );
+    const topicFollowState = _.zipObject(
+        watchStateUids,
+        watchStates.topicFollowed
+    );
     uids = filterTidCidIgnorers(watchStateUids, watchStates);
     uids = await user.blocks.filterUids(uid, uids);
     uids = await user.blocks.filterUids(post.topic.uid, uids);
@@ -72,20 +78,43 @@ async function getWatchStates(uids, tid, cid) {
 }
 
 function filterTidCidIgnorers(uids, watchStates) {
-    return uids.filter((uid, index) => watchStates.topicFollowed[index] || (!watchStates.topicIgnored[index] && watchStates.categoryWatchStates[index] !== categories.watchStates.ignoring));
+    return uids.filter(
+        (uid, index) =>
+            watchStates.topicFollowed[index] ||
+            (!watchStates.topicIgnored[index] &&
+                watchStates.categoryWatchStates[index] !==
+                    categories.watchStates.ignoring)
+    );
 }
 
-SocketHelpers.sendNotificationToPostOwner = async function (pid, fromuid, command, notification) {
+SocketHelpers.sendNotificationToPostOwner = async function (
+    pid,
+    fromuid,
+    command,
+    notification
+) {
     if (!pid || !fromuid || !notification) {
         return;
     }
     fromuid = parseInt(fromuid, 10);
     const postData = await posts.getPostFields(pid, ['tid', 'uid', 'content']);
-    const [canRead, isIgnoring] = await Promise.all([privileges.posts.can('topics:read', pid, postData.uid), topics.isIgnoring([postData.tid], postData.uid)]);
-    if (!canRead || isIgnoring[0] || !postData.uid || fromuid === postData.uid) {
+    const [canRead, isIgnoring] = await Promise.all([
+        privileges.posts.can('topics:read', pid, postData.uid),
+        topics.isIgnoring([postData.tid], postData.uid),
+    ]);
+    if (
+        !canRead ||
+        isIgnoring[0] ||
+        !postData.uid ||
+        fromuid === postData.uid
+    ) {
         return;
     }
-    const [userData, topicTitle, postObj] = await Promise.all([user.getUserFields(fromuid, ['username']), topics.getTopicField(postData.tid, 'title'), posts.parsePost(postData)]);
+    const [userData, topicTitle, postObj] = await Promise.all([
+        user.getUserFields(fromuid, ['username']),
+        topics.getTopicField(postData.tid, 'title'),
+        posts.parsePost(postData),
+    ]);
 
     const { displayname } = userData;
 
@@ -108,14 +137,22 @@ SocketHelpers.sendNotificationToPostOwner = async function (pid, fromuid, comman
     notifications.push(notifObj, [postData.uid]);
 };
 
-SocketHelpers.sendNotificationToTopicOwner = async function (tid, fromuid, command, notification) {
+SocketHelpers.sendNotificationToTopicOwner = async function (
+    tid,
+    fromuid,
+    command,
+    notification
+) {
     if (!tid || !fromuid || !notification) {
         return;
     }
 
     fromuid = parseInt(fromuid, 10);
 
-    const [userData, topicData] = await Promise.all([user.getUserFields(fromuid, ['username']), topics.getTopicFields(tid, ['uid', 'slug', 'title'])]);
+    const [userData, topicData] = await Promise.all([
+        user.getUserFields(fromuid, ['username']),
+        topics.getTopicFields(tid, ['uid', 'slug', 'title']),
+    ]);
 
     if (fromuid === topicData.uid) {
         return;
@@ -140,7 +177,14 @@ SocketHelpers.sendNotificationToTopicOwner = async function (tid, fromuid, comma
 };
 
 SocketHelpers.upvote = async function (data, notification) {
-    if (!data || !data.post || !data.post.uid || !data.post.votes || !data.post.pid || !data.fromuid) {
+    if (
+        !data ||
+        !data.post ||
+        !data.post.uid ||
+        !data.post.votes ||
+        !data.post.pid ||
+        !data.fromuid
+    ) {
         return;
     }
 
@@ -160,7 +204,10 @@ SocketHelpers.upvote = async function (data, notification) {
             return votes > 0 && votes % 10 === 0;
         },
         threshold: function () {
-            return [1, 5, 10, 25].includes(votes) || (votes >= 50 && votes % 50 === 0);
+            return (
+                [1, 5, 10, 25].includes(votes) ||
+                (votes >= 50 && votes % 50 === 0)
+            );
         },
         logarithmic: function () {
             return votes > 1 && Math.log10(votes) % 1 === 0;
@@ -173,7 +220,12 @@ SocketHelpers.upvote = async function (data, notification) {
     const should = shouldNotify[settings.upvoteNotifFreq] || shouldNotify.all;
 
     if (should()) {
-        SocketHelpers.sendNotificationToPostOwner(pid, fromuid, 'upvote', notification);
+        SocketHelpers.sendNotificationToPostOwner(
+            pid,
+            fromuid,
+            'upvote',
+            notification
+        );
     }
 };
 

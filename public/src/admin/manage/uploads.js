@@ -1,6 +1,11 @@
 'use strict';
 
-define('admin/manage/uploads', ['api', 'bootbox', 'alerts', 'uploader'], function (api, bootbox, alerts, uploader) {
+define('admin/manage/uploads', [
+    'api',
+    'bootbox',
+    'alerts',
+    'uploader',
+], function (api, bootbox, alerts, uploader) {
     const Uploads = {};
 
     Uploads.init = function () {
@@ -19,36 +24,42 @@ define('admin/manage/uploads', ['api', 'bootbox', 'alerts', 'uploader'], functio
 
         $('.delete').on('click', function () {
             const file = $(this).parents('[data-path]');
-            bootbox.confirm('[[admin/manage/uploads:confirm-delete]]', function (ok) {
-                if (!ok) {
-                    return;
-                }
+            bootbox.confirm(
+                '[[admin/manage/uploads:confirm-delete]]',
+                function (ok) {
+                    if (!ok) {
+                        return;
+                    }
 
-                api.del('/files', {
-                    path: file.attr('data-path'),
-                })
-                    .then(() => {
-                        file.remove();
+                    api.del('/files', {
+                        path: file.attr('data-path'),
                     })
-                    .catch(alerts.error);
-            });
+                        .then(() => {
+                            file.remove();
+                        })
+                        .catch(alerts.error);
+                }
+            );
         });
 
         $('#new-folder').on('click', async function () {
-            bootbox.prompt('[[admin/manage/uploads:name-new-folder]]', newFolderName => {
-                if (!newFolderName || !newFolderName.trim()) {
-                    return;
-                }
+            bootbox.prompt(
+                '[[admin/manage/uploads:name-new-folder]]',
+                newFolderName => {
+                    if (!newFolderName || !newFolderName.trim()) {
+                        return;
+                    }
 
-                api.put('/files/folder', {
-                    path: ajaxify.data.currentFolder,
-                    folderName: newFolderName,
-                })
-                    .then(() => {
-                        ajaxify.refresh();
+                    api.put('/files/folder', {
+                        path: ajaxify.data.currentFolder,
+                        folderName: newFolderName,
                     })
-                    .catch(alerts.error);
-            });
+                        .then(() => {
+                            ajaxify.refresh();
+                        })
+                        .catch(alerts.error);
+                }
+            );
         });
     };
 

@@ -30,7 +30,9 @@ define('admin/extend/rewards', ['alerts'], function (alerts) {
                     if (err) {
                         alerts.error(err);
                     } else {
-                        alerts.success('[[admin/extend/rewards:alert.delete-success]]');
+                        alerts.success(
+                            '[[admin/extend/rewards:alert.delete-success]]'
+                        );
                     }
                 });
 
@@ -42,7 +44,11 @@ define('admin/extend/rewards', ['alerts'], function (alerts) {
                 const disabled = btn.hasClass('btn-success');
                 btn.toggleClass('btn-warning')
                     .toggleClass('btn-success')
-                    .translateHtml('[[admin/extend/rewards:' + (disabled ? 'disable' : 'enable') + ']]');
+                    .translateHtml(
+                        '[[admin/extend/rewards:' +
+                            (disabled ? 'disable' : 'enable') +
+                            ']]'
+                    );
                 // send disable api call
                 return false;
             });
@@ -88,20 +94,34 @@ define('admin/extend/rewards', ['alerts'], function (alerts) {
         }
 
         if (!inputs) {
-            return alerts.error('[[admin/extend/rewards:alert.no-inputs-found]] ' + el.attr('data-selected'));
+            return alerts.error(
+                '[[admin/extend/rewards:alert.no-inputs-found]] ' +
+                    el.attr('data-selected')
+            );
         }
 
         inputs.forEach(function (input) {
             html += '<label for="' + input.name + '">' + input.label + '<br />';
             switch (input.type) {
                 case 'select':
-                    html += '<select class="form-control" name="' + input.name + '">';
+                    html +=
+                        '<select class="form-control" name="' +
+                        input.name +
+                        '">';
                     input.values.forEach(function (value) {
-                        html += '<option value="' + value.value + '">' + value.name + '</option>';
+                        html +=
+                            '<option value="' +
+                            value.value +
+                            '">' +
+                            value.name +
+                            '</option>';
                     });
                     break;
                 case 'text':
-                    html += '<input type="text" class="form-control" name="' + input.name + '" />';
+                    html +=
+                        '<input type="text" class="form-control" name="' +
+                        input.name +
+                        '" />';
                     break;
             }
             html += '</label><br />';
@@ -141,10 +161,15 @@ define('admin/extend/rewards', ['alerts'], function (alerts) {
             rewards: available,
         };
 
-        app.parseAndTranslate('admin/extend/rewards', 'active', data, function (li) {
-            ul.append(li);
-            li.find('select').val('');
-        });
+        app.parseAndTranslate(
+            'admin/extend/rewards',
+            'active',
+            data,
+            function (li) {
+                ul.append(li);
+                li.find('select').val('');
+            }
+        );
     }
 
     function saveRewards() {
@@ -169,19 +194,25 @@ define('admin/extend/rewards', ['alerts'], function (alerts) {
             activeRewards.push(data);
         });
 
-        socket.emit('admin.rewards.save', activeRewards, function (err, result) {
-            if (err) {
-                alerts.error(err);
-            } else {
-                alerts.success('[[admin/extend/rewards:alert.save-success]]');
-                // newly added rewards are missing data-id, update to prevent rewards getting duplicated
-                $('#active li').each(function (index) {
-                    if (!$(this).attr('data-id')) {
-                        $(this).attr('data-id', result[index].id);
-                    }
-                });
+        socket.emit(
+            'admin.rewards.save',
+            activeRewards,
+            function (err, result) {
+                if (err) {
+                    alerts.error(err);
+                } else {
+                    alerts.success(
+                        '[[admin/extend/rewards:alert.save-success]]'
+                    );
+                    // newly added rewards are missing data-id, update to prevent rewards getting duplicated
+                    $('#active li').each(function (index) {
+                        if (!$(this).attr('data-id')) {
+                            $(this).attr('data-id', result[index].id);
+                        }
+                    });
+                }
             }
-        });
+        );
     }
 
     return rewards;

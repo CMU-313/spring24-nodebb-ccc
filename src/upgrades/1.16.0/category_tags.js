@@ -12,13 +12,18 @@ module.exports = {
         const { progress } = this;
 
         async function getTopicsTags(tids) {
-            return await db.getSetsMembers(tids.map(tid => `topic:${tid}:tags`));
+            return await db.getSetsMembers(
+                tids.map(tid => `topic:${tid}:tags`)
+            );
         }
 
         await batch.processSortedSet(
             'topics:tid',
             async tids => {
-                const [topicData, tags] = await Promise.all([topics.getTopicsFields(tids, ['tid', 'cid', 'timestamp']), getTopicsTags(tids)]);
+                const [topicData, tags] = await Promise.all([
+                    topics.getTopicsFields(tids, ['tid', 'cid', 'timestamp']),
+                    getTopicsTags(tids),
+                ]);
                 const topicsWithTags = topicData
                     .map((t, i) => {
                         t.tags = tags[i];
@@ -33,7 +38,9 @@ module.exports = {
                         topicObj.timestamp,
                         topicObj.tid
                     );
-                    const counts = await db.sortedSetsCard(tags.map(tag => `cid:${cid}:tag:${tag}:topics`));
+                    const counts = await db.sortedSetsCard(
+                        tags.map(tag => `cid:${cid}:tag:${tag}:topics`)
+                    );
                     await db.sortedSetAdd(`cid:${cid}:tags`, counts, tags);
                 });
                 progress.incr(tids.length);

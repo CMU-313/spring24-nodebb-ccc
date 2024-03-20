@@ -30,11 +30,38 @@ let sanitizeConfig = {
         a: ['href', 'name', 'hreflang', 'media', 'rel', 'target', 'type'],
         img: ['alt', 'height', 'ismap', 'src', 'usemap', 'width', 'srcset'],
         iframe: ['height', 'name', 'src', 'width'],
-        video: ['autoplay', 'controls', 'height', 'loop', 'muted', 'poster', 'preload', 'src', 'width'],
+        video: [
+            'autoplay',
+            'controls',
+            'height',
+            'loop',
+            'muted',
+            'poster',
+            'preload',
+            'src',
+            'width',
+        ],
         audio: ['autoplay', 'controls', 'loop', 'muted', 'preload', 'src'],
         embed: ['height', 'src', 'type', 'width'],
     },
-    globalAttributes: ['accesskey', 'class', 'contenteditable', 'dir', 'draggable', 'dropzone', 'hidden', 'id', 'lang', 'spellcheck', 'style', 'tabindex', 'title', 'translate', 'aria-expanded', 'data-*'],
+    globalAttributes: [
+        'accesskey',
+        'class',
+        'contenteditable',
+        'dir',
+        'draggable',
+        'dropzone',
+        'hidden',
+        'id',
+        'lang',
+        'spellcheck',
+        'style',
+        'tabindex',
+        'title',
+        'translate',
+        'aria-expanded',
+        'data-*',
+    ],
     allowedClasses: {
         ...sanitize.defaults.allowedClasses,
     },
@@ -103,7 +130,12 @@ module.exports = function (Posts) {
                             absolute = `//${current[1]}`;
                         }
 
-                        content = content.slice(0, current.index + regex.length) + absolute + content.slice(current.index + regex.length + current[1].length);
+                        content =
+                            content.slice(0, current.index + regex.length) +
+                            absolute +
+                            content.slice(
+                                current.index + regex.length + current[1].length
+                            );
                     }
                 } catch (err) {
                     winston.verbose(err.messsage);
@@ -126,11 +158,17 @@ module.exports = function (Posts) {
     Posts.configureSanitize = async () => {
         // Each allowed tags should have some common global attributes...
         sanitizeConfig.allowedTags.forEach(tag => {
-            sanitizeConfig.allowedAttributes[tag] = _.union(sanitizeConfig.allowedAttributes[tag], sanitizeConfig.globalAttributes);
+            sanitizeConfig.allowedAttributes[tag] = _.union(
+                sanitizeConfig.allowedAttributes[tag],
+                sanitizeConfig.globalAttributes
+            );
         });
 
         // Some plugins might need to adjust or whitelist their own tags...
-        sanitizeConfig = await plugins.hooks.fire('filter:sanitize.config', sanitizeConfig);
+        sanitizeConfig = await plugins.hooks.fire(
+            'filter:sanitize.config',
+            sanitizeConfig
+        );
     };
 
     Posts.registerHooks = () => {
@@ -155,7 +193,9 @@ module.exports = function (Posts) {
         plugins.hooks.register('core', {
             hook: 'filter:parse.signature',
             method: async data => {
-                data.userData.signature = Posts.sanitize(data.userData.signature);
+                data.userData.signature = Posts.sanitize(
+                    data.userData.signature
+                );
                 return data;
             },
         });

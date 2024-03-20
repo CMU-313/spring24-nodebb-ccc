@@ -16,6 +16,8 @@ module.exports = function (app, middleware, controllers) {
         res.status(200)
             .type('application/javascript')
             .set('Service-Worker-Allowed', `${nconf.get('relative_path')}/`)
-            .sendFile(path.join(__dirname, '../../public/src/service-worker.js'));
+            .sendFile(
+                path.join(__dirname, '../../public/src/service-worker.js')
+            );
     });
 };

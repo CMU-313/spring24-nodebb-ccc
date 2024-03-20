@@ -1,6 +1,13 @@
 'use strict';
 
-define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'components', 'api', 'bootbox', 'alerts'], function (topicSelect, threadTools, components, api, bootbox, alerts) {
+define('forum/category/tools', [
+    'topicSelect',
+    'forum/topic/threadTools',
+    'components',
+    'api',
+    'bootbox',
+    'alerts',
+], function (topicSelect, threadTools, components, api, bootbox, alerts) {
     const CategoryTools = {};
 
     CategoryTools.init = function () {
@@ -55,7 +62,9 @@ define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'compo
                 }
                 alerts.success('[[topic:markAsUnreadForAll.success]]');
                 tids.forEach(function (tid) {
-                    $('[component="category/topic"][data-tid="' + tid + '"]').addClass('unread');
+                    $(
+                        '[component="category/topic"][data-tid="' + tid + '"]'
+                    ).addClass('unread');
                 });
                 onCommandComplete();
             });
@@ -123,7 +132,9 @@ define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'compo
         const body = {};
         const execute = function (ok) {
             if (ok) {
-                Promise.all(tids.map(tid => api[method](`/topics/${tid}${path}`, body)))
+                Promise.all(
+                    tids.map(tid => api[method](`/topics/${tid}${path}`, body))
+                )
                     .then(onComplete)
                     .catch(alerts.error);
             }
@@ -137,7 +148,10 @@ define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'compo
             case 'delete':
             case 'restore':
             case 'purge':
-                bootbox.confirm(`[[topic:thread_tools.${command}_confirm]]`, execute);
+                bootbox.confirm(
+                    `[[topic:thread_tools.${command}_confirm]]`,
+                    execute
+                );
                 break;
 
             case 'pin':
@@ -185,14 +199,20 @@ define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'compo
         const areAllScheduled = areAll(isTopicScheduled, tids);
 
         components.get('topic/delete').toggleClass('hidden', isAnyDeleted);
-        components.get('topic/restore').toggleClass('hidden', isAnyScheduled || !isAnyDeleted);
+        components
+            .get('topic/restore')
+            .toggleClass('hidden', isAnyScheduled || !isAnyDeleted);
         components.get('topic/purge').toggleClass('hidden', !areAllDeleted);
 
         components.get('topic/lock').toggleClass('hidden', isAnyLocked);
         components.get('topic/unlock').toggleClass('hidden', !isAnyLocked);
 
-        components.get('topic/pin').toggleClass('hidden', areAllScheduled || isAnyPinned);
-        components.get('topic/unpin').toggleClass('hidden', areAllScheduled || !isAnyPinned);
+        components
+            .get('topic/pin')
+            .toggleClass('hidden', areAllScheduled || isAnyPinned);
+        components
+            .get('topic/unpin')
+            .toggleClass('hidden', areAllScheduled || !isAnyPinned);
 
         components.get('topic/merge').toggleClass('hidden', isAnyScheduled);
     }
@@ -238,20 +258,26 @@ define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'compo
     function setDeleteState(data) {
         const topic = getTopicEl(data.tid);
         topic.toggleClass('deleted', data.isDeleted);
-        topic.find('[component="topic/locked"]').toggleClass('hide', !data.isDeleted);
+        topic
+            .find('[component="topic/locked"]')
+            .toggleClass('hide', !data.isDeleted);
     }
 
     function setPinnedState(data) {
         const topic = getTopicEl(data.tid);
         topic.toggleClass('pinned', data.isPinned);
-        topic.find('[component="topic/pinned"]').toggleClass('hide', !data.isPinned);
+        topic
+            .find('[component="topic/pinned"]')
+            .toggleClass('hide', !data.isPinned);
         ajaxify.refresh();
     }
 
     function setLockedState(data) {
         const topic = getTopicEl(data.tid);
         topic.toggleClass('locked', data.isLocked);
-        topic.find('[component="topic/locked"]').toggleClass('hide', !data.isLocked);
+        topic
+            .find('[component="topic/locked"]')
+            .toggleClass('hide', !data.isLocked);
     }
 
     function onTopicMoved(data) {
@@ -266,21 +292,32 @@ define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'compo
         if (!ajaxify.data.topics || !ajaxify.data.template.category) {
             return;
         }
-        const numPinned = ajaxify.data.topics.filter(topic => topic.pinned).length;
+        const numPinned = ajaxify.data.topics.filter(
+            topic => topic.pinned
+        ).length;
         if ((!app.user.isAdmin && !app.user.isMod) || numPinned < 2) {
             return;
         }
 
         app.loadJQueryUI(function () {
-            const topicListEl = $('[component="category"]').filter(function (i, e) {
-                return !$(e).parents('[widget-area],[data-widget-area]').length;
-            });
+            const topicListEl = $('[component="category"]').filter(
+                function (i, e) {
+                    return !$(e).parents('[widget-area],[data-widget-area]')
+                        .length;
+                }
+            );
             let baseIndex = 0;
             topicListEl.sortable({
                 handle: '[component="topic/pinned"]',
                 items: '[component="category/topic"].pinned',
                 start: function () {
-                    baseIndex = parseInt(topicListEl.find('[component="category/topic"].pinned').first().attr('data-index'), 10);
+                    baseIndex = parseInt(
+                        topicListEl
+                            .find('[component="category/topic"].pinned')
+                            .first()
+                            .attr('data-index'),
+                        10
+                    );
                 },
                 update: function (ev, ui) {
                     socket.emit(
@@ -293,9 +330,11 @@ define('forum/category/tools', ['topicSelect', 'forum/topic/threadTools', 'compo
                             if (err) {
                                 return alerts.error(err);
                             }
-                            topicListEl.find('[component="category/topic"].pinned').each((index, el) => {
-                                $(el).attr('data-index', baseIndex + index);
-                            });
+                            topicListEl
+                                .find('[component="category/topic"].pinned')
+                                .each((index, el) => {
+                                    $(el).attr('data-index', baseIndex + index);
+                                });
                         }
                     );
                 },

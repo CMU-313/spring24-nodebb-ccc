@@ -65,7 +65,9 @@ describe('Flags', () => {
             username: 'moderator',
             password: 'abcdef',
         });
-        await Privileges.categories.give(['moderate'], category.cid, [moderatorUid]);
+        await Privileges.categories.give(['moderate'], category.cid, [
+            moderatorUid,
+        ]);
 
         const login = await helpers.loginUser('moderator', 'abcdef');
         jar = login.jar;
@@ -234,7 +236,10 @@ describe('Flags', () => {
                     Flags.get(payload.flags[0].flagId, (err, flagData) => {
                         assert.ifError(err);
                         assert.equal(payload.flags[0].flagId, flagData.flagId);
-                        assert.equal(payload.flags[0].description, flagData.description);
+                        assert.equal(
+                            payload.flags[0].description,
+                            flagData.description
+                        );
                         done();
                     });
                 }
@@ -256,7 +261,10 @@ describe('Flags', () => {
                         assert.ok(payload.hasOwnProperty('page'));
                         assert.ok(payload.hasOwnProperty('pageCount'));
                         assert.ok(Array.isArray(payload.flags));
-                        assert.strictEqual(1, parseInt(payload.flags[0].flagId, 10));
+                        assert.strictEqual(
+                            1,
+                            parseInt(payload.flags[0].flagId, 10)
+                        );
                         done();
                     }
                 );
@@ -409,7 +417,10 @@ describe('Flags', () => {
                         }
 
                         const next = payload.flags[idx + 1];
-                        return parseInt(cur.datetime, 10) > parseInt(next.datetime, 10);
+                        return (
+                            parseInt(cur.datetime, 10) >
+                            parseInt(next.datetime, 10)
+                        );
                     })
                 );
             });
@@ -427,7 +438,10 @@ describe('Flags', () => {
                         }
 
                         const next = payload.flags[idx + 1];
-                        return parseInt(cur.datetime, 10) < parseInt(next.datetime, 10);
+                        return (
+                            parseInt(cur.datetime, 10) <
+                            parseInt(next.datetime, 10)
+                        );
                     })
                 );
             });
@@ -445,7 +459,9 @@ describe('Flags', () => {
                         }
 
                         const next = payload.flags[idx + 1];
-                        return parseInt(cur.heat, 10) >= parseInt(next.heat, 10);
+                        return (
+                            parseInt(cur.heat, 10) >= parseInt(next.heat, 10)
+                        );
                     })
                 );
             });
@@ -463,16 +479,23 @@ describe('Flags', () => {
                 },
                 err => {
                     assert.ifError(err);
-                    db.getObjectFields('flag:1', ['state', 'assignee'], (err, data) => {
-                        if (err) {
-                            throw err;
-                        }
+                    db.getObjectFields(
+                        'flag:1',
+                        ['state', 'assignee'],
+                        (err, data) => {
+                            if (err) {
+                                throw err;
+                            }
 
-                        assert.strictEqual('wip', data.state);
-                        assert.ok(!isNaN(parseInt(data.assignee, 10)));
-                        assert.strictEqual(adminUid, parseInt(data.assignee, 10));
-                        done();
-                    });
+                            assert.strictEqual('wip', data.state);
+                            assert.ok(!isNaN(parseInt(data.assignee, 10)));
+                            assert.strictEqual(
+                                adminUid,
+                                parseInt(data.assignee, 10)
+                            );
+                            done();
+                        }
+                    );
                 }
             );
         });
@@ -486,7 +509,10 @@ describe('Flags', () => {
                 history.forEach(change => {
                     switch (change.attribute) {
                         case 'state':
-                            assert.strictEqual('[[flags:state-wip]]', change.value);
+                            assert.strictEqual(
+                                '[[flags:state-wip]]',
+                                change.value
+                            );
                             break;
 
                         case 'assignee':
@@ -568,7 +594,10 @@ describe('Flags', () => {
                     title: 'Topic to flag',
                     content: 'This is flaggable content',
                 });
-                flagObj = await api.flags.create({ uid: uid1 }, { type: 'post', id: result.postData.pid, reason: 'spam' });
+                flagObj = await api.flags.create(
+                    { uid: uid1 },
+                    { type: 'post', id: result.postData.pid, reason: 'spam' }
+                );
                 await sleep(2000);
             });
 
@@ -581,7 +610,9 @@ describe('Flags', () => {
                 });
 
                 userNotifs = await User.notifications.getAll(adminUid);
-                assert(!userNotifs.includes(`flag:post:${result.postData.pid}`));
+                assert(
+                    !userNotifs.includes(`flag:post:${result.postData.pid}`)
+                );
             });
 
             it('should rescind notification if flag is rejected', async () => {
@@ -593,7 +624,9 @@ describe('Flags', () => {
                 });
 
                 userNotifs = await User.notifications.getAll(adminUid);
-                assert(!userNotifs.includes(`flag:post:${result.postData.pid}`));
+                assert(
+                    !userNotifs.includes(`flag:post:${result.postData.pid}`)
+                );
             });
 
             it('should do nothing if flag is resolved but ACP action is not "rescind"', async () => {
@@ -691,7 +724,10 @@ describe('Flags', () => {
                     },
                     err => {
                         assert.ok(err);
-                        assert.strictEqual('[[error:post-deleted]]', err.message);
+                        assert.strictEqual(
+                            '[[error:post-deleted]]',
+                            err.message
+                        );
                         Posts.restore(1, 1, done);
                     }
                 );
@@ -710,7 +746,10 @@ describe('Flags', () => {
                     },
                     err => {
                         assert.ok(err);
-                        assert.strictEqual('[[error:not-enough-reputation-to-flag, 50]]', err.message);
+                        assert.strictEqual(
+                            '[[error:not-enough-reputation-to-flag, 50]]',
+                            err.message
+                        );
                         Meta.configs.set('min:rep:flag', 0, done);
                     }
                 );
@@ -779,8 +818,15 @@ describe('Flags', () => {
         });
 
         it('should insert a note in the past if a datetime is passed in', async () => {
-            await Flags.appendNote(1, 1, 'this is the first note', 1626446956652);
-            const note = (await db.getSortedSetRange('flag:1:notes', 0, 0)).pop();
+            await Flags.appendNote(
+                1,
+                1,
+                'this is the first note',
+                1626446956652
+            );
+            const note = (
+                await db.getSortedSetRange('flag:1:notes', 0, 0)
+            ).pop();
             assert.strictEqual('[1,"this is the first note"]', note);
         });
     });
@@ -812,7 +858,10 @@ describe('Flags', () => {
         it('should retrieve a list of notes, from newest to oldest', done => {
             Flags.getNotes(1, (err, notes) => {
                 assert.ifError(err);
-                assert(notes[0].datetime > notes[1].datetime, `${notes[0].datetime}-${notes[1].datetime}`);
+                assert(
+                    notes[0].datetime > notes[1].datetime,
+                    `${notes[0].datetime}-${notes[1].datetime}`
+                );
                 assert.strictEqual('this is the second note', notes[0].content);
                 done();
             });
@@ -856,7 +905,10 @@ describe('Flags', () => {
         it("should retrieve a flag's history", done => {
             Flags.getHistory(1, (err, history) => {
                 assert.ifError(err);
-                assert.strictEqual(history[0].fields.state, '[[flags:state-rejected]]');
+                assert.strictEqual(
+                    history[0].fields.state,
+                    '[[flags:state-rejected]]'
+                );
                 done();
             });
         });
@@ -926,7 +978,10 @@ describe('Flags', () => {
                 });
 
                 const flagData = await Flags.get(response.flagId);
-                assert.strictEqual(flagData.reports[0].value, '&quot;&lt;script&gt;alert(&#x27;ok&#x27;);&lt;&#x2F;script&gt;');
+                assert.strictEqual(
+                    flagData.reports[0].value,
+                    '&quot;&lt;script&gt;alert(&#x27;ok&#x27;);&lt;&#x2F;script&gt;'
+                );
             });
 
             it('should not allow flagging post in private category', async () => {
@@ -934,7 +989,11 @@ describe('Flags', () => {
                     name: 'private category',
                 });
 
-                await Privileges.categories.rescind(['groups:topics:read'], category.cid, 'registered-users');
+                await Privileges.categories.rescind(
+                    ['groups:topics:read'],
+                    category.cid,
+                    'registered-users'
+                );
                 await Groups.join('private category', uid3);
                 const result = await Topics.post({
                     cid: category.cid,
@@ -974,7 +1033,8 @@ describe('Flags', () => {
                 assert.deepStrictEqual(body, {
                     status: {
                         code: 'forbidden',
-                        message: 'You do not have enough privileges for this action.',
+                        message:
+                            'You do not have enough privileges for this action.',
                     },
                     response: {},
                 });
@@ -999,7 +1059,10 @@ describe('Flags', () => {
                 const { history } = response;
                 assert(Array.isArray(history));
                 assert(history[0].fields.hasOwnProperty('state'));
-                assert.strictEqual('[[flags:state-wip]]', history[0].fields.state);
+                assert.strictEqual(
+                    '[[flags:state-wip]]',
+                    history[0].fields.state
+                );
             });
         });
 
@@ -1021,13 +1084,25 @@ describe('Flags', () => {
 
                 assert(response.hasOwnProperty('notes'));
                 assert(Array.isArray(response.notes));
-                assert.strictEqual('lorem ipsum dolor sit amet', response.notes[0].content);
+                assert.strictEqual(
+                    'lorem ipsum dolor sit amet',
+                    response.notes[0].content
+                );
                 assert.strictEqual(2, response.notes[0].uid);
 
                 assert(response.hasOwnProperty('history'));
                 assert(Array.isArray(response.history));
-                assert.strictEqual(1, Object.keys(response.history[response.history.length - 1].fields).length);
-                assert(response.history[response.history.length - 1].fields.hasOwnProperty('notes'));
+                assert.strictEqual(
+                    1,
+                    Object.keys(
+                        response.history[response.history.length - 1].fields
+                    ).length
+                );
+                assert(
+                    response.history[
+                        response.history.length - 1
+                    ].fields.hasOwnProperty('notes')
+                );
             });
         });
 
@@ -1065,7 +1140,10 @@ describe('Flags', () => {
                     username: 'flags-access-control',
                     password: 'abcdef',
                 });
-                ({ jar, csrf_token } = await helpers.loginUser('flags-access-control', 'abcdef'));
+                ({ jar, csrf_token } = await helpers.loginUser(
+                    'flags-access-control',
+                    'abcdef'
+                ));
 
                 flaggerUid = await User.create({
                     username: 'flags-access-control-flagger',
@@ -1086,7 +1164,12 @@ describe('Flags', () => {
                     content: utils.generateUUID(),
                 });
 
-                ({ flagId } = await Flags.create('post', postData.pid, flaggerUid, 'spam'));
+                ({ flagId } = await Flags.create(
+                    'post',
+                    postData.pid,
+                    flaggerUid,
+                    'spam'
+                ));
                 requests = new Set([
                     {
                         method: 'get',
@@ -1161,7 +1244,10 @@ describe('Flags', () => {
 
                     // eslint-disable-next-line no-await-in-loop
                     const { statusCode } = await request(opts);
-                    assert(statusCode.toString().startsWith(4), `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`);
+                    assert(
+                        statusCode.toString().startsWith(4),
+                        `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`
+                    );
                 }
             });
 
@@ -1169,7 +1255,10 @@ describe('Flags', () => {
                 for (const opts of requests) {
                     // eslint-disable-next-line no-await-in-loop
                     const { statusCode } = await request(opts);
-                    assert(statusCode.toString().startsWith(4), `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`);
+                    assert(
+                        statusCode.toString().startsWith(4),
+                        `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`
+                    );
                 }
             });
 
@@ -1179,7 +1268,11 @@ describe('Flags', () => {
                 for (const opts of requests) {
                     // eslint-disable-next-line no-await-in-loop
                     const { statusCode } = await request(opts);
-                    assert.strictEqual(statusCode, 200, `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`);
+                    assert.strictEqual(
+                        statusCode,
+                        200,
+                        `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`
+                    );
                 }
             });
 
@@ -1189,7 +1282,11 @@ describe('Flags', () => {
                 for (const opts of requests) {
                     // eslint-disable-next-line no-await-in-loop
                     const { statusCode } = await request(opts);
-                    assert.strictEqual(statusCode, 200, `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`);
+                    assert.strictEqual(
+                        statusCode,
+                        200,
+                        `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`
+                    );
                 }
             });
 
@@ -1199,7 +1296,11 @@ describe('Flags', () => {
                 for (const opts of requests) {
                     // eslint-disable-next-line no-await-in-loop
                     const { statusCode } = await request(opts);
-                    assert.strictEqual(statusCode, 200, `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`);
+                    assert.strictEqual(
+                        statusCode,
+                        200,
+                        `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`
+                    );
                 }
             });
 
@@ -1213,7 +1314,10 @@ describe('Flags', () => {
                 for (const opts of requests) {
                     // eslint-disable-next-line no-await-in-loop
                     const { statusCode } = await request(opts);
-                    assert(statusCode.toString().startsWith(4), `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`);
+                    assert(
+                        statusCode.toString().startsWith(4),
+                        `${opts.method.toUpperCase()} ${opts.uri} => ${statusCode}`
+                    );
                 }
             });
         });

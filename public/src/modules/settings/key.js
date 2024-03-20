@@ -41,8 +41,20 @@ define('settings/key', function () {
      @returns Key | null The Key-Object the focused element should be set to.
      */
     function getKey(event) {
-        const anyModChange = event.ctrlKey !== lastKey.c || event.altKey !== lastKey.a || event.shiftKey !== lastKey.s || event.metaKey !== lastKey.m;
-        const modChange = event.ctrlKey + event.altKey + event.shiftKey + event.metaKey - lastKey.c - lastKey.a - lastKey.s - lastKey.m;
+        const anyModChange =
+            event.ctrlKey !== lastKey.c ||
+            event.altKey !== lastKey.a ||
+            event.shiftKey !== lastKey.s ||
+            event.metaKey !== lastKey.m;
+        const modChange =
+            event.ctrlKey +
+            event.altKey +
+            event.shiftKey +
+            event.metaKey -
+            lastKey.c -
+            lastKey.a -
+            lastKey.s -
+            lastKey.m;
         const key = new Key();
         key.c = event.ctrlKey;
         key.a = event.altKey;
@@ -200,7 +212,8 @@ define('settings/key', function () {
         },
         get: function (element, trim, empty) {
             const key = element.data('keyData');
-            const separator = element.data('split') || element.data('separator') || '+';
+            const separator =
+                element.data('split') || element.data('separator') || '+';
             const short = !helper.isFalse(element.data('short'));
             if (trim) {
                 if (empty || (key != null && key.char)) {

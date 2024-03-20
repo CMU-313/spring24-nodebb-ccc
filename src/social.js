@@ -27,9 +27,13 @@ var __awaiter =
                 }
             }
             function step(result) {
-                result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+                result.done
+                    ? resolve(result.value)
+                    : adopt(result.value).then(fulfilled, rejected);
             }
-            step((generator = generator.apply(thisArg, _arguments || [])).next());
+            step(
+                (generator = generator.apply(thisArg, _arguments || [])).next()
+            );
         });
     };
 var __importDefault =
@@ -38,7 +42,10 @@ var __importDefault =
         return mod && mod.__esModule ? mod : { default: mod };
     };
 Object.defineProperty(exports, '__esModule', { value: true });
-exports.setActivePostSharingNetworks = exports.getActivePostSharing = exports.getPostSharing = void 0;
+exports.setActivePostSharingNetworks =
+    exports.getActivePostSharing =
+    exports.getPostSharing =
+        void 0;
 const lodash_1 = __importDefault(require('lodash'));
 const plugins_1 = __importDefault(require('./plugins'));
 const database_1 = __importDefault(require('./database'));
@@ -62,10 +69,15 @@ function getPostSharing() {
                 activated: null,
             },
         ];
-        networks = yield plugins_1.default.hooks.fire('filter:social.posts', networks);
+        networks = yield plugins_1.default.hooks.fire(
+            'filter:social.posts',
+            networks
+        );
         // The next line calls a function in a module that has not been updated to TS yet
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        const activated = yield database_1.default.getSetMembers('social:posts.activated');
+        const activated = yield database_1.default.getSetMembers(
+            'social:posts.activated'
+        );
         networks.forEach(network => {
             network.activated = activated.includes(network.id);
         });

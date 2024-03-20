@@ -15,14 +15,22 @@ const minifier = require('./minifier');
 const JS = module.exports;
 
 JS.scripts = {
-    base: ['node_modules/@adactive/bootstrap-tagsinput/src/bootstrap-tagsinput.js', 'node_modules/jquery-serializeobject/jquery.serializeObject.js', 'node_modules/jquery-deserialize/src/jquery.deserialize.js', 'public/vendor/bootbox/wrapper.js'],
+    base: [
+        'node_modules/@adactive/bootstrap-tagsinput/src/bootstrap-tagsinput.js',
+        'node_modules/jquery-serializeobject/jquery.serializeObject.js',
+        'node_modules/jquery-deserialize/src/jquery.deserialize.js',
+        'public/vendor/bootbox/wrapper.js',
+    ],
 
     // plugins add entries into this object,
     // they get linked into /build/public/src/modules
     modules: {
-        '../admin/plugins/persona.js': 'themes/nodebb-theme-persona/public/admin.js',
-        'persona/quickreply.js': 'themes/nodebb-theme-persona/public/modules/quickreply.js',
-        '../client/account/theme.js': 'themes/nodebb-theme-persona/public/settings.js',
+        '../admin/plugins/persona.js':
+            'themes/nodebb-theme-persona/public/admin.js',
+        'persona/quickreply.js':
+            'themes/nodebb-theme-persona/public/modules/quickreply.js',
+        '../client/account/theme.js':
+            'themes/nodebb-theme-persona/public/settings.js',
     },
 };
 
@@ -31,13 +39,23 @@ const basePath = path.resolve(__dirname, '../..');
 async function linkModules() {
     const { modules } = JS.scripts;
 
-    await Promise.all([mkdirp(path.join(__dirname, '../../build/public/src/admin/plugins')), mkdirp(path.join(__dirname, '../../build/public/src/client/plugins'))]);
+    await Promise.all([
+        mkdirp(path.join(__dirname, '../../build/public/src/admin/plugins')),
+        mkdirp(path.join(__dirname, '../../build/public/src/client/plugins')),
+    ]);
 
     await Promise.all(
         Object.keys(modules).map(async relPath => {
             const srcPath = path.join(__dirname, '../../', modules[relPath]);
-            const destPath = path.join(__dirname, '../../build/public/src/modules', relPath);
-            const [stats] = await Promise.all([fs.promises.stat(srcPath), mkdirp(path.dirname(destPath))]);
+            const destPath = path.join(
+                __dirname,
+                '../../build/public/src/modules',
+                relPath
+            );
+            const [stats] = await Promise.all([
+                fs.promises.stat(srcPath),
+                mkdirp(path.dirname(destPath)),
+            ]);
             if (stats.isDirectory()) {
                 await file.linkDirs(srcPath, destPath, true);
             } else {
@@ -50,7 +68,9 @@ async function linkModules() {
 const moduleDirs = ['modules', 'admin', 'client'];
 
 async function clearModules() {
-    const builtPaths = moduleDirs.map(p => path.join(__dirname, '../../build/public/src', p));
+    const builtPaths = moduleDirs.map(p =>
+        path.join(__dirname, '../../build/public/src', p)
+    );
     await Promise.all(builtPaths.map(builtPath => rimrafAsync(builtPath)));
 }
 
@@ -58,7 +78,10 @@ JS.buildModules = async function () {
     await clearModules();
 
     const fse = require('fs-extra');
-    await fse.copy(path.join(__dirname, `../../public/src`), path.join(__dirname, `../../build/public/src`));
+    await fse.copy(
+        path.join(__dirname, `../../public/src`),
+        path.join(__dirname, `../../build/public/src`)
+    );
 
     await linkModules();
 };
@@ -69,7 +92,11 @@ JS.linkStatics = async function () {
     await Promise.all(
         Object.keys(plugins.staticDirs).map(async mappedPath => {
             const sourceDir = plugins.staticDirs[mappedPath];
-            const destDir = path.join(__dirname, '../../build/public/plugins', mappedPath);
+            const destDir = path.join(
+                __dirname,
+                '../../build/public/plugins',
+                mappedPath
+            );
 
             await mkdirp(path.dirname(destDir));
             await file.linkDirs(sourceDir, destDir, true);

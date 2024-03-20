@@ -16,7 +16,9 @@ module.exports = function (Groups) {
 
         const isMembers = await Groups.isMemberOfGroups(uid, groupNames);
 
-        const groupsToLeave = groupNames.filter((groupName, index) => isMembers[index]);
+        const groupsToLeave = groupNames.filter(
+            (groupName, index) => isMembers[index]
+        );
         if (!groupsToLeave.length) {
             return;
         }
@@ -39,12 +41,18 @@ module.exports = function (Groups) {
         Groups.clearCache(uid, groupsToLeave);
         cache.del(groupsToLeave.map(name => `group:${name}:members`));
 
-        const groupData = await Groups.getGroupsFields(groupsToLeave, ['name', 'hidden', 'memberCount']);
+        const groupData = await Groups.getGroupsFields(groupsToLeave, [
+            'name',
+            'hidden',
+            'memberCount',
+        ]);
         if (!groupData) {
             return;
         }
 
-        const emptyPrivilegeGroups = groupData.filter(g => g && Groups.isPrivilegeGroup(g.name) && g.memberCount === 0);
+        const emptyPrivilegeGroups = groupData.filter(
+            g => g && Groups.isPrivilegeGroup(g.name) && g.memberCount === 0
+        );
         const visibleGroups = groupData.filter(g => g && !g.hidden);
 
         const promises = [];
@@ -71,7 +79,11 @@ module.exports = function (Groups) {
     };
 
     async function clearGroupTitleIfSet(groupNames, uid) {
-        groupNames = groupNames.filter(groupName => groupName !== 'registered-users' && !Groups.isPrivilegeGroup(groupName));
+        groupNames = groupNames.filter(
+            groupName =>
+                groupName !== 'registered-users' &&
+                !Groups.isPrivilegeGroup(groupName)
+        );
         if (!groupNames.length) {
             return;
         }
@@ -80,9 +92,15 @@ module.exports = function (Groups) {
             return;
         }
 
-        const newTitleArray = userData.groupTitleArray.filter(groupTitle => !groupNames.includes(groupTitle));
+        const newTitleArray = userData.groupTitleArray.filter(
+            groupTitle => !groupNames.includes(groupTitle)
+        );
         if (newTitleArray.length) {
-            await db.setObjectField(`user:${uid}`, 'groupTitle', JSON.stringify(newTitleArray));
+            await db.setObjectField(
+                `user:${uid}`,
+                'groupTitle',
+                JSON.stringify(newTitleArray)
+            );
         } else {
             await db.deleteObjectField(`user:${uid}`, 'groupTitle');
         }
@@ -90,7 +108,10 @@ module.exports = function (Groups) {
 
     Groups.leaveAllGroups = async function (uid) {
         const groups = await db.getSortedSetRange('groups:createtime', 0, -1);
-        await Promise.all([Groups.leave(groups, uid), Groups.rejectMembership(groups, uid)]);
+        await Promise.all([
+            Groups.leave(groups, uid),
+            Groups.rejectMembership(groups, uid),
+        ]);
     };
 
     Groups.kick = async function (uid, groupName, isOwner) {

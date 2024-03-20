@@ -16,7 +16,12 @@ module.exports = {
                     ids,
                     (id, next) => {
                         winston.verbose(`processing uid ${id}`);
-                        db.sortedSetsRemoveRangeByScore([`uid:${id}:posts:votes`], '-inf', 0, next);
+                        db.sortedSetsRemoveRangeByScore(
+                            [`uid:${id}:posts:votes`],
+                            '-inf',
+                            0,
+                            next
+                        );
                     },
                     next
                 );

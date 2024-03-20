@@ -3,7 +3,11 @@
 const crypto = require('crypto');
 
 process.profile = function (operation, start) {
-    console.log('%s took %d milliseconds', operation, process.elapsedTimeSince(start));
+    console.log(
+        '%s took %d milliseconds',
+        operation,
+        process.elapsedTimeSince(start)
+    );
 };
 
 process.elapsedTimeSince = function (start) {
@@ -14,7 +18,9 @@ const utils = { ...require('../public/src/utils.common') };
 
 utils.getLanguage = function () {
     const meta = require('./meta');
-    return meta.config && meta.config.defaultLang ? meta.config.defaultLang : 'en-GB';
+    return meta.config && meta.config.defaultLang
+        ? meta.config.defaultLang
+        : 'en-GB';
 };
 
 utils.generateUUID = function () {

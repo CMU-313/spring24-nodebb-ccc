@@ -89,9 +89,14 @@ if (typeof window !== 'undefined') {
         // FIX FOR #1245 - https://github.com/NodeBB/NodeBB/issues/1245
         // from http://stackoverflow.com/questions/15931962/bootstrap-dropdown-disappear-with-right-click-on-firefox
         // obtain a reference to the original handler
-        let _clearMenus = $._data(document, 'events').click.filter(function (el) {
-            return el.namespace === 'bs.data-api.dropdown' && el.selector === undefined;
-        });
+        let _clearMenus = $._data(document, 'events').click.filter(
+            function (el) {
+                return (
+                    el.namespace === 'bs.data-api.dropdown' &&
+                    el.selector === undefined
+                );
+            }
+        );
 
         if (_clearMenus.length) {
             _clearMenus = _clearMenus[0].handler;
@@ -109,7 +114,10 @@ if (typeof window !== 'undefined') {
     })();
     let timeagoFn;
     overrides.overrideTimeagoCutoff = function () {
-        const cutoff = parseInt(ajaxify.data.timeagoCutoff || config.timeagoCutoff, 10);
+        const cutoff = parseInt(
+            ajaxify.data.timeagoCutoff || config.timeagoCutoff,
+            10
+        );
         if (cutoff === 0) {
             $.timeago.settings.cutoff = 1;
         } else if (cutoff > 0) {

@@ -42,7 +42,10 @@ module.exports = function (Topics) {
             canRestore: canDelete,
         });
 
-        if ((!data.canDelete && data.isDelete) || (!data.canRestore && !data.isDelete)) {
+        if (
+            (!data.canDelete && data.isDelete) ||
+            (!data.canRestore && !data.isDelete)
+        ) {
             throw new Error('[[error:no-privileges]]');
         }
         if (data.topicData.deleted && data.isDelete) {
@@ -73,7 +76,10 @@ module.exports = function (Topics) {
                 uid: data.uid,
             });
         }
-        const userData = await user.getUserFields(data.uid, ['username', 'userslug']);
+        const userData = await user.getUserFields(data.uid, [
+            'username',
+            'userslug',
+        ]);
         return {
             tid: data.topicData.tid,
             cid: data.topicData.cid,
@@ -107,11 +113,18 @@ module.exports = function (Topics) {
     };
 
     async function toggleLock(tid, uid, lock) {
-        const topicData = await Topics.getTopicFields(tid, ['tid', 'uid', 'cid']);
+        const topicData = await Topics.getTopicFields(tid, [
+            'tid',
+            'uid',
+            'cid',
+        ]);
         if (!topicData || !topicData.cid) {
             throw new Error('[[error:no-topic]]');
         }
-        const isAdminOrMod = await privileges.categories.isAdminOrMod(topicData.cid, uid);
+        const isAdminOrMod = await privileges.categories.isAdminOrMod(
+            topicData.cid,
+            uid
+        );
         if (!isAdminOrMod) {
             throw new Error('[[error:no-privileges]]');
         }
@@ -143,8 +156,15 @@ module.exports = function (Topics) {
             throw new Error('[[error:invalid-data]]');
         }
 
-        const topicData = await Topics.getTopicFields(tid, ['tid', 'uid', 'cid']);
-        const isAdminOrMod = await privileges.categories.isAdminOrMod(topicData.cid, uid);
+        const topicData = await Topics.getTopicFields(tid, [
+            'tid',
+            'uid',
+            'cid',
+        ]);
+        const isAdminOrMod = await privileges.categories.isAdminOrMod(
+            topicData.cid,
+            uid
+        );
         if (!isAdminOrMod) {
             throw new Error('[[error:no-privileges]]');
         }
@@ -157,7 +177,9 @@ module.exports = function (Topics) {
     };
 
     topicTools.checkPinExpiry = async tids => {
-        const expiry = (await topics.getTopicsFields(tids, ['pinExpiry'])).map(obj => obj.pinExpiry);
+        const expiry = (await topics.getTopicsFields(tids, ['pinExpiry'])).map(
+            obj => obj.pinExpiry
+        );
         const now = Date.now();
 
         tids = await Promise.all(
@@ -184,23 +206,59 @@ module.exports = function (Topics) {
             throw new Error('[[error:cant-pin-scheduled]]');
         }
 
-        if (uid !== 'system' && !(await privileges.topics.isAdminOrMod(tid, uid))) {
+        if (
+            uid !== 'system' &&
+            !(await privileges.topics.isAdminOrMod(tid, uid))
+        ) {
             throw new Error('[[error:no-privileges]]');
         }
 
-        const promises = [Topics.setTopicField(tid, 'pinned', pin ? 1 : 0), Topics.events.log(tid, { type: pin ? 'pin' : 'unpin', uid })];
+        const promises = [
+            Topics.setTopicField(tid, 'pinned', pin ? 1 : 0),
+            Topics.events.log(tid, { type: pin ? 'pin' : 'unpin', uid }),
+        ];
         if (pin) {
-            promises.push(db.sortedSetAdd(`cid:${topicData.cid}:tids:pinned`, Date.now(), tid));
-            promises.push(db.sortedSetsRemove([`cid:${topicData.cid}:tids`, `cid:${topicData.cid}:tids:posts`, `cid:${topicData.cid}:tids:votes`, `cid:${topicData.cid}:tids:views`], tid));
+            promises.push(
+                db.sortedSetAdd(
+                    `cid:${topicData.cid}:tids:pinned`,
+                    Date.now(),
+                    tid
+                )
+            );
+            promises.push(
+                db.sortedSetsRemove(
+                    [
+                        `cid:${topicData.cid}:tids`,
+                        `cid:${topicData.cid}:tids:posts`,
+                        `cid:${topicData.cid}:tids:votes`,
+                        `cid:${topicData.cid}:tids:views`,
+                    ],
+                    tid
+                )
+            );
         } else {
-            promises.push(db.sortedSetRemove(`cid:${topicData.cid}:tids:pinned`, tid));
+            promises.push(
+                db.sortedSetRemove(`cid:${topicData.cid}:tids:pinned`, tid)
+            );
             promises.push(Topics.deleteTopicField(tid, 'pinExpiry'));
             promises.push(
                 db.sortedSetAddBulk([
                     [`cid:${topicData.cid}:tids`, topicData.lastposttime, tid],
-                    [`cid:${topicData.cid}:tids:posts`, topicData.postcount, tid],
-                    [`cid:${topicData.cid}:tids:votes`, parseInt(topicData.votes, 10) || 0, tid],
-                    [`cid:${topicData.cid}:tids:views`, topicData.viewcount, tid],
+                    [
+                        `cid:${topicData.cid}:tids:posts`,
+                        topicData.postcount,
+                        tid,
+                    ],
+                    [
+                        `cid:${topicData.cid}:tids:votes`,
+                        parseInt(topicData.votes, 10) || 0,
+                        tid,
+                    ],
+                    [
+                        `cid:${topicData.cid}:tids:views`,
+                        topicData.viewcount,
+                        tid,
+                    ],
                 ])
             );
             topicData.pinExpiry = undefined;
@@ -234,7 +292,11 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-privileges]]');
         }
 
-        const pinnedTids = await db.getSortedSetRange(`cid:${cid}:tids:pinned`, 0, -1);
+        const pinnedTids = await db.getSortedSetRange(
+            `cid:${cid}:tids:pinned`,
+            0,
+            -1
+        );
         const currentIndex = pinnedTids.indexOf(String(tid));
         if (currentIndex === -1) {
             return;
@@ -242,7 +304,11 @@ module.exports = function (Topics) {
         const newOrder = pinnedTids.length - order - 1;
         // moves tid to index order in the array
         if (pinnedTids.length > 1) {
-            pinnedTids.splice(Math.max(0, newOrder), 0, pinnedTids.splice(currentIndex, 1)[0]);
+            pinnedTids.splice(
+                Math.max(0, newOrder),
+                0,
+                pinnedTids.splice(currentIndex, 1)[0]
+            );
         }
 
         await db.sortedSetAdd(
@@ -262,12 +328,33 @@ module.exports = function (Topics) {
             throw new Error('[[error:cant-move-topic-to-same-category]]');
         }
         const tags = await Topics.getTopicTags(tid);
-        await db.sortedSetsRemove([`cid:${topicData.cid}:tids`, `cid:${topicData.cid}:tids:pinned`, `cid:${topicData.cid}:tids:posts`, `cid:${topicData.cid}:tids:votes`, `cid:${topicData.cid}:tids:views`, `cid:${topicData.cid}:tids:lastposttime`, `cid:${topicData.cid}:recent_tids`, `cid:${topicData.cid}:uid:${topicData.uid}:tids`, ...tags.map(tag => `cid:${topicData.cid}:tag:${tag}:topics`)], tid);
+        await db.sortedSetsRemove(
+            [
+                `cid:${topicData.cid}:tids`,
+                `cid:${topicData.cid}:tids:pinned`,
+                `cid:${topicData.cid}:tids:posts`,
+                `cid:${topicData.cid}:tids:votes`,
+                `cid:${topicData.cid}:tids:views`,
+                `cid:${topicData.cid}:tids:lastposttime`,
+                `cid:${topicData.cid}:recent_tids`,
+                `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
+                ...tags.map(tag => `cid:${topicData.cid}:tag:${tag}:topics`),
+            ],
+            tid
+        );
 
         topicData.postcount = topicData.postcount || 0;
         const votes = topicData.upvotes - topicData.downvotes;
 
-        const bulk = [[`cid:${cid}:tids:lastposttime`, topicData.lastposttime, tid], [`cid:${cid}:uid:${topicData.uid}:tids`, topicData.timestamp, tid], ...tags.map(tag => [`cid:${cid}:tag:${tag}:topics`, topicData.timestamp, tid])];
+        const bulk = [
+            [`cid:${cid}:tids:lastposttime`, topicData.lastposttime, tid],
+            [`cid:${cid}:uid:${topicData.uid}:tids`, topicData.timestamp, tid],
+            ...tags.map(tag => [
+                `cid:${cid}:tag:${tag}:topics`,
+                topicData.timestamp,
+                tid,
+            ]),
+        ];
         if (topicData.pinned) {
             bulk.push([`cid:${cid}:tids:pinned`, Date.now(), tid]);
         } else {

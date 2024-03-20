@@ -86,7 +86,14 @@ events.log = async function (data) {
     data.timestamp = Date.now();
     data.eid = eid;
 
-    await Promise.all([db.sortedSetsAdd(['events:time', `events:time:${data.type}`], data.timestamp, eid), db.setObject(`event:${eid}`, data)]);
+    await Promise.all([
+        db.sortedSetsAdd(
+            ['events:time', `events:time:${data.type}`],
+            data.timestamp,
+            eid
+        ),
+        db.setObject(`event:${eid}`, data),
+    ]);
     plugins.hooks.fire('action:events.log', { data: data });
 };
 
@@ -99,7 +106,13 @@ events.getEvents = async function (filter, start, stop, from, to) {
         to = Date.now();
     }
 
-    const eids = await db.getSortedSetRevRangeByScore(`events:time${filter ? `:${filter}` : ''}`, start, stop - start + 1, to, from);
+    const eids = await db.getSortedSetRevRangeByScore(
+        `events:time${filter ? `:${filter}` : ''}`,
+        start,
+        stop - start + 1,
+        to,
+        from
+    );
     let eventsData = await db.getObjects(eids.map(eid => `event:${eid}`));
     eventsData = eventsData.filter(Boolean);
     await addUserData(eventsData, 'uid', 'user');
@@ -117,7 +130,9 @@ events.getEvents = async function (filter, start, stop, from, to) {
         e.ip = undefined;
         e.user = undefined;
         event.jsonString = JSON.stringify(e, null, 4);
-        event.timestampISO = new Date(parseInt(event.timestamp, 10)).toUTCString();
+        event.timestampISO = new Date(
+            parseInt(event.timestamp, 10)
+        ).toUTCString();
     });
     return eventsData;
 };
@@ -129,7 +144,10 @@ async function addUserData(eventsData, field, objectName) {
         return eventsData;
     }
 
-    const [isAdmin, userData] = await Promise.all([user.isAdministrator(uids), user.getUsersFields(uids, ['username', 'userslug', 'picture'])]);
+    const [isAdmin, userData] = await Promise.all([
+        user.isAdministrator(uids),
+        user.getUsersFields(uids, ['username', 'userslug', 'picture']),
+    ]);
 
     const map = {};
     userData.forEach((user, index) => {
@@ -148,7 +166,9 @@ async function addUserData(eventsData, field, objectName) {
 events.deleteEvents = async function (eids) {
     const keys = eids.map(eid => `event:${eid}`);
     const eventData = await db.getObjectsFields(keys, ['type']);
-    const sets = _.uniq(['events:time'].concat(eventData.map(e => `events:time:${e.type}`)));
+    const sets = _.uniq(
+        ['events:time'].concat(eventData.map(e => `events:time:${e.type}`))
+    );
     await Promise.all([db.deleteAll(keys), db.sortedSetRemove(sets, eids)]);
 };
 

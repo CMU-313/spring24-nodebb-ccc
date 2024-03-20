@@ -1,6 +1,12 @@
 'use strict';
 
-define('admin/manage/groups', ['categorySelector', 'slugify', 'api', 'bootbox', 'alerts'], function (categorySelector, slugify, api, bootbox, alerts) {
+define('admin/manage/groups', [
+    'categorySelector',
+    'slugify',
+    'api',
+    'bootbox',
+    'alerts',
+], function (categorySelector, slugify, api, bootbox, alerts) {
     const Groups = {};
 
     Groups.init = function () {
@@ -43,26 +49,34 @@ define('admin/manage/groups', ['categorySelector', 'slugify', 'api', 'bootbox', 
                 })
                 .catch(err => {
                     if (!utils.hasLanguageKey(err.status.message)) {
-                        err.status.message = '[[admin/manage/groups:alerts.create-failure]]';
+                        err.status.message =
+                            '[[admin/manage/groups:alerts.create-failure]]';
                     }
-                    createModalError.translateHtml(err.status.message).removeClass('hide');
+                    createModalError
+                        .translateHtml(err.status.message)
+                        .removeClass('hide');
                 });
         });
 
         $('.groups-list').on('click', '[data-action]', function () {
             const el = $(this);
             const action = el.attr('data-action');
-            const groupName = el.parents('tr[data-groupname]').attr('data-groupname');
+            const groupName = el
+                .parents('tr[data-groupname]')
+                .attr('data-groupname');
 
             switch (action) {
                 case 'delete':
-                    bootbox.confirm('[[admin/manage/groups:alerts.confirm-delete]]', function (confirm) {
-                        if (confirm) {
-                            api.del(`/groups/${slugify(groupName)}`, {})
-                                .then(ajaxify.refresh)
-                                .catch(alerts.error);
+                    bootbox.confirm(
+                        '[[admin/manage/groups:alerts.confirm-delete]]',
+                        function (confirm) {
+                            if (confirm) {
+                                api.del(`/groups/${slugify(groupName)}`, {})
+                                    .then(ajaxify.refresh)
+                                    .catch(alerts.error);
+                            }
                         }
-                    });
+                    );
                     break;
             }
         });
@@ -72,10 +86,17 @@ define('admin/manage/groups', ['categorySelector', 'slugify', 'api', 'bootbox', 
 
     function enableCategorySelectors() {
         $('.groups-list [component="category-selector"]').each(function () {
-            const nameEncoded = $(this).parents('[data-name-encoded]').attr('data-name-encoded');
+            const nameEncoded = $(this)
+                .parents('[data-name-encoded]')
+                .attr('data-name-encoded');
             categorySelector.init($(this), {
                 onSelect: function (selectedCategory) {
-                    ajaxify.go('admin/manage/privileges/' + selectedCategory.cid + '?group=' + nameEncoded);
+                    ajaxify.go(
+                        'admin/manage/privileges/' +
+                            selectedCategory.cid +
+                            '?group=' +
+                            nameEncoded
+                    );
                 },
                 showLinks: true,
             });

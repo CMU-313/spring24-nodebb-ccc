@@ -1,6 +1,9 @@
 'use strict';
 
-define('admin/manage/digest', ['bootbox', 'alerts'], function (bootbox, alerts) {
+define('admin/manage/digest', ['bootbox', 'alerts'], function (
+    bootbox,
+    alerts
+) {
     const Digest = {};
 
     Digest.init = function () {
@@ -10,17 +13,24 @@ define('admin/manage/digest', ['bootbox', 'alerts'], function (bootbox, alerts) 
 
             if (action.startsWith('resend-')) {
                 const interval = action.slice(7);
-                bootbox.confirm('[[admin/manage/digest:resend-all-confirm]]', function (ok) {
-                    if (ok) {
-                        Digest.send(action, undefined, function (err) {
-                            if (err) {
-                                return alerts.error(err);
-                            }
+                bootbox.confirm(
+                    '[[admin/manage/digest:resend-all-confirm]]',
+                    function (ok) {
+                        if (ok) {
+                            Digest.send(action, undefined, function (err) {
+                                if (err) {
+                                    return alerts.error(err);
+                                }
 
-                            alerts.success('[[admin/manage/digest:resent-' + interval + ']]');
-                        });
+                                alerts.success(
+                                    '[[admin/manage/digest:resent-' +
+                                        interval +
+                                        ']]'
+                                );
+                            });
+                        }
                     }
-                });
+                );
             } else {
                 Digest.send(action, uid, function (err) {
                     if (err) {

@@ -81,10 +81,19 @@ $('document').ready(function () {
             if (!utils.isPasswordValid(field)) {
                 parent.addClass('error');
                 help.html('Invalid Password.');
-            } else if (field.length < $('[name="admin:password"]').attr('data-minimum-length')) {
+            } else if (
+                field.length <
+                $('[name="admin:password"]').attr('data-minimum-length')
+            ) {
                 parent.addClass('error');
                 help.html('Password is too short.');
-            } else if (zxcvbn(field).score < parseInt($('[name="admin:password"]').attr('data-minimum-strength'), 10)) {
+            } else if (
+                zxcvbn(field).score <
+                parseInt(
+                    $('[name="admin:password"]').attr('data-minimum-strength'),
+                    10
+                )
+            ) {
                 parent.addClass('error');
                 help.html('Password is too weak.');
             } else {
@@ -93,7 +102,10 @@ $('document').ready(function () {
         }
 
         function validateConfirmPassword() {
-            if ($('[name="admin:password"]').val() !== $('[name="admin:passwordConfirm"]').val()) {
+            if (
+                $('[name="admin:password"]').val() !==
+                $('[name="admin:passwordConfirm"]').val()
+            ) {
                 parent.addClass('error');
                 help.html('Passwords do not match.');
             } else {
@@ -111,7 +123,9 @@ $('document').ready(function () {
         }
 
         function switchDatabase(field) {
-            $('#database-config').html($('[data-database="' + field + '"]').html());
+            $('#database-config').html(
+                $('[data-database="' + field + '"]').html()
+            );
         }
 
         switch (type) {

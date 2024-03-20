@@ -47,15 +47,22 @@ describe('Notifications', () => {
                 notification = _notification;
                 assert.ifError(err);
                 assert(notification);
-                db.exists(`notifications:${notification.nid}`, (err, exists) => {
-                    assert.ifError(err);
-                    assert(exists);
-                    db.isSortedSetMember('notifications', notification.nid, (err, isMember) => {
+                db.exists(
+                    `notifications:${notification.nid}`,
+                    (err, exists) => {
                         assert.ifError(err);
-                        assert(isMember);
-                        done();
-                    });
-                });
+                        assert(exists);
+                        db.isSortedSetMember(
+                            'notifications',
+                            notification.nid,
+                            (err, isMember) => {
+                                assert.ifError(err);
+                                assert(isMember);
+                                done();
+                            }
+                        );
+                    }
+                );
             }
         );
     });
@@ -87,13 +94,16 @@ describe('Notifications', () => {
     });
 
     it('should get notifications', done => {
-        notifications.getMultiple([notification.nid], (err, notificationsData) => {
-            assert.ifError(err);
-            assert(Array.isArray(notificationsData));
-            assert(notificationsData[0]);
-            assert.equal(notification.nid, notificationsData[0].nid);
-            done();
-        });
+        notifications.getMultiple(
+            [notification.nid],
+            (err, notificationsData) => {
+                assert.ifError(err);
+                assert(Array.isArray(notificationsData));
+                assert(notificationsData[0]);
+                assert.equal(notification.nid, notificationsData[0].nid);
+                done();
+            }
+        );
     });
 
     it('should do nothing', done => {
@@ -113,11 +123,15 @@ describe('Notifications', () => {
         notifications.push(notification, [uid], err => {
             assert.ifError(err);
             setTimeout(() => {
-                db.isSortedSetMember(`uid:${uid}:notifications:unread`, notification.nid, (err, isMember) => {
-                    assert.ifError(err);
-                    assert(isMember);
-                    done();
-                });
+                db.isSortedSetMember(
+                    `uid:${uid}:notifications:unread`,
+                    notification.nid,
+                    (err, isMember) => {
+                        assert.ifError(err);
+                        assert(isMember);
+                        done();
+                    }
+                );
             }, 2000);
         });
     });
@@ -126,26 +140,38 @@ describe('Notifications', () => {
         notifications.pushGroup(notification, 'registered-users', err => {
             assert.ifError(err);
             setTimeout(() => {
-                db.isSortedSetMember(`uid:${uid}:notifications:unread`, notification.nid, (err, isMember) => {
-                    assert.ifError(err);
-                    assert(isMember);
-                    done();
-                });
+                db.isSortedSetMember(
+                    `uid:${uid}:notifications:unread`,
+                    notification.nid,
+                    (err, isMember) => {
+                        assert.ifError(err);
+                        assert(isMember);
+                        done();
+                    }
+                );
             }, 2000);
         });
     });
 
     it('should push a notification to groups', done => {
-        notifications.pushGroups(notification, ['registered-users', 'administrators'], err => {
-            assert.ifError(err);
-            setTimeout(() => {
-                db.isSortedSetMember(`uid:${uid}:notifications:unread`, notification.nid, (err, isMember) => {
-                    assert.ifError(err);
-                    assert(isMember);
-                    done();
-                });
-            }, 2000);
-        });
+        notifications.pushGroups(
+            notification,
+            ['registered-users', 'administrators'],
+            err => {
+                assert.ifError(err);
+                setTimeout(() => {
+                    db.isSortedSetMember(
+                        `uid:${uid}:notifications:unread`,
+                        notification.nid,
+                        (err, isMember) => {
+                            assert.ifError(err);
+                            assert(isMember);
+                            done();
+                        }
+                    );
+                }, 2000);
+            }
+        );
     });
 
     it('should not mark anything with invalid uid or nid', done => {
@@ -161,15 +187,23 @@ describe('Notifications', () => {
     it('should mark a notification read', done => {
         socketNotifications.markRead({ uid: uid }, notification.nid, err => {
             assert.ifError(err);
-            db.isSortedSetMember(`uid:${uid}:notifications:unread`, notification.nid, (err, isMember) => {
-                assert.ifError(err);
-                assert.equal(isMember, false);
-                db.isSortedSetMember(`uid:${uid}:notifications:read`, notification.nid, (err, isMember) => {
+            db.isSortedSetMember(
+                `uid:${uid}:notifications:unread`,
+                notification.nid,
+                (err, isMember) => {
                     assert.ifError(err);
-                    assert.equal(isMember, true);
-                    done();
-                });
-            });
+                    assert.equal(isMember, false);
+                    db.isSortedSetMember(
+                        `uid:${uid}:notifications:read`,
+                        notification.nid,
+                        (err, isMember) => {
+                            assert.ifError(err);
+                            assert.equal(isMember, true);
+                            done();
+                        }
+                    );
+                }
+            );
         });
     });
 
@@ -193,34 +227,54 @@ describe('Notifications', () => {
     it('should mark a notification unread', done => {
         socketNotifications.markUnread({ uid: uid }, notification.nid, err => {
             assert.ifError(err);
-            db.isSortedSetMember(`uid:${uid}:notifications:unread`, notification.nid, (err, isMember) => {
-                assert.ifError(err);
-                assert.equal(isMember, true);
-                db.isSortedSetMember(`uid:${uid}:notifications:read`, notification.nid, (err, isMember) => {
+            db.isSortedSetMember(
+                `uid:${uid}:notifications:unread`,
+                notification.nid,
+                (err, isMember) => {
                     assert.ifError(err);
-                    assert.equal(isMember, false);
-                    socketNotifications.getCount({ uid: uid }, null, (err, count) => {
-                        assert.ifError(err);
-                        assert.equal(count, 1);
-                        done();
-                    });
-                });
-            });
+                    assert.equal(isMember, true);
+                    db.isSortedSetMember(
+                        `uid:${uid}:notifications:read`,
+                        notification.nid,
+                        (err, isMember) => {
+                            assert.ifError(err);
+                            assert.equal(isMember, false);
+                            socketNotifications.getCount(
+                                { uid: uid },
+                                null,
+                                (err, count) => {
+                                    assert.ifError(err);
+                                    assert.equal(count, 1);
+                                    done();
+                                }
+                            );
+                        }
+                    );
+                }
+            );
         });
     });
 
     it('should mark all notifications read', done => {
         socketNotifications.markAllRead({ uid: uid }, null, err => {
             assert.ifError(err);
-            db.isSortedSetMember(`uid:${uid}:notifications:unread`, notification.nid, (err, isMember) => {
-                assert.ifError(err);
-                assert.equal(isMember, false);
-                db.isSortedSetMember(`uid:${uid}:notifications:read`, notification.nid, (err, isMember) => {
+            db.isSortedSetMember(
+                `uid:${uid}:notifications:unread`,
+                notification.nid,
+                (err, isMember) => {
                     assert.ifError(err);
-                    assert.equal(isMember, true);
-                    done();
-                });
-            });
+                    assert.equal(isMember, false);
+                    db.isSortedSetMember(
+                        `uid:${uid}:notifications:read`,
+                        notification.nid,
+                        (err, isMember) => {
+                            assert.ifError(err);
+                            assert.equal(isMember, true);
+                            done();
+                        }
+                    );
+                }
+            );
         });
     });
 
@@ -250,7 +304,8 @@ describe('Notifications', () => {
                     categories.create(
                         {
                             name: 'Test Category',
-                            description: 'Test category created by testing script',
+                            description:
+                                'Test category created by testing script',
                         },
                         next
                     );
@@ -303,8 +358,16 @@ describe('Notifications', () => {
                     user.notifications.get(watcherUid, next);
                 },
                 function (notifications, next) {
-                    assert.equal(notifications.unread.length, 1, 'there should be 1 unread notification');
-                    assert.equal(`${nconf.get('relative_path')}/post/${pid}`, notifications.unread[0].path, 'the notification should link to the first unread post');
+                    assert.equal(
+                        notifications.unread.length,
+                        1,
+                        'there should be 1 unread notification'
+                    );
+                    assert.equal(
+                        `${nconf.get('relative_path')}/post/${pid}`,
+                        notifications.unread[0].path,
+                        'the notification should link to the first unread post'
+                    );
                     next();
                 },
             ],
@@ -316,13 +379,20 @@ describe('Notifications', () => {
     });
 
     it('should get notification by nid', done => {
-        socketNotifications.get({ uid: uid }, { nids: [notification.nid] }, (err, data) => {
-            assert.ifError(err);
-            assert.equal(data[0].bodyShort, 'bodyShort');
-            assert.equal(data[0].nid, 'notification_id');
-            assert.equal(data[0].path, `${nconf.get('relative_path')}/notification/path`);
-            done();
-        });
+        socketNotifications.get(
+            { uid: uid },
+            { nids: [notification.nid] },
+            (err, data) => {
+                assert.ifError(err);
+                assert.equal(data[0].bodyShort, 'bodyShort');
+                assert.equal(data[0].nid, 'notification_id');
+                assert.equal(
+                    data[0].path,
+                    `${nconf.get('relative_path')}/notification/path`
+                );
+                done();
+            }
+        );
     });
 
     it("should get user's notifications", done => {
@@ -388,11 +458,15 @@ describe('Notifications', () => {
     });
 
     it('should not get anything if notifications does not exist', done => {
-        user.notifications.getNotifications(['doesnotexistnid1', 'doesnotexistnid2'], uid, (err, data) => {
-            assert.ifError(err);
-            assert.deepEqual(data, []);
-            done();
-        });
+        user.notifications.getNotifications(
+            ['doesnotexistnid1', 'doesnotexistnid2'],
+            uid,
+            (err, data) => {
+                assert.ifError(err);
+                assert.deepEqual(data, []);
+                done();
+            }
+        );
     });
 
     it('should get daily notifications', done => {
@@ -441,7 +515,8 @@ describe('Notifications', () => {
                     categories.create(
                         {
                             name: 'Test Category',
-                            description: 'Test category created by testing script',
+                            description:
+                                'Test category created by testing script',
                         },
                         next
                     );
@@ -502,17 +577,25 @@ describe('Notifications', () => {
                 notifications.prune(err => {
                     assert.ifError(err);
                     const month = 2592000000;
-                    db.sortedSetAdd('notifications', Date.now() - 2 * month, notification.nid, err => {
-                        assert.ifError(err);
-                        notifications.prune(err => {
+                    db.sortedSetAdd(
+                        'notifications',
+                        Date.now() - 2 * month,
+                        notification.nid,
+                        err => {
                             assert.ifError(err);
-                            notifications.get(notification.nid, (err, data) => {
+                            notifications.prune(err => {
                                 assert.ifError(err);
-                                assert(!data);
-                                done();
+                                notifications.get(
+                                    notification.nid,
+                                    (err, data) => {
+                                        assert.ifError(err);
+                                        assert(!data);
+                                        done();
+                                    }
+                                );
                             });
-                        });
-                    });
+                        }
+                    );
                 });
             }
         );

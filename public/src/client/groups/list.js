@@ -1,6 +1,12 @@
 'use strict';
 
-define('forum/groups/list', ['forum/infinitescroll', 'benchpress', 'api', 'bootbox', 'alerts'], function (infinitescroll, Benchpress, api, bootbox, alerts) {
+define('forum/groups/list', [
+    'forum/infinitescroll',
+    'benchpress',
+    'api',
+    'bootbox',
+    'alerts',
+], function (infinitescroll, Benchpress, api, bootbox, alerts) {
     const Groups = {};
 
     Groups.init = function () {
@@ -40,7 +46,9 @@ define('forum/groups/list', ['forum/infinitescroll', 'benchpress', 'api', 'bootb
             'groups.loadMore',
             {
                 sort: $('#search-sort').val(),
-                after: $('[component="groups/container"]').attr('data-nextstart'),
+                after: $('[component="groups/container"]').attr(
+                    'data-nextstart'
+                ),
             },
             function (data, done) {
                 if (data && data.groups.length) {
@@ -55,7 +63,10 @@ define('forum/groups/list', ['forum/infinitescroll', 'benchpress', 'api', 'bootb
                 }
 
                 if (data && data.nextStart) {
-                    $('[component="groups/container"]').attr('data-nextstart', data.nextStart);
+                    $('[component="groups/container"]').attr(
+                        'data-nextstart',
+                        data.nextStart
+                    );
                 }
             }
         );
@@ -82,7 +93,10 @@ define('forum/groups/list', ['forum/infinitescroll', 'benchpress', 'api', 'bootb
                     return alerts.error(err);
                 }
                 groups = groups.filter(function (group) {
-                    return group.name !== 'registered-users' && group.name !== 'guests';
+                    return (
+                        group.name !== 'registered-users' &&
+                        group.name !== 'guests'
+                    );
                 });
                 Benchpress.render('partials/groups/list', {
                     groups: groups,

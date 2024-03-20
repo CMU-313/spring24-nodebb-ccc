@@ -26,7 +26,13 @@ module.exports = function (Topics) {
     };
 
     Topics.unfollow = async function (tid, uid) {
-        await setWatching(unfollow, unignore, 'action:topic.unfollow', tid, uid);
+        await setWatching(
+            unfollow,
+            unignore,
+            'action:topic.unfollow',
+            tid,
+            uid
+        );
     };
 
     Topics.ignore = async function (tid, uid) {
@@ -47,19 +53,39 @@ module.exports = function (Topics) {
     }
 
     async function follow(tid, uid) {
-        await addToSets(`tid:${tid}:followers`, `uid:${uid}:followed_tids`, tid, uid);
+        await addToSets(
+            `tid:${tid}:followers`,
+            `uid:${uid}:followed_tids`,
+            tid,
+            uid
+        );
     }
 
     async function unfollow(tid, uid) {
-        await removeFromSets(`tid:${tid}:followers`, `uid:${uid}:followed_tids`, tid, uid);
+        await removeFromSets(
+            `tid:${tid}:followers`,
+            `uid:${uid}:followed_tids`,
+            tid,
+            uid
+        );
     }
 
     async function ignore(tid, uid) {
-        await addToSets(`tid:${tid}:ignorers`, `uid:${uid}:ignored_tids`, tid, uid);
+        await addToSets(
+            `tid:${tid}:ignorers`,
+            `uid:${uid}:ignored_tids`,
+            tid,
+            uid
+        );
     }
 
     async function unignore(tid, uid) {
-        await removeFromSets(`tid:${tid}:ignorers`, `uid:${uid}:ignored_tids`, tid, uid);
+        await removeFromSets(
+            `tid:${tid}:ignorers`,
+            `uid:${uid}:ignored_tids`,
+            tid,
+            uid
+        );
     }
 
     async function addToSets(set1, set2, tid, uid) {
@@ -88,7 +114,9 @@ module.exports = function (Topics) {
             return tids.map(() => ({ following: false, ignoring: false }));
         }
         const keys = [];
-        tids.forEach(tid => keys.push(`tid:${tid}:followers`, `tid:${tid}:ignorers`));
+        tids.forEach(tid =>
+            keys.push(`tid:${tid}:followers`, `tid:${tid}:ignorers`)
+        );
 
         const data = await db.isMemberOfSets(keys, uid);
 
@@ -123,7 +151,9 @@ module.exports = function (Topics) {
 
     Topics.filterIgnoringUids = async function (tid, uids) {
         const isIgnoring = await db.isSetMembers(`tid:${tid}:ignorers`, uids);
-        const readingUids = uids.filter((uid, index) => uid && !isIgnoring[index]);
+        const readingUids = uids.filter(
+            (uid, index) => uid && !isIgnoring[index]
+        );
         return readingUids;
     };
 
@@ -131,7 +161,10 @@ module.exports = function (Topics) {
         if (parseInt(uid, 10) <= 0) {
             return [];
         }
-        const scores = await db.sortedSetScores(`uid:${uid}:followed_tids`, tids);
+        const scores = await db.sortedSetScores(
+            `uid:${uid}:followed_tids`,
+            tids
+        );
         return tids.filter((tid, index) => tid && !!scores[index]);
     };
 
@@ -139,7 +172,10 @@ module.exports = function (Topics) {
         if (parseInt(uid, 10) <= 0) {
             return tids;
         }
-        const scores = await db.sortedSetScores(`uid:${uid}:ignored_tids`, tids);
+        const scores = await db.sortedSetScores(
+            `uid:${uid}:ignored_tids`,
+            tids
+        );
         return tids.filter((tid, index) => tid && !scores[index]);
     };
 
@@ -151,7 +187,11 @@ module.exports = function (Topics) {
             followers.splice(index, 1);
         }
 
-        followers = await privileges.topics.filterUids('topics:read', postData.topic.tid, followers);
+        followers = await privileges.topics.filterUids(
+            'topics:read',
+            postData.topic.tid,
+            followers
+        );
         if (!followers.length) {
             return;
         }

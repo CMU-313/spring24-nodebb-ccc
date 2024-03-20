@@ -1,6 +1,11 @@
 'use strict';
 
-define('forum/topic/diffs', ['api', 'bootbox', 'alerts', 'forum/topic/images'], function (api, bootbox, alerts) {
+define('forum/topic/diffs', [
+    'api',
+    'bootbox',
+    'alerts',
+    'forum/topic/images',
+], function (api, bootbox, alerts) {
     const Diffs = {};
     const localeStringOpts = {
         year: 'numeric',
@@ -29,15 +34,27 @@ define('forum/topic/diffs', ['api', 'bootbox', 'alerts', 'forum/topic/images'], 
                     }
 
                     const $selectEl = $modal.find('select');
-                    const $revertEl = $modal.find('button[data-action="restore"]');
-                    const $deleteEl = $modal.find('button[data-action="delete"]');
+                    const $revertEl = $modal.find(
+                        'button[data-action="restore"]'
+                    );
+                    const $deleteEl = $modal.find(
+                        'button[data-action="delete"]'
+                    );
                     const $postContainer = $modal.find('ul.posts-list');
-                    const $numberOfDiffCon = $modal.find('.number-of-diffs strong');
+                    const $numberOfDiffCon = $modal.find(
+                        '.number-of-diffs strong'
+                    );
 
                     $selectEl.on('change', function () {
                         Diffs.load(pid, this.value, $postContainer);
-                        $revertEl.prop('disabled', data.timestamps.indexOf(this.value) === 0);
-                        $deleteEl.prop('disabled', data.timestamps.indexOf(this.value) === 0);
+                        $revertEl.prop(
+                            'disabled',
+                            data.timestamps.indexOf(this.value) === 0
+                        );
+                        $deleteEl.prop(
+                            'disabled',
+                            data.timestamps.indexOf(this.value) === 0
+                        );
                     });
 
                     $revertEl.on('click', function () {
@@ -45,7 +62,12 @@ define('forum/topic/diffs', ['api', 'bootbox', 'alerts', 'forum/topic/images'], 
                     });
 
                     $deleteEl.on('click', function () {
-                        Diffs.delete(pid, $selectEl.val(), $selectEl, $numberOfDiffCon);
+                        Diffs.delete(
+                            pid,
+                            $selectEl.val(),
+                            $selectEl,
+                            $numberOfDiffCon
+                        );
                     });
 
                     $modal.on('shown.bs.modal', function () {
@@ -119,7 +141,10 @@ define('forum/topic/diffs', ['api', 'bootbox', 'alerts', 'forum/topic/images'], 
                         return {
                             username: revision.username,
                             timestamp: timestamp,
-                            pretty: new Date(timestamp).toLocaleString(config.userLang.replace('_', '-'), localeStringOpts),
+                            pretty: new Date(timestamp).toLocaleString(
+                                config.userLang.replace('_', '-'),
+                                localeStringOpts
+                            ),
                         };
                     }),
                     numDiffs: data.timestamps.length,

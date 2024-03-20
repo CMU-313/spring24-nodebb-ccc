@@ -16,7 +16,11 @@ const hasAdminPrivilege = async uid => {
 };
 
 Categories.get = async (req, res) => {
-    helpers.formatApiResponse(200, res, await api.categories.get(req, req.params));
+    helpers.formatApiResponse(
+        200,
+        res,
+        await api.categories.get(req, req.params)
+    );
 };
 
 Categories.create = async (req, res) => {
@@ -48,7 +52,10 @@ Categories.getPrivileges = async (req, res) => {
         throw new Error('[[error:no-privileges]]');
     }
 
-    const privilegeSet = await api.categories.getPrivileges(req, req.params.cid);
+    const privilegeSet = await api.categories.getPrivileges(
+        req,
+        req.params.cid
+    );
     helpers.formatApiResponse(200, res, privilegeSet);
 };
 
@@ -63,7 +70,10 @@ Categories.setPrivilege = async (req, res) => {
         set: req.method === 'PUT',
     });
 
-    const privilegeSet = await api.categories.getPrivileges(req, req.params.cid);
+    const privilegeSet = await api.categories.getPrivileges(
+        req,
+        req.params.cid
+    );
     helpers.formatApiResponse(200, res, privilegeSet);
 };
 

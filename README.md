@@ -69,27 +69,27 @@ NodeBB is licensed under the **GNU General Public License v3 (GPL-3)** (http://w
 
 ## Helpful Links
 
--   [NodeBB Demo](https://try.nodebb.org)
--   [NodeBB Documentation](http://docs.nodebb.org)
--   **Git & Github:**
-    -   [Git Documentation](https://git-scm.com/docs/gittutorial)
-    -   [Git Flow](https://datasift.github.io/gitflow/IntroducingGitFlow.html)
-    -   [GitHub Basics](https://guides.github.com/activities/hello-world/)
-    -   [GitHub's Flow](https://guides.github.com/introduction/flow/)
-    -   [GitHub Cross-Referencing](https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests)
--   **Frontend Development:**
-    -   [Benchpress Documentation](https://github.com/benchpressjs/benchpressjs)
-    -   [Bootstrap 3 Documentation ](http://getbootstrap.com/)
--   **Server Development:**
-    -   [Node.js Documentation](https://nodejs.org/en/docs/)
--   **Database/Backend:**
-    -   [Redis Documentation](https://redis.io/docs/)
-    -   [Redis CLI](https://redis.io/docs/manual/cli/)
--   **Linting & Testing:**
-    -   [Mocha Documentation](https://mochajs.org/)
-    -   [ESLint Documentation](https://eslint.org/docs/latest/)
-    -   [nyc Test Coverage Documentation](https://www.npmjs.com/package/nyc)
--   **TypeScript:**
-    -   [TypeScript for New Programmers](https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html)
-    -   [TypeScript for JavaScript Programmers](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
-    -   [JavaScript to TypeScript Translation](https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html#moving-to-typescript-files)
+- [NodeBB Demo](https://try.nodebb.org)
+- [NodeBB Documentation](http://docs.nodebb.org)
+- **Git & Github:**
+  - [Git Documentation](https://git-scm.com/docs/gittutorial)
+  - [Git Flow](https://datasift.github.io/gitflow/IntroducingGitFlow.html)
+  - [GitHub Basics](https://guides.github.com/activities/hello-world/)
+  - [GitHub's Flow](https://guides.github.com/introduction/flow/)
+  - [GitHub Cross-Referencing](https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls#issues-and-pull-requests)
+- **Frontend Development:**
+  - [Benchpress Documentation](https://github.com/benchpressjs/benchpressjs)
+  - [Bootstrap 3 Documentation ](http://getbootstrap.com/)
+- **Server Development:**
+  - [Node.js Documentation](https://nodejs.org/en/docs/)
+- **Database/Backend:**
+  - [Redis Documentation](https://redis.io/docs/)
+  - [Redis CLI](https://redis.io/docs/manual/cli/)
+- **Linting & Testing:**
+  - [Mocha Documentation](https://mochajs.org/)
+  - [ESLint Documentation](https://eslint.org/docs/latest/)
+  - [nyc Test Coverage Documentation](https://www.npmjs.com/package/nyc)
+- **TypeScript:**
+  - [TypeScript for New Programmers](https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html)
+  - [TypeScript for JavaScript Programmers](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
+  - [JavaScript to TypeScript Translation](https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html#moving-to-typescript-files)

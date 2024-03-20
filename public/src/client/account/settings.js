@@ -1,11 +1,21 @@
 'use strict';
 
-define('forum/account/settings', ['forum/account/header', 'components', 'translator', 'api', 'alerts'], function (header, components, translator, api, alerts) {
+define('forum/account/settings', [
+    'forum/account/header',
+    'components',
+    'translator',
+    'api',
+    'alerts',
+], function (header, components, translator, api, alerts) {
     const AccountSettings = {};
 
     // If page skin is changed but not saved, switch the skin back
     $(window).on('action:ajaxify.start', function () {
-        if (ajaxify.data.template.name === 'account/settings' && $('#bootswatchSkin').length && $('#bootswatchSkin').val() !== config.bootswatchSkin) {
+        if (
+            ajaxify.data.template.name === 'account/settings' &&
+            $('#bootswatchSkin').length &&
+            $('#bootswatchSkin').val() !== config.bootswatchSkin
+        ) {
             reskin(config.bootswatchSkin);
         }
     });
@@ -16,10 +26,16 @@ define('forum/account/settings', ['forum/account/header', 'components', 'transla
         $('#submitBtn').on('click', function () {
             const settings = loadSettings();
 
-            if (settings.homePageRoute === 'custom' && settings.homePageCustom) {
-                $.get(config.relative_path + '/' + settings.homePageCustom, function () {
-                    saveSettings(settings);
-                }).fail(function () {
+            if (
+                settings.homePageRoute === 'custom' &&
+                settings.homePageCustom
+            ) {
+                $.get(
+                    config.relative_path + '/' + settings.homePageCustom,
+                    function () {
+                        saveSettings(settings);
+                    }
+                ).fail(function () {
                     alerts.error('[[error:invalid-home-page-route]]');
                 });
             } else {
@@ -67,33 +83,49 @@ define('forum/account/settings', ['forum/account/header', 'components', 'transla
     }
 
     function saveSettings(settings) {
-        api.put(`/users/${ajaxify.data.uid}/settings`, { settings }).then(newSettings => {
-            alerts.success('[[success:settings-saved]]');
-            let languageChanged = false;
-            for (const key in newSettings) {
-                if (newSettings.hasOwnProperty(key)) {
-                    if (key === 'userLang' && config.userLang !== newSettings.userLang) {
-                        languageChanged = true;
-                    }
-                    if (config.hasOwnProperty(key)) {
-                        config[key] = newSettings[key];
+        api.put(`/users/${ajaxify.data.uid}/settings`, { settings }).then(
+            newSettings => {
+                alerts.success('[[success:settings-saved]]');
+                let languageChanged = false;
+                for (const key in newSettings) {
+                    if (newSettings.hasOwnProperty(key)) {
+                        if (
+                            key === 'userLang' &&
+                            config.userLang !== newSettings.userLang
+                        ) {
+                            languageChanged = true;
+                        }
+                        if (config.hasOwnProperty(key)) {
+                            config[key] = newSettings[key];
+                        }
                     }
                 }
-            }
 
-            if (languageChanged && parseInt(app.user.uid, 10) === parseInt(ajaxify.data.theirid, 10)) {
-                translator.translate('[[language:dir]]', config.userLang, function (translated) {
-                    const htmlEl = $('html');
-                    htmlEl.attr('data-dir', translated);
-                    htmlEl.css('direction', translated);
-                });
+                if (
+                    languageChanged &&
+                    parseInt(app.user.uid, 10) ===
+                        parseInt(ajaxify.data.theirid, 10)
+                ) {
+                    translator.translate(
+                        '[[language:dir]]',
+                        config.userLang,
+                        function (translated) {
+                            const htmlEl = $('html');
+                            htmlEl.attr('data-dir', translated);
+                            htmlEl.css('direction', translated);
+                        }
+                    );
 
-                translator.switchTimeagoLanguage(utils.userLangToTimeagoCode(config.userLang), function () {
-                    overrides.overrideTimeago();
-                    ajaxify.refresh();
-                });
+                    translator.switchTimeagoLanguage(
+                        utils.userLangToTimeagoCode(config.userLang),
+                        function () {
+                            overrides.overrideTimeago();
+                            ajaxify.refresh();
+                        }
+                    );
+                }
             }
-        });
+        );
     }
 
     function toggleCustomRoute() {
@@ -107,9 +139,16 @@ define('forum/account/settings', ['forum/account/header', 'components', 'transla
 
     function reskin(skinName) {
         const clientEl =
-            Array.prototype.filter.call(document.querySelectorAll('link[rel="stylesheet"]'), function (el) {
-                return el.href.indexOf(config.relative_path + '/assets/client') !== -1;
-            })[0] || null;
+            Array.prototype.filter.call(
+                document.querySelectorAll('link[rel="stylesheet"]'),
+                function (el) {
+                    return (
+                        el.href.indexOf(
+                            config.relative_path + '/assets/client'
+                        ) !== -1
+                    );
+                }
+            )[0] || null;
         if (!clientEl) {
             return;
         }
@@ -134,7 +173,11 @@ define('forum/account/settings', ['forum/account/header', 'components', 'transla
         const linkEl = document.createElement('link');
         linkEl.rel = 'stylesheet';
         linkEl.type = 'text/css';
-        linkEl.href = config.relative_path + '/assets/client' + (skinName ? '-' + skinName : '') + '.css';
+        linkEl.href =
+            config.relative_path +
+            '/assets/client' +
+            (skinName ? '-' + skinName : '') +
+            '.css';
         linkEl.onload = function () {
             clientEl.parentNode.removeChild(clientEl);
 

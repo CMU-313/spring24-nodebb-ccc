@@ -37,7 +37,9 @@ async function install(plugin, options) {
             if (!options.force) {
                 throw new Error(suggested.message);
             }
-            winston.warn(`${suggested.message} Proceeding with installation anyway due to force option being provided`);
+            winston.warn(
+                `${suggested.message} Proceeding with installation anyway due to force option being provided`
+            );
             suggested.version = 'latest';
         }
         winston.info('Installing Plugin `%s@%s`', plugin, suggested.version);
@@ -45,7 +47,9 @@ async function install(plugin, options) {
 
         process.exit(0);
     } catch (err) {
-        winston.error(`An error occurred during plugin installation\n${err.stack}`);
+        winston.error(
+            `An error occurred during plugin installation\n${err.stack}`
+        );
         process.exit(1);
     }
 }
@@ -76,7 +80,9 @@ async function activate(plugin) {
             process.exit(0);
         }
         if (nconf.get('plugins:active')) {
-            winston.error('Cannot activate plugins while plugin state configuration is set, please change your active configuration (config.json, environmental variables or terminal arguments) instead');
+            winston.error(
+                'Cannot activate plugins while plugin state configuration is set, please change your active configuration (config.json, environmental variables or terminal arguments) instead'
+            );
             process.exit(1);
         }
         const numPlugins = await db.sortedSetCard('plugins:active');
@@ -89,7 +95,9 @@ async function activate(plugin) {
 
         process.exit(0);
     } catch (err) {
-        winston.error(`An error occurred during plugin activation\n${err.stack}`);
+        winston.error(
+            `An error occurred during plugin activation\n${err.stack}`
+        );
         process.exit(1);
     }
 }
@@ -120,10 +128,18 @@ async function listPlugins() {
     // Pretty output
     process.stdout.write('Active plugins:\n');
     combined.forEach(plugin => {
-        process.stdout.write(`\t* ${plugin.id}${plugin.version ? `@${plugin.version}` : ''} (`);
-        process.stdout.write(plugin.installed ? chalk.green('installed') : chalk.red('not installed'));
+        process.stdout.write(
+            `\t* ${plugin.id}${plugin.version ? `@${plugin.version}` : ''} (`
+        );
+        process.stdout.write(
+            plugin.installed
+                ? chalk.green('installed')
+                : chalk.red('not installed')
+        );
         process.stdout.write(', ');
-        process.stdout.write(plugin.active ? chalk.green('enabled') : chalk.yellow('disabled'));
+        process.stdout.write(
+            plugin.active ? chalk.green('enabled') : chalk.yellow('disabled')
+        );
         process.stdout.write(')\n');
     });
 
@@ -133,9 +149,13 @@ async function listPlugins() {
 async function listEvents(count = 10) {
     await db.init();
     const eventData = await events.getEvents('', 0, count - 1);
-    console.log(chalk.bold(`\nDisplaying last ${count} administrative events...`));
+    console.log(
+        chalk.bold(`\nDisplaying last ${count} administrative events...`)
+    );
     eventData.forEach(event => {
-        console.log(`  * ${chalk.green(String(event.timestampISO))} ${chalk.yellow(String(event.type))}${event.text ? ` ${event.text}` : ''} (uid: ${event.uid ? event.uid : 0})`);
+        console.log(
+            `  * ${chalk.green(String(event.timestampISO))} ${chalk.yellow(String(event.type))}${event.text ? ` ${event.text}` : ''} (uid: ${event.uid ? event.uid : 0})`
+        );
     });
     process.exit();
 }
@@ -171,7 +191,11 @@ async function info() {
             break;
     }
 
-    const analyticsData = await analytics.getHourlyStatsForSet('analytics:pageviews', Date.now(), 24);
+    const analyticsData = await analytics.getHourlyStatsForSet(
+        'analytics:pageviews',
+        Date.now(),
+        24
+    );
     const graph = new CliGraph({
         height: 12,
         width: 25,

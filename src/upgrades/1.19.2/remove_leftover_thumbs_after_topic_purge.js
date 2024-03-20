@@ -19,9 +19,15 @@ module.exports = {
             tids.push(x);
         }
 
-        const purgedTids = (await db.isSortedSetMembers('topics:tid', tids)).map((exists, idx) => (exists ? false : tids[idx])).filter(Boolean);
+        const purgedTids = (await db.isSortedSetMembers('topics:tid', tids))
+            .map((exists, idx) => (exists ? false : tids[idx]))
+            .filter(Boolean);
 
-        const affectedTids = (await db.exists(purgedTids.map(tid => `topic:${tid}:thumbs`))).map((exists, idx) => (exists ? purgedTids[idx] : false)).filter(Boolean);
+        const affectedTids = (
+            await db.exists(purgedTids.map(tid => `topic:${tid}:thumbs`))
+        )
+            .map((exists, idx) => (exists ? purgedTids[idx] : false))
+            .filter(Boolean);
 
         progress.total = affectedTids.length;
 
@@ -30,8 +36,12 @@ module.exports = {
             async tids => {
                 await Promise.all(
                     tids.map(async tid => {
-                        const relativePaths = await db.getSortedSetMembers(`topic:${tid}:thumbs`);
-                        const absolutePaths = relativePaths.map(relativePath => path.join(nconf.get('upload_path'), relativePath));
+                        const relativePaths = await db.getSortedSetMembers(
+                            `topic:${tid}:thumbs`
+                        );
+                        const absolutePaths = relativePaths.map(relativePath =>
+                            path.join(nconf.get('upload_path'), relativePath)
+                        );
 
                         await Promise.all(
                             absolutePaths.map(async absolutePath => {

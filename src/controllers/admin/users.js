@@ -13,7 +13,20 @@ const utils = require('../../utils');
 
 const usersController = module.exports;
 
-const userFields = ['uid', 'username', 'userslug', 'email', 'postcount', 'joindate', 'banned', 'reputation', 'picture', 'flags', 'lastonline', 'email:confirmed'];
+const userFields = [
+    'uid',
+    'username',
+    'userslug',
+    'email',
+    'postcount',
+    'joindate',
+    'banned',
+    'reputation',
+    'picture',
+    'flags',
+    'lastonline',
+    'email:confirmed',
+];
 
 usersController.index = async function (req, res) {
     if (req.query.query) {
@@ -33,7 +46,9 @@ async function getUsers(req, res) {
         resultsPerPage = 50;
     }
     let sortBy = validator.escape(req.query.sortBy || '');
-    const filterBy = Array.isArray(req.query.filters || []) ? req.query.filters || [] : [req.query.filters];
+    const filterBy = Array.isArray(req.query.filters || [])
+        ? req.query.filters || []
+        : [req.query.filters];
     const start = Math.max(0, page - 1) * resultsPerPage;
     const stop = start + resultsPerPage - 1;
 
@@ -77,21 +92,28 @@ async function getUsers(req, res) {
         let uids = [];
         if (Array.isArray(set)) {
             const weights = set.map((s, index) => (index ? 0 : 1));
-            uids = await db[reverse ? 'getSortedSetRevIntersect' : 'getSortedSetIntersect']({
+            uids = await db[
+                reverse ? 'getSortedSetRevIntersect' : 'getSortedSetIntersect'
+            ]({
                 sets: set,
                 start: start,
                 stop: stop,
                 weights: weights,
             });
         } else {
-            uids = await db[reverse ? 'getSortedSetRevRange' : 'getSortedSetRange'](set, start, stop);
+            uids = await db[
+                reverse ? 'getSortedSetRevRange' : 'getSortedSetRange'
+            ](set, start, stop);
         }
         return uids;
     }
 
     const set = buildSet();
     const uids = await getUids(set);
-    const [count, users] = await Promise.all([getCount(set), loadUserInfo(req.uid, uids)]);
+    const [count, users] = await Promise.all([
+        getCount(set),
+        loadUserInfo(req.uid, uids),
+    ]);
 
     await render(req, res, {
         users: users.filter(user => user && parseInt(user.uid, 10)),
@@ -156,9 +178,16 @@ usersController.search = async function (req, res) {
 
 async function loadUserInfo(callerUid, uids) {
     async function getIPs() {
-        return await Promise.all(uids.map(uid => db.getSortedSetRevRange(`uid:${uid}:ip`, 0, -1)));
+        return await Promise.all(
+            uids.map(uid => db.getSortedSetRevRange(`uid:${uid}:ip`, 0, -1))
+        );
     }
-    const [isAdmin, userData, lastonline, ips] = await Promise.all([user.isAdministrator(uids), user.getUsersWithFields(uids, userFields, callerUid), db.sortedSetScores('users:online', uids), getIPs()]);
+    const [isAdmin, userData, lastonline, ips] = await Promise.all([
+        user.isAdministrator(uids),
+        user.getUsersWithFields(uids, userFields, callerUid),
+        db.sortedSetScores('users:online', uids),
+        getIPs(),
+    ]);
     userData.forEach((user, index) => {
         if (user) {
             user.administrator = isAdmin[index];
@@ -182,10 +211,16 @@ usersController.registrationQueue = async function (req, res) {
     const data = await utils.promiseParallel({
         registrationQueueCount: db.sortedSetCard('registration:queue'),
         users: user.getRegistrationQueue(start, stop),
-        customHeaders: plugins.hooks.fire('filter:admin.registrationQueue.customHeaders', { headers: [] }),
+        customHeaders: plugins.hooks.fire(
+            'filter:admin.registrationQueue.customHeaders',
+            { headers: [] }
+        ),
         invites: getInvites(),
     });
-    const pageCount = Math.max(1, Math.ceil(data.registrationQueueCount / itemsPerPage));
+    const pageCount = Math.max(
+        1,
+        Math.ceil(data.registrationQueueCount / itemsPerPage)
+    );
     data.pagination = pagination.create(page, pageCount);
     data.customHeaders = data.customHeaders.headers;
     res.render('admin/manage/registration', data);
@@ -210,12 +245,17 @@ async function getInvites() {
         return usernames.map(user => user.username);
     }
 
-    usernames = await Promise.all(invitations.map(invites => getUsernamesByEmails(invites.invitations)));
+    usernames = await Promise.all(
+        invitations.map(invites => getUsernamesByEmails(invites.invitations))
+    );
 
     invitations.forEach((invites, index) => {
         invites.invitations = invites.invitations.map((email, i) => ({
             email: email,
-            username: usernames[index][i] === '[[global:guest]]' ? '' : usernames[index][i],
+            username:
+                usernames[index][i] === '[[global:guest]]'
+                    ? ''
+                    : usernames[index][i],
         }));
     });
     return invitations;
@@ -226,21 +266,30 @@ async function render(req, res, data) {
 
     const { registrationType } = meta.config;
 
-    data.inviteOnly = registrationType === 'invite-only' || registrationType === 'admin-invite-only';
+    data.inviteOnly =
+        registrationType === 'invite-only' ||
+        registrationType === 'admin-invite-only';
     data.adminInviteOnly = registrationType === 'admin-invite-only';
     data[`sort_${data.sortBy}`] = true;
     if (req.query.searchBy) {
         data[`searchBy_${validator.escape(String(req.query.searchBy))}`] = true;
     }
-    const filterBy = Array.isArray(req.query.filters || []) ? req.query.filters || [] : [req.query.filters];
+    const filterBy = Array.isArray(req.query.filters || [])
+        ? req.query.filters || []
+        : [req.query.filters];
     filterBy.forEach(filter => {
         data[`filterBy_${validator.escape(String(filter))}`] = true;
     });
-    data.userCount = parseInt(await db.getObjectField('global', 'userCount'), 10);
+    data.userCount = parseInt(
+        await db.getObjectField('global', 'userCount'),
+        10
+    );
     if (data.adminInviteOnly) {
         data.showInviteButton = await privileges.users.isAdministrator(req.uid);
     } else {
-        data.showInviteButton = await privileges.users.hasInvitePrivilege(req.uid);
+        data.showInviteButton = await privileges.users.hasInvitePrivilege(
+            req.uid
+        );
     }
 
     res.render('admin/manage/users', data);

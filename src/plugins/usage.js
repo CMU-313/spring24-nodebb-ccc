@@ -24,7 +24,11 @@ module.exports = function (Plugins) {
 
     Plugins.submitUsageData = function (callback) {
         callback = callback || function () {};
-        if (!meta.config.submitPluginUsage || !Plugins.loadedPlugins.length || global.env !== 'production') {
+        if (
+            !meta.config.submitPluginUsage ||
+            !Plugins.loadedPlugins.length ||
+            global.env !== 'production'
+        ) {
             return callback();
         }
 
@@ -46,7 +50,9 @@ module.exports = function (Plugins) {
                     return callback(err);
                 }
                 if (res.statusCode !== 200) {
-                    winston.error(`[plugins.submitUsageData] received ${res.statusCode} ${body}`);
+                    winston.error(
+                        `[plugins.submitUsageData] received ${res.statusCode} ${body}`
+                    );
                     callback(new Error(`[[error:nbbpm-${res.statusCode}]]`));
                 } else {
                     callback();

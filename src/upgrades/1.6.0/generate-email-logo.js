@@ -17,8 +17,18 @@ module.exports = {
             [
                 function (next) {
                     // Resize existing logo (if present) to email header size
-                    const uploadPath = path.join(nconf.get('upload_path'), 'system', 'site-logo-x50.png');
-                    const sourcePath = meta.config['brand:logo'] ? path.join(nconf.get('upload_path'), 'system', path.basename(meta.config['brand:logo'])) : null;
+                    const uploadPath = path.join(
+                        nconf.get('upload_path'),
+                        'system',
+                        'site-logo-x50.png'
+                    );
+                    const sourcePath = meta.config['brand:logo']
+                        ? path.join(
+                              nconf.get('upload_path'),
+                              'system',
+                              path.basename(meta.config['brand:logo'])
+                          )
+                        : null;
 
                     if (!sourcePath) {
                         skip = true;
@@ -48,8 +58,12 @@ module.exports = {
 
                     meta.configs.setMultiple(
                         {
-                            'brand:logo': path.join('/assets/uploads/system', path.basename(meta.config['brand:logo'])),
-                            'brand:emailLogo': '/assets/uploads/system/site-logo-x50.png',
+                            'brand:logo': path.join(
+                                '/assets/uploads/system',
+                                path.basename(meta.config['brand:logo'])
+                            ),
+                            'brand:emailLogo':
+                                '/assets/uploads/system/site-logo-x50.png',
                         },
                         next
                     );

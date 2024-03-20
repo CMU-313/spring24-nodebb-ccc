@@ -17,7 +17,10 @@ module.exports = function (User) {
         const isArray = Array.isArray(uids);
         uids = isArray ? uids : [uids];
         const blocks = await User.blocks.list(uids);
-        const isBlocked = uids.map((uid, index) => blocks[index] && blocks[index].includes(parseInt(targetUid, 10)));
+        const isBlocked = uids.map(
+            (uid, index) =>
+                blocks[index] && blocks[index].includes(parseInt(targetUid, 10))
+        );
         return isArray ? isBlocked : isBlocked[0];
     };
 
@@ -31,11 +34,17 @@ module.exports = function (User) {
 
         // Administrators and global moderators cannot be blocked
         // Only admins/mods can block users as another user
-        const [isCallerAdminOrMod, isBlockeeAdminOrMod] = await Promise.all([User.isAdminOrGlobalMod(callerUid), User.isAdminOrGlobalMod(blockeeUid)]);
+        const [isCallerAdminOrMod, isBlockeeAdminOrMod] = await Promise.all([
+            User.isAdminOrGlobalMod(callerUid),
+            User.isAdminOrGlobalMod(blockeeUid),
+        ]);
         if (isBlockeeAdminOrMod && type === 'block') {
             throw new Error('[[error:cannot-block-privileged]]');
         }
-        if (parseInt(callerUid, 10) !== parseInt(blockerUid, 10) && !isCallerAdminOrMod) {
+        if (
+            parseInt(callerUid, 10) !== parseInt(blockerUid, 10) &&
+            !isCallerAdminOrMod
+        ) {
             throw new Error('[[error:no-privileges]]');
         }
     };
@@ -44,11 +53,18 @@ module.exports = function (User) {
         const isArray = Array.isArray(uids);
         uids = (isArray ? uids : [uids]).map(uid => parseInt(uid, 10));
         const cachedData = {};
-        const unCachedUids = User.blocks._cache.getUnCachedKeys(uids, cachedData);
+        const unCachedUids = User.blocks._cache.getUnCachedKeys(
+            uids,
+            cachedData
+        );
         if (unCachedUids.length) {
-            const unCachedData = await db.getSortedSetsMembers(unCachedUids.map(uid => `uid:${uid}:blocked_uids`));
+            const unCachedData = await db.getSortedSetsMembers(
+                unCachedUids.map(uid => `uid:${uid}:blocked_uids`)
+            );
             unCachedUids.forEach((uid, index) => {
-                cachedData[uid] = (unCachedData[index] || []).map(uid => parseInt(uid, 10));
+                cachedData[uid] = (unCachedData[index] || []).map(uid =>
+                    parseInt(uid, 10)
+                );
                 User.blocks._cache.set(uid, cachedData[uid]);
             });
         }
@@ -83,7 +99,9 @@ module.exports = function (User) {
         const isBlock = type === 'block';
         const is = await User.blocks.is(targetUid, uid);
         if (is === isBlock) {
-            throw new Error(`[[error:already-${isBlock ? 'blocked' : 'unblocked'}]]`);
+            throw new Error(
+                `[[error:already-${isBlock ? 'blocked' : 'unblocked'}]]`
+            );
         }
     };
 
@@ -108,7 +126,12 @@ module.exports = function (User) {
         const blocked_uids = await User.blocks.list(uid);
         const blockedSet = new Set(blocked_uids);
 
-        set = set.filter(item => !blockedSet.has(parseInt(isPlain ? item : item && item[property], 10)));
+        set = set.filter(
+            item =>
+                !blockedSet.has(
+                    parseInt(isPlain ? item : item && item[property], 10)
+                )
+        );
         const data = await plugins.hooks.fire('filter:user.blocks.filter', {
             set: set,
             property: property,

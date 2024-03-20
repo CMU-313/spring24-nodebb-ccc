@@ -57,7 +57,10 @@ flagsApi.appendNote = async (caller, data) => {
         }
     }
     await flags.appendNote(data.flagId, caller.uid, data.note, data.datetime);
-    const [notes, history] = await Promise.all([flags.getNotes(data.flagId), flags.getHistory(data.flagId)]);
+    const [notes, history] = await Promise.all([
+        flags.getNotes(data.flagId),
+        flags.getHistory(data.flagId),
+    ]);
     return { notes: notes, history: history };
 };
 
@@ -73,6 +76,9 @@ flagsApi.deleteNote = async (caller, data) => {
         datetime: Date.now(),
     });
 
-    const [notes, history] = await Promise.all([flags.getNotes(data.flagId), flags.getHistory(data.flagId)]);
+    const [notes, history] = await Promise.all([
+        flags.getNotes(data.flagId),
+        flags.getHistory(data.flagId),
+    ]);
     return { notes: notes, history: history };
 };

@@ -47,9 +47,13 @@ define('hooks', [], () => {
             const deprecated = Hooks.deprecated[hookName];
 
             if (deprecated) {
-                console.groupCollapsed(`[hooks] Hook "${hookName}" is deprecated, please use "${deprecated}" instead.`);
+                console.groupCollapsed(
+                    `[hooks] Hook "${hookName}" is deprecated, please use "${deprecated}" instead.`
+                );
             } else {
-                console.groupCollapsed(`[hooks] Hook "${hookName}" is deprecated, there is no alternative.`);
+                console.groupCollapsed(
+                    `[hooks] Hook "${hookName}" is deprecated, there is no alternative.`
+                );
             }
 
             console.info(method);
@@ -83,17 +87,22 @@ define('hooks', [], () => {
             Hooks.loaded[hookName].delete(method);
             Hooks.logs.log(`[hooks] Unregistered ${hookName}`, method);
         } else {
-            Hooks.logs.log(`[hooks] Unregistration of ${hookName} failed, passed-in method is not a registered listener or the hook itself has no listeners, currently.`);
+            Hooks.logs.log(
+                `[hooks] Unregistration of ${hookName} failed, passed-in method is not a registered listener or the hook itself has no listeners, currently.`
+            );
         }
 
         return Hooks;
     };
     Hooks.off = Hooks.unregister;
 
-    Hooks.hasListeners = hookName => Hooks.loaded[hookName] && Hooks.loaded[hookName].size > 0;
+    Hooks.hasListeners = hookName =>
+        Hooks.loaded[hookName] && Hooks.loaded[hookName].size > 0;
 
     const _onHookError = (e, listener, data) => {
-        console.warn(`[hooks] Exception encountered in ${listener.name ? listener.name : 'anonymous function'}, stack trace follows.`);
+        console.warn(
+            `[hooks] Exception encountered in ${listener.name ? listener.name : 'anonymous function'}, stack trace follows.`
+        );
         console.error(e);
         return Promise.resolve(data);
     };
@@ -109,7 +118,11 @@ define('hooks', [], () => {
                 promise.then(data => {
                     try {
                         const result = listener(data);
-                        return utils.isPromise(result) ? result.then(data => Promise.resolve(data)).catch(e => _onHookError(e, listener, data)) : result;
+                        return utils.isPromise(result)
+                            ? result
+                                  .then(data => Promise.resolve(data))
+                                  .catch(e => _onHookError(e, listener, data))
+                            : result;
                     } catch (e) {
                         return _onHookError(e, listener, data);
                     }

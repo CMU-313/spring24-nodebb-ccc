@@ -11,10 +11,62 @@ const utils = require('../utils');
 
 const relative_path = nconf.get('relative_path');
 
-const intFields = ['uid', 'postcount', 'topiccount', 'reputation', 'profileviews', 'banned', 'banned:expire', 'email:confirmed', 'joindate', 'lastonline', 'lastqueuetime', 'lastposttime', 'followingCount', 'followerCount', 'blocksCount', 'passwordExpiry', 'mutedUntil'];
+const intFields = [
+    'uid',
+    'postcount',
+    'topiccount',
+    'reputation',
+    'profileviews',
+    'banned',
+    'banned:expire',
+    'email:confirmed',
+    'joindate',
+    'lastonline',
+    'lastqueuetime',
+    'lastposttime',
+    'followingCount',
+    'followerCount',
+    'blocksCount',
+    'passwordExpiry',
+    'mutedUntil',
+];
 
 module.exports = function (User) {
-    const fieldWhitelist = ['uid', 'username', 'userslug', 'email', 'email:confirmed', 'joindate', 'accounttype', 'lastonline', 'picture', 'icon:bgColor', 'fullname', 'location', 'birthday', 'website', 'aboutme', 'signature', 'uploadedpicture', 'profileviews', 'reputation', 'postcount', 'topiccount', 'lastposttime', 'banned', 'banned:expire', 'status', 'flags', 'followerCount', 'followingCount', 'cover:url', 'cover:position', 'groupTitle', 'mutedUntil', 'mutedReason'];
+    const fieldWhitelist = [
+        'uid',
+        'username',
+        'userslug',
+        'email',
+        'email:confirmed',
+        'joindate',
+        'accounttype',
+        'lastonline',
+        'picture',
+        'icon:bgColor',
+        'fullname',
+        'location',
+        'birthday',
+        'website',
+        'aboutme',
+        'signature',
+        'uploadedpicture',
+        'profileviews',
+        'reputation',
+        'postcount',
+        'topiccount',
+        'lastposttime',
+        'banned',
+        'banned:expire',
+        'status',
+        'flags',
+        'followerCount',
+        'followingCount',
+        'cover:url',
+        'cover:position',
+        'groupTitle',
+        'mutedUntil',
+        'mutedReason',
+    ];
 
     User.guestData = {
         uid: 0,
@@ -45,10 +97,13 @@ module.exports = function (User) {
 
         const uniqueUids = _.uniq(uids).filter(uid => uid > 0);
 
-        const results = await plugins.hooks.fire('filter:user.whitelistFields', {
-            uids: uids,
-            whitelist: fieldWhitelist.slice(),
-        });
+        const results = await plugins.hooks.fire(
+            'filter:user.whitelistFields',
+            {
+                uids: uids,
+                whitelist: fieldWhitelist.slice(),
+            }
+        );
         if (!fields.length) {
             fields = results.whitelist;
         } else {
@@ -108,7 +163,10 @@ module.exports = function (User) {
         const users = uids.map(uid => {
             const user = uidToUser[uid] || { ...User.guestData };
             if (!parseInt(user.uid, 10)) {
-                user.username = user.hasOwnProperty('oldUid') && parseInt(user.oldUid, 10) ? '[[global:former_user]]' : '[[global:guest]]';
+                user.username =
+                    user.hasOwnProperty('oldUid') && parseInt(user.oldUid, 10)
+                        ? '[[global:former_user]]'
+                        : '[[global:guest]]';
                 user.displayname = user.username;
             }
 
@@ -143,19 +201,31 @@ module.exports = function (User) {
             single = true;
         }
 
-        const [userSettings, isAdmin, isGlobalModerator] = await Promise.all([User.getMultipleUserSettings(users.map(user => user.uid)), User.isAdministrator(callerUID), User.isGlobalModerator(callerUID)]);
+        const [userSettings, isAdmin, isGlobalModerator] = await Promise.all([
+            User.getMultipleUserSettings(users.map(user => user.uid)),
+            User.isAdministrator(callerUID),
+            User.isGlobalModerator(callerUID),
+        ]);
 
         users = await Promise.all(
             users.map(async (userData, idx) => {
                 const _userData = { ...userData };
 
-                const isSelf = parseInt(callerUID, 10) === parseInt(_userData.uid, 10);
+                const isSelf =
+                    parseInt(callerUID, 10) === parseInt(_userData.uid, 10);
                 const privilegedOrSelf = isAdmin || isGlobalModerator || isSelf;
 
-                if (!privilegedOrSelf && (!userSettings[idx].showemail || meta.config.hideEmail)) {
+                if (
+                    !privilegedOrSelf &&
+                    (!userSettings[idx].showemail || meta.config.hideEmail)
+                ) {
                     _userData.email = '';
                 }
-                if (!privilegedOrSelf && (!userSettings[idx].showfullname || meta.config.hideFullname)) {
+                if (
+                    !privilegedOrSelf &&
+                    (!userSettings[idx].showfullname ||
+                        meta.config.hideFullname)
+                ) {
                     _userData.fullname = '';
                 }
                 return _userData;
@@ -188,11 +258,15 @@ module.exports = function (User) {
 
                 if (user.hasOwnProperty('username')) {
                     parseDisplayName(user, uidToSettings);
-                    user.username = validator.escape(user.username ? user.username.toString() : '');
+                    user.username = validator.escape(
+                        user.username ? user.username.toString() : ''
+                    );
                 }
 
                 if (user.hasOwnProperty('email')) {
-                    user.email = validator.escape(user.email ? user.email.toString() : '');
+                    user.email = validator.escape(
+                        user.email ? user.email.toString() : ''
+                    );
                 }
 
                 if (!parseInt(user.uid, 10)) {
@@ -207,16 +281,25 @@ module.exports = function (User) {
                 }
 
                 if (user.picture && user.picture === user.uploadedpicture) {
-                    user.uploadedpicture = user.picture.startsWith('http') ? user.picture : relative_path + user.picture;
+                    user.uploadedpicture = user.picture.startsWith('http')
+                        ? user.picture
+                        : relative_path + user.picture;
                     user.picture = user.uploadedpicture;
                 } else if (user.uploadedpicture) {
-                    user.uploadedpicture = user.uploadedpicture.startsWith('http') ? user.uploadedpicture : relative_path + user.uploadedpicture;
+                    user.uploadedpicture = user.uploadedpicture.startsWith(
+                        'http'
+                    )
+                        ? user.uploadedpicture
+                        : relative_path + user.uploadedpicture;
                 }
                 if (meta.config.defaultAvatar && !user.picture) {
                     user.picture = User.getDefaultAvatar();
                 }
 
-                if (user.hasOwnProperty('status') && user.hasOwnProperty('lastonline')) {
+                if (
+                    user.hasOwnProperty('status') &&
+                    user.hasOwnProperty('lastonline')
+                ) {
                     user.status = User.getStatus(user);
                 }
 
@@ -225,12 +308,27 @@ module.exports = function (User) {
                 }
 
                 // User Icons
-                if (requestedFields.includes('picture') && user.username && parseInt(user.uid, 10) && !meta.config.defaultAvatar) {
-                    const iconBackgrounds = await User.getIconBackgrounds(user.uid);
-                    let bgColor = await User.getUserField(user.uid, 'icon:bgColor');
+                if (
+                    requestedFields.includes('picture') &&
+                    user.username &&
+                    parseInt(user.uid, 10) &&
+                    !meta.config.defaultAvatar
+                ) {
+                    const iconBackgrounds = await User.getIconBackgrounds(
+                        user.uid
+                    );
+                    let bgColor = await User.getUserField(
+                        user.uid,
+                        'icon:bgColor'
+                    );
                     if (!iconBackgrounds.includes(bgColor)) {
-                        bgColor = Array.prototype.reduce.call(user.username, (cur, next) => cur + next.charCodeAt(), 0);
-                        bgColor = iconBackgrounds[bgColor % iconBackgrounds.length];
+                        bgColor = Array.prototype.reduce.call(
+                            user.username,
+                            (cur, next) => cur + next.charCodeAt(),
+                            0
+                        );
+                        bgColor =
+                            iconBackgrounds[bgColor % iconBackgrounds.length];
                     }
                     user['icon:text'] = (user.username[0] || '').toUpperCase();
                     user['icon:bgColor'] = bgColor;
@@ -241,15 +339,23 @@ module.exports = function (User) {
                 }
 
                 if (user.hasOwnProperty('lastonline')) {
-                    user.lastonlineISO = utils.toISOString(user.lastonline) || user.joindateISO;
+                    user.lastonlineISO =
+                        utils.toISOString(user.lastonline) || user.joindateISO;
                 }
 
-                if (user.hasOwnProperty('banned') || user.hasOwnProperty('banned:expire')) {
-                    const result = await User.bans.calcExpiredFromUserData(user);
+                if (
+                    user.hasOwnProperty('banned') ||
+                    user.hasOwnProperty('banned:expire')
+                ) {
+                    const result =
+                        await User.bans.calcExpiredFromUserData(user);
                     user.banned = result.banned;
                     const unban = result.banned && result.banExpired;
                     user.banned_until = unban ? 0 : user['banned:expire'];
-                    user.banned_until_readable = user.banned_until && !unban ? utils.toISOString(user.banned_until) : 'Not Banned';
+                    user.banned_until_readable =
+                        user.banned_until && !unban
+                            ? utils.toISOString(user.banned_until)
+                            : 'Not Banned';
                     if (unban) {
                         await User.bans.unban(user.uid);
                         user.banned = false;
@@ -270,12 +376,22 @@ module.exports = function (User) {
         if (uidToSettings[user.uid]) {
             if (parseInt(uidToSettings[user.uid].showfullname, 10) === 0) {
                 showfullname = false;
-            } else if (parseInt(uidToSettings[user.uid].showfullname, 10) === 1) {
+            } else if (
+                parseInt(uidToSettings[user.uid].showfullname, 10) === 1
+            ) {
                 showfullname = true;
             }
         }
 
-        user.displayname = validator.escape(String(meta.config.showFullnameAsDisplayName && showfullname && user.fullname ? user.fullname : user.username));
+        user.displayname = validator.escape(
+            String(
+                meta.config.showFullnameAsDisplayName &&
+                    showfullname &&
+                    user.fullname
+                    ? user.fullname
+                    : user.username
+            )
+        );
     }
 
     function parseGroupTitle(user) {
@@ -302,9 +418,27 @@ module.exports = function (User) {
     }
 
     User.getIconBackgrounds = async (uid = 0) => {
-        let iconBackgrounds = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#009688', '#1b5e20', '#33691e', '#827717', '#e65100', '#ff5722', '#795548', '#607d8b'];
+        let iconBackgrounds = [
+            '#f44336',
+            '#e91e63',
+            '#9c27b0',
+            '#673ab7',
+            '#3f51b5',
+            '#2196f3',
+            '#009688',
+            '#1b5e20',
+            '#33691e',
+            '#827717',
+            '#e65100',
+            '#ff5722',
+            '#795548',
+            '#607d8b',
+        ];
 
-        ({ iconBackgrounds } = await plugins.hooks.fire('filter:user.iconBackgrounds', { uid, iconBackgrounds }));
+        ({ iconBackgrounds } = await plugins.hooks.fire(
+            'filter:user.iconBackgrounds',
+            { uid, iconBackgrounds }
+        ));
         return iconBackgrounds;
     };
 
@@ -312,7 +446,9 @@ module.exports = function (User) {
         if (!meta.config.defaultAvatar) {
             return '';
         }
-        return meta.config.defaultAvatar.startsWith('http') ? meta.config.defaultAvatar : relative_path + meta.config.defaultAvatar;
+        return meta.config.defaultAvatar.startsWith('http')
+            ? meta.config.defaultAvatar
+            : relative_path + meta.config.defaultAvatar;
     };
 
     User.setUserField = async function (uid, field, value) {
@@ -340,7 +476,11 @@ module.exports = function (User) {
     };
 
     async function incrDecrUserFieldBy(uid, field, value, type) {
-        const newValue = await db.incrObjectFieldBy(`user:${uid}`, field, value);
+        const newValue = await db.incrObjectFieldBy(
+            `user:${uid}`,
+            field,
+            value
+        );
         plugins.hooks.fire('action:user.set', {
             uid: uid,
             field: field,

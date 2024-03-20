@@ -21,7 +21,9 @@ module.exports = function (module) {
         const type = await module.type(key);
         if (type === 'zset') {
             if (Array.isArray(key)) {
-                const members = await Promise.all(key.map(key => module.getSortedSetRange(key, 0, 0)));
+                const members = await Promise.all(
+                    key.map(key => module.getSortedSetRange(key, 0, 0))
+                );
                 return members.map(member => member.length > 0);
             }
             const members = await module.getSortedSetRange(key, 0, 0);
@@ -231,7 +233,9 @@ SELECT "expireAt"::TEXT
             values: [key],
         });
 
-        return res.rows.length ? new Date(res.rows[0].expireAt).getTime() : null;
+        return res.rows.length
+            ? new Date(res.rows[0].expireAt).getTime()
+            : null;
     }
 
     module.ttl = async function (key) {

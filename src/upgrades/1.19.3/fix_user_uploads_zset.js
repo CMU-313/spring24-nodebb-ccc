@@ -22,10 +22,16 @@ module.exports = {
                     uids.map(async uid => {
                         const key = `uid:${uid}:uploads`;
                         // Rename the paths within
-                        let uploads = await db.getSortedSetRangeWithScores(key, 0, -1);
+                        let uploads = await db.getSortedSetRangeWithScores(
+                            key,
+                            0,
+                            -1
+                        );
                         if (uploads.length) {
                             // Don't process those that have already the right format
-                            uploads = uploads.filter(upload => upload.value.startsWith('/files/'));
+                            uploads = uploads.filter(upload =>
+                                upload.value.startsWith('/files/')
+                            );
 
                             await db.sortedSetRemove(
                                 key,
@@ -38,7 +44,12 @@ module.exports = {
                             );
                             // Add uid to the upload's hash object
                             uploads = await db.getSortedSetMembers(key);
-                            await db.setObjectBulk(uploads.map(relativePath => [`upload:${md5(relativePath)}`, { uid: uid }]));
+                            await db.setObjectBulk(
+                                uploads.map(relativePath => [
+                                    `upload:${md5(relativePath)}`,
+                                    { uid: uid },
+                                ])
+                            );
                         }
                     })
                 );

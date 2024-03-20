@@ -19,16 +19,37 @@ describe('Utility Methods', () => {
 
     // https://github.com/jprichardson/string.js/blob/master/test/string.test.js
     it('should decode HTML entities', done => {
-        assert.strictEqual(utils.decodeHTMLEntities('Ken Thompson &amp; Dennis Ritchie'), 'Ken Thompson & Dennis Ritchie');
+        assert.strictEqual(
+            utils.decodeHTMLEntities('Ken Thompson &amp; Dennis Ritchie'),
+            'Ken Thompson & Dennis Ritchie'
+        );
         assert.strictEqual(utils.decodeHTMLEntities('3 &lt; 4'), '3 < 4');
-        assert.strictEqual(utils.decodeHTMLEntities('http:&#47;&#47;'), 'http://');
+        assert.strictEqual(
+            utils.decodeHTMLEntities('http:&#47;&#47;'),
+            'http://'
+        );
         done();
     });
     it('should strip HTML tags', done => {
-        assert.strictEqual(utils.stripHTMLTags('<p>just <b>some</b> text</p>'), 'just some text');
-        assert.strictEqual(utils.stripHTMLTags('<p>just <b>some</b> text</p>', ['p']), 'just <b>some</b> text');
-        assert.strictEqual(utils.stripHTMLTags('<i>just</i> some <image/> text', ['i']), 'just some <image/> text');
-        assert.strictEqual(utils.stripHTMLTags('<i>just</i> some <image/> <div>text</div>', ['i', 'div']), 'just some <image/> text');
+        assert.strictEqual(
+            utils.stripHTMLTags('<p>just <b>some</b> text</p>'),
+            'just some text'
+        );
+        assert.strictEqual(
+            utils.stripHTMLTags('<p>just <b>some</b> text</p>', ['p']),
+            'just <b>some</b> text'
+        );
+        assert.strictEqual(
+            utils.stripHTMLTags('<i>just</i> some <image/> text', ['i']),
+            'just some <image/> text'
+        );
+        assert.strictEqual(
+            utils.stripHTMLTags('<i>just</i> some <image/> <div>text</div>', [
+                'i',
+                'div',
+            ]),
+            'just some <image/> text'
+        );
         done();
     });
 
@@ -50,7 +71,11 @@ describe('Utility Methods', () => {
 
         it('rejects empty string', () => {
             const username = '';
-            assert.equal(utils.isUserNameValid(username), false, 'accepted as valid username');
+            assert.equal(
+                utils.isUserNameValid(username),
+                false,
+                'accepted as valid username'
+            );
         });
 
         it('should reject new lines', () => {
@@ -75,7 +100,10 @@ describe('Utility Methods', () => {
         });
 
         it('accepts quotes', () => {
-            assert(utils.isUserNameValid('baris "the best" usakli'), 'invalid username');
+            assert(
+                utils.isUserNameValid('baris "the best" usakli'),
+                'invalid username'
+            );
         });
     });
 
@@ -86,7 +114,11 @@ describe('Utility Methods', () => {
         });
         it('rejects empty address', () => {
             const email = '';
-            assert.equal(utils.isEmailValid(email), false, 'accepted as valid email');
+            assert.equal(
+                utils.isEmailValid(email),
+                false,
+                'accepted as valid email'
+            );
         });
     });
 
@@ -118,18 +150,28 @@ describe('Utility Methods', () => {
     });
 
     it('should remove punctuation', done => {
-        const removed = utils.removePunctuation('some text with , ! punctuation inside "');
+        const removed = utils.removePunctuation(
+            'some text with , ! punctuation inside "'
+        );
         assert.equal(removed, 'some text with   punctuation inside ');
         done();
     });
 
     it('should return true if string has language key', done => {
-        assert.equal(utils.hasLanguageKey('some text [[topic:title]] and [[user:reputaiton]]'), true);
+        assert.equal(
+            utils.hasLanguageKey(
+                'some text [[topic:title]] and [[user:reputaiton]]'
+            ),
+            true
+        );
         done();
     });
 
     it('should return false if string does not have language key', done => {
-        assert.equal(utils.hasLanguageKey('some text with no language keys'), false);
+        assert.equal(
+            utils.hasLanguageKey('some text with no language keys'),
+            false
+        );
         done();
     });
 
@@ -223,7 +265,8 @@ describe('Utility Methods', () => {
 
     it('should return false if browser is not android', done => {
         global.navigator = {
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36',
+            userAgent:
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36',
         };
         assert.equal(utils.isAndroidBrowser(), false);
         done();
@@ -231,7 +274,8 @@ describe('Utility Methods', () => {
 
     it('should return true if browser is android', done => {
         global.navigator = {
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Android /58.0.3029.96 Safari/537.36',
+            userAgent:
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Android /58.0.3029.96 Safari/537.36',
         };
         assert.equal(utils.isAndroidBrowser(), true);
         done();
@@ -406,11 +450,27 @@ describe('Utility Methods', () => {
     it('should get days array', done => {
         const currentDay = new Date(Date.now()).getTime();
         const days = utils.getDaysArray();
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const months = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+        ];
         let index = 0;
         for (let x = 29; x >= 0; x -= 1) {
             const tmpDate = new Date(currentDay - 1000 * 60 * 60 * 24 * x);
-            assert.equal(`${months[tmpDate.getMonth()]} ${tmpDate.getDate()}`, days[index]);
+            assert.equal(
+                `${months[tmpDate.getMonth()]} ${tmpDate.getDate()}`,
+                days[index]
+            );
             index += 1;
         }
         done();
@@ -439,7 +499,9 @@ describe('Utility Methods', () => {
             user1: user.getUserData(uid1),
             user2: user.getUserData(uid2),
         });
-        assert(result.hasOwnProperty('user1') && result.hasOwnProperty('user2'));
+        assert(
+            result.hasOwnProperty('user1') && result.hasOwnProperty('user2')
+        );
         assert.strictEqual(result.user1.uid, uid1);
         assert.strictEqual(result.user2.uid, uid2);
     });

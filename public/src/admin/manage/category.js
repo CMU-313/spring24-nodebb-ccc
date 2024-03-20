@@ -1,6 +1,22 @@
 'use strict';
 
-define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', 'benchpress', 'api', 'bootbox', 'alerts'], function (uploader, iconSelect, categorySelector, Benchpress, api, bootbox, alerts) {
+define('admin/manage/category', [
+    'uploader',
+    'iconSelect',
+    'categorySelector',
+    'benchpress',
+    'api',
+    'bootbox',
+    'alerts',
+], function (
+    uploader,
+    iconSelect,
+    categorySelector,
+    Benchpress,
+    api,
+    bootbox,
+    alerts
+) {
     const Category = {};
     let updateHash = {};
 
@@ -19,7 +35,9 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
 
         handleTags();
 
-        $('#category-settings input, #category-settings select, #category-settings textarea').on('change', function (ev) {
+        $(
+            '#category-settings input, #category-settings select, #category-settings textarea'
+        ).on('change', function (ev) {
             modified(ev.target);
         });
 
@@ -27,22 +45,34 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
             $('.category-preview').css('background-size', $(this).val());
         });
 
-        $('[data-name="bgColor"], [data-name="color"]').on('input', function () {
-            const $inputEl = $(this);
-            const previewEl = $inputEl.parents('[data-cid]').find('.category-preview');
-            if ($inputEl.attr('data-name') === 'bgColor') {
-                previewEl.css('background-color', $inputEl.val());
-            } else if ($inputEl.attr('data-name') === 'color') {
-                previewEl.css('color', $inputEl.val());
-            }
+        $('[data-name="bgColor"], [data-name="color"]').on(
+            'input',
+            function () {
+                const $inputEl = $(this);
+                const previewEl = $inputEl
+                    .parents('[data-cid]')
+                    .find('.category-preview');
+                if ($inputEl.attr('data-name') === 'bgColor') {
+                    previewEl.css('background-color', $inputEl.val());
+                } else if ($inputEl.attr('data-name') === 'color') {
+                    previewEl.css('color', $inputEl.val());
+                }
 
-            modified($inputEl[0]);
-        });
+                modified($inputEl[0]);
+            }
+        );
 
         $('#save').on('click', function () {
-            const tags = $('#tag-whitelist').val() ? $('#tag-whitelist').val().split(',') : [];
-            if (tags.length && tags.length < parseInt($('#cid-min-tags').val(), 10)) {
-                return alerts.error('[[admin/manage/categories:alert.not-enough-whitelisted-tags]]');
+            const tags = $('#tag-whitelist').val()
+                ? $('#tag-whitelist').val().split(',')
+                : [];
+            if (
+                tags.length &&
+                tags.length < parseInt($('#cid-min-tags').val(), 10)
+            ) {
+                return alerts.error(
+                    '[[admin/manage/categories:alert.not-enough-whitelisted-tags]]'
+                );
             }
 
             const cid = ajaxify.data.category.cid;
@@ -51,7 +81,10 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                     app.flags._unsaved = false;
                     alerts.alert({
                         title: 'Updated Categories',
-                        message: 'Category "' + res.name + '" was successfully updated.',
+                        message:
+                            'Category "' +
+                            res.name +
+                            '" was successfully updated.',
                         type: 'success',
                         timeout: 5000,
                     });
@@ -78,30 +111,53 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                             label: '[[modules:bootbox.confirm]]',
                             className: 'btn-primary',
                             callback: function () {
-                                modal.find('.modal-footer button').prop('disabled', true);
+                                modal
+                                    .find('.modal-footer button')
+                                    .prop('disabled', true);
 
                                 const intervalId = setInterval(function () {
-                                    socket.emit('categories.getTopicCount', ajaxify.data.category.cid, function (err, count) {
-                                        if (err) {
-                                            return alerts.error(err);
-                                        }
+                                    socket.emit(
+                                        'categories.getTopicCount',
+                                        ajaxify.data.category.cid,
+                                        function (err, count) {
+                                            if (err) {
+                                                return alerts.error(err);
+                                            }
 
-                                        let percent = 0;
-                                        if (ajaxify.data.category.topic_count > 0) {
-                                            percent = Math.max(0, 1 - count / ajaxify.data.category.topic_count) * 100;
-                                        }
+                                            let percent = 0;
+                                            if (
+                                                ajaxify.data.category
+                                                    .topic_count > 0
+                                            ) {
+                                                percent =
+                                                    Math.max(
+                                                        0,
+                                                        1 -
+                                                            count /
+                                                                ajaxify.data
+                                                                    .category
+                                                                    .topic_count
+                                                    ) * 100;
+                                            }
 
-                                        modal.find('.progress-bar').css({ width: percent + '%' });
-                                    });
+                                            modal
+                                                .find('.progress-bar')
+                                                .css({ width: percent + '%' });
+                                        }
+                                    );
                                 }, 1000);
 
-                                api.del('/categories/' + ajaxify.data.category.cid)
+                                api.del(
+                                    '/categories/' + ajaxify.data.category.cid
+                                )
                                     .then(() => {
                                         if (intervalId) {
                                             clearInterval(intervalId);
                                         }
                                         modal.modal('hide');
-                                        alerts.success('[[admin/manage/categories:alert.purge-success]]');
+                                        alerts.success(
+                                            '[[admin/manage/categories:alert.purge-success]]'
+                                        );
                                         ajaxify.go('admin/manage/categories');
                                     })
                                     .catch(alerts.error);
@@ -115,7 +171,10 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
         });
 
         $('.copy-settings').on('click', function () {
-            Benchpress.render('admin/partials/categories/copy-settings', {}).then(function (html) {
+            Benchpress.render(
+                'admin/partials/categories/copy-settings',
+                {}
+            ).then(function (html) {
                 let selectedCid;
                 const modal = bootbox.dialog({
                     title: '[[modules:composer.select_category]]',
@@ -125,7 +184,11 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                             label: '[[modules:bootbox.confirm]]',
                             className: 'btn-primary',
                             callback: function () {
-                                if (!selectedCid || parseInt(selectedCid, 10) === parseInt(ajaxify.data.category.cid, 10)) {
+                                if (
+                                    !selectedCid ||
+                                    parseInt(selectedCid, 10) ===
+                                        parseInt(ajaxify.data.category.cid, 10)
+                                ) {
                                     return;
                                 }
 
@@ -134,7 +197,9 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                                     {
                                         fromCid: selectedCid,
                                         toCid: ajaxify.data.category.cid,
-                                        copyParent: modal.find('#copyParent').prop('checked'),
+                                        copyParent: modal
+                                            .find('#copyParent')
+                                            .prop('checked'),
                                     },
                                     function (err) {
                                         if (err) {
@@ -142,7 +207,9 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                                         }
 
                                         modal.modal('hide');
-                                        alert.success('[[admin/manage/categories:alert.copy-success]]');
+                                        alert.success(
+                                            '[[admin/manage/categories:alert.copy-success]]'
+                                        );
                                         ajaxify.refresh();
                                     }
                                 );
@@ -152,15 +219,21 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                     },
                 });
                 modal.find('.modal-footer button').prop('disabled', true);
-                categorySelector.init(modal.find('[component="category-selector"]'), {
-                    onSelect: function (selectedCategory) {
-                        selectedCid = selectedCategory && selectedCategory.cid;
-                        if (selectedCid) {
-                            modal.find('.modal-footer button').prop('disabled', false);
-                        }
-                    },
-                    showLinks: true,
-                });
+                categorySelector.init(
+                    modal.find('[component="category-selector"]'),
+                    {
+                        onSelect: function (selectedCategory) {
+                            selectedCid =
+                                selectedCategory && selectedCategory.cid;
+                            if (selectedCid) {
+                                modal
+                                    .find('.modal-footer button')
+                                    .prop('disabled', false);
+                            }
+                        },
+                        showLinks: true,
+                    }
+                );
             });
             return false;
         });
@@ -172,13 +245,25 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
             uploader.show(
                 {
                     title: '[[admin/manage/categories:alert.upload-image]]',
-                    route: config.relative_path + '/api/admin/category/uploadpicture',
+                    route:
+                        config.relative_path +
+                        '/api/admin/category/uploadpicture',
                     params: { cid: cid },
                 },
                 function (imageUrlOnServer) {
                     $('#category-image').val(imageUrlOnServer);
-                    const previewBox = inputEl.parent().parent().siblings('.category-preview');
-                    previewBox.css('background', 'url(' + imageUrlOnServer + '?' + new Date().getTime() + ')');
+                    const previewBox = inputEl
+                        .parent()
+                        .parent()
+                        .siblings('.category-preview');
+                    previewBox.css(
+                        'background',
+                        'url(' +
+                            imageUrlOnServer +
+                            '?' +
+                            new Date().getTime() +
+                            ')'
+                    );
 
                     modified($('#category-image'));
                 }
@@ -186,7 +271,10 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
         });
 
         $('#category-image').on('change', function () {
-            $('.category-preview').css('background-image', $(this).val() ? 'url("' + $(this).val() + '")' : '');
+            $('.category-preview').css(
+                'background-image',
+                $(this).val() ? 'url("' + $(this).val() + '")' : ''
+            );
             modified($('#category-image'));
         });
 
@@ -210,14 +298,20 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
             modified($(this));
         });
 
-        $('button[data-action="setParent"], button[data-action="changeParent"]').on('click', Category.launchParentSelector);
+        $(
+            'button[data-action="setParent"], button[data-action="changeParent"]'
+        ).on('click', Category.launchParentSelector);
         $('button[data-action="removeParent"]').on('click', function () {
             api.put('/categories/' + ajaxify.data.category.cid, {
                 parentCid: 0,
             })
                 .then(() => {
-                    $('button[data-action="removeParent"]').parent().addClass('hide');
-                    $('button[data-action="changeParent"]').parent().addClass('hide');
+                    $('button[data-action="removeParent"]')
+                        .parent()
+                        .addClass('hide');
+                    $('button[data-action="changeParent"]')
+                        .parent()
+                        .addClass('hide');
                     $('button[data-action="setParent"]').removeClass('hide');
                 })
                 .catch(alerts.error);
@@ -229,8 +323,14 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                 disabled: disabled ? 0 : 1,
             })
                 .then(() => {
-                    $this.translateText(!disabled ? '[[admin/manage/categories:enable]]' : '[[admin/manage/categories:disable]]');
-                    $this.toggleClass('btn-primary', !disabled).toggleClass('btn-danger', disabled);
+                    $this.translateText(
+                        !disabled
+                            ? '[[admin/manage/categories:enable]]'
+                            : '[[admin/manage/categories:disable]]'
+                    );
+                    $this
+                        .toggleClass('btn-primary', !disabled)
+                        .toggleClass('btn-danger', disabled);
                     $this.attr('data-disabled', disabled ? 0 : 1);
                 })
                 .catch(alerts.error);
@@ -299,14 +399,25 @@ define('admin/manage/category', ['uploader', 'iconSelect', 'categorySelector', '
                     parentCid: parentCid,
                 })
                     .then(() => {
-                        api.get(`/categories/${parentCid}`, {}).then(function (parent) {
-                            if (parent && parent.icon && parent.name) {
-                                const buttonHtml = '<i class="fa ' + parent.icon + '"></i> ' + parent.name;
-                                $('button[data-action="changeParent"]').html(buttonHtml).parent().removeClass('hide');
+                        api.get(`/categories/${parentCid}`, {}).then(
+                            function (parent) {
+                                if (parent && parent.icon && parent.name) {
+                                    const buttonHtml =
+                                        '<i class="fa ' +
+                                        parent.icon +
+                                        '"></i> ' +
+                                        parent.name;
+                                    $('button[data-action="changeParent"]')
+                                        .html(buttonHtml)
+                                        .parent()
+                                        .removeClass('hide');
+                                }
                             }
-                        });
+                        );
 
-                        $('button[data-action="removeParent"]').parent().removeClass('hide');
+                        $('button[data-action="removeParent"]')
+                            .parent()
+                            .removeClass('hide');
                         $('button[data-action="setParent"]').addClass('hide');
                     })
                     .catch(alerts.error);

@@ -22,7 +22,9 @@ Thumbs.exists = async function (id, path) {
 };
 
 Thumbs.load = async function (topicData) {
-    const topicsWithThumbs = topicData.filter(t => t && parseInt(t.numThumbs, 10) > 0);
+    const topicsWithThumbs = topicData.filter(
+        t => t && parseInt(t.numThumbs, 10) > 0
+    );
     const tidsWithThumbs = topicsWithThumbs.map(t => t.tid);
     const thumbs = await Thumbs.get(tidsWithThumbs);
     const tidToThumbs = _.zipObject(tidsWithThumbs, thumbs);
@@ -43,7 +45,10 @@ Thumbs.get = async function (tids) {
 
     const hasTimestampPrefix = /^\d+-/;
     const upload_url = nconf.get('relative_path') + nconf.get('upload_url');
-    const sets = tids.map(tid => `${validator.isUUID(String(tid)) ? 'draft' : 'topic'}:${tid}:thumbs`);
+    const sets = tids.map(
+        tid =>
+            `${validator.isUUID(String(tid)) ? 'draft' : 'topic'}:${tid}:thumbs`
+    );
     const thumbs = await Promise.all(sets.map(getThumbs));
     let response = thumbs.map((thumbSet, idx) =>
         thumbSet.map(thumb => ({
@@ -52,11 +57,16 @@ Thumbs.get = async function (tids) {
                 const name = path.basename(thumb);
                 return hasTimestampPrefix.test(name) ? name.slice(14) : name;
             })(),
-            url: thumb.startsWith('http') ? thumb : path.posix.join(upload_url, thumb),
+            url: thumb.startsWith('http')
+                ? thumb
+                : path.posix.join(upload_url, thumb),
         }))
     );
 
-    ({ thumbs: response } = await plugins.hooks.fire('filter:topics.getThumbs', { tids, thumbs: response }));
+    ({ thumbs: response } = await plugins.hooks.fire(
+        'filter:topics.getThumbs',
+        { tids, thumbs: response }
+    ));
     return singular ? response.pop() : response;
 };
 
@@ -124,8 +134,15 @@ Thumbs.delete = async function (id, relativePaths) {
         throw new Error('[[error:invalid-data]]');
     }
 
-    const absolutePaths = relativePaths.map(relativePath => path.join(nconf.get('upload_path'), relativePath));
-    const [associated, existsOnDisk] = await Promise.all([db.isSortedSetMembers(set, relativePaths), Promise.all(absolutePaths.map(async absolutePath => file.exists(absolutePath)))]);
+    const absolutePaths = relativePaths.map(relativePath =>
+        path.join(nconf.get('upload_path'), relativePath)
+    );
+    const [associated, existsOnDisk] = await Promise.all([
+        db.isSortedSetMembers(set, relativePaths),
+        Promise.all(
+            absolutePaths.map(async absolutePath => file.exists(absolutePath))
+        ),
+    ]);
 
     const toRemove = [];
     const toDelete = [];
@@ -143,14 +160,23 @@ Thumbs.delete = async function (id, relativePaths) {
 
     if (isDraft && toDelete.length) {
         // drafts only; post upload dissociation handles disk deletion for topics
-        await Promise.all(toDelete.map(async absolutePath => file.delete(absolutePath)));
+        await Promise.all(
+            toDelete.map(async absolutePath => file.delete(absolutePath))
+        );
     }
 
     if (toRemove.length && !isDraft) {
         const topics = require('.');
         const mainPid = (await topics.getMainPids([id]))[0];
 
-        await Promise.all([db.incrObjectFieldBy(`topic:${id}`, 'numThumbs', -toRemove.length), Promise.all(toRemove.map(async relativePath => posts.uploads.dissociate(mainPid, relativePath.slice(1))))]);
+        await Promise.all([
+            db.incrObjectFieldBy(`topic:${id}`, 'numThumbs', -toRemove.length),
+            Promise.all(
+                toRemove.map(async relativePath =>
+                    posts.uploads.dissociate(mainPid, relativePath.slice(1))
+                )
+            ),
+        ]);
     }
 };
 

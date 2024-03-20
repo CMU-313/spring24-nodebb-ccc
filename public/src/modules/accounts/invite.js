@@ -1,6 +1,11 @@
 'use strict';
 
-define('accounts/invite', ['api', 'benchpress', 'bootbox', 'alerts'], function (api, Benchpress, bootbox, alerts) {
+define('accounts/invite', ['api', 'benchpress', 'bootbox', 'alerts'], function (
+    api,
+    Benchpress,
+    bootbox,
+    alerts
+) {
     const Invite = {};
 
     function isACP() {
@@ -12,24 +17,28 @@ define('accounts/invite', ['api', 'benchpress', 'bootbox', 'alerts'], function (
             e.preventDefault();
             api.get(`/api/v3/users/${app.user.uid}/invites/groups`, {})
                 .then(groups => {
-                    Benchpress.parse('modals/invite', { groups: groups }, function (html) {
-                        bootbox.dialog({
-                            message: html,
-                            title: `[[${isACP() ? 'admin/manage/users:invite' : 'users:invite'}]]`,
-                            onEscape: true,
-                            buttons: {
-                                cancel: {
-                                    label: `[[${isACP() ? 'admin/manage/users:alerts.button-cancel' : 'modules:bootbox.cancel'}]]`,
-                                    className: 'btn-default',
+                    Benchpress.parse(
+                        'modals/invite',
+                        { groups: groups },
+                        function (html) {
+                            bootbox.dialog({
+                                message: html,
+                                title: `[[${isACP() ? 'admin/manage/users:invite' : 'users:invite'}]]`,
+                                onEscape: true,
+                                buttons: {
+                                    cancel: {
+                                        label: `[[${isACP() ? 'admin/manage/users:alerts.button-cancel' : 'modules:bootbox.cancel'}]]`,
+                                        className: 'btn-default',
+                                    },
+                                    invite: {
+                                        label: `[[${isACP() ? 'admin/manage/users:invite' : 'users:invite'}]]`,
+                                        className: 'btn-primary',
+                                        callback: Invite.send,
+                                    },
                                 },
-                                invite: {
-                                    label: `[[${isACP() ? 'admin/manage/users:invite' : 'users:invite'}]]`,
-                                    className: 'btn-primary',
-                                    callback: Invite.send,
-                                },
-                            },
-                        });
-                    });
+                            });
+                        }
+                    );
                 })
                 .catch(alerts.error);
         });
@@ -56,7 +65,9 @@ define('accounts/invite', ['api', 'benchpress', 'bootbox', 'alerts'], function (
 
         api.post(`/users/${app.user.uid}/invites`, data)
             .then(() => {
-                alerts.success(`[[${isACP() ? 'admin/manage/users:alerts.email-sent-to' : 'users:invitation-email-sent'}, ${data.emails.replace(/,/g, '&#44; ')}]]`);
+                alerts.success(
+                    `[[${isACP() ? 'admin/manage/users:alerts.email-sent-to' : 'users:invitation-email-sent'}, ${data.emails.replace(/,/g, '&#44; ')}]]`
+                );
             })
             .catch(alerts.error);
     };

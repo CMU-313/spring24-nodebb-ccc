@@ -1,6 +1,9 @@
 'use strict';
 
-define('coverPhoto', ['alerts', 'vendor/jquery/draggable-background/backgroundDraggable'], function (alerts) {
+define('coverPhoto', [
+    'alerts',
+    'vendor/jquery/draggable-background/backgroundDraggable',
+], function (alerts) {
     const coverPhoto = {
         coverEl: null,
         saveFn: null,
@@ -16,7 +19,9 @@ define('coverPhoto', ['alerts', 'vendor/jquery/draggable-background/backgroundDr
         });
         coverEl.find('.remove').on('click', removeFn);
 
-        coverEl.on('dragover', coverPhoto.onDragOver).on('drop', coverPhoto.onDrop);
+        coverEl
+            .on('dragover', coverPhoto.onDragOver)
+            .on('drop', coverPhoto.onDrop);
 
         coverEl.find('.save').on('click', coverPhoto.save);
         coverEl.addClass('initialised');
@@ -37,7 +42,10 @@ define('coverPhoto', ['alerts', 'vendor/jquery/draggable-background/backgroundDr
 
         if (files.length && files[0].type.match('image.*')) {
             reader.onload = function (e) {
-                coverPhoto.coverEl.css('background-image', 'url(' + e.target.result + ')');
+                coverPhoto.coverEl.css(
+                    'background-image',
+                    'url(' + e.target.result + ')'
+                );
                 coverPhoto.newCover = e.target.result;
             };
 
@@ -63,19 +71,23 @@ define('coverPhoto', ['alerts', 'vendor/jquery/draggable-background/backgroundDr
     coverPhoto.save = function () {
         coverPhoto.coverEl.addClass('saving');
 
-        coverPhoto.saveFn(coverPhoto.newCover || undefined, coverPhoto.coverEl.css('background-position'), function (err) {
-            if (!err) {
-                coverPhoto.coverEl.toggleClass('active', 0);
-                coverPhoto.coverEl.backgroundDraggable('disable');
-                coverPhoto.coverEl.off('dragover', coverPhoto.onDragOver);
-                coverPhoto.coverEl.off('drop', coverPhoto.onDrop);
-                alerts.success('[[modules:cover.saved]]');
-            } else {
-                alerts.error(err);
-            }
+        coverPhoto.saveFn(
+            coverPhoto.newCover || undefined,
+            coverPhoto.coverEl.css('background-position'),
+            function (err) {
+                if (!err) {
+                    coverPhoto.coverEl.toggleClass('active', 0);
+                    coverPhoto.coverEl.backgroundDraggable('disable');
+                    coverPhoto.coverEl.off('dragover', coverPhoto.onDragOver);
+                    coverPhoto.coverEl.off('drop', coverPhoto.onDrop);
+                    alerts.success('[[modules:cover.saved]]');
+                } else {
+                    alerts.error(err);
+                }
 
-            coverPhoto.coverEl.removeClass('saving');
-        });
+                coverPhoto.coverEl.removeClass('saving');
+            }
+        );
     };
 
     return coverPhoto;

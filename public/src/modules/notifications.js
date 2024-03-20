@@ -1,6 +1,13 @@
 'use strict';
 
-define('notifications', ['translator', 'components', 'navigator', 'tinycon', 'hooks', 'alerts'], function (translator, components, navigator, Tinycon, hooks, alerts) {
+define('notifications', [
+    'translator',
+    'components',
+    'navigator',
+    'tinycon',
+    'hooks',
+    'alerts',
+], function (translator, components, navigator, Tinycon, hooks, alerts) {
     const Notifications = {};
 
     let unreadNotifs = {};
@@ -9,7 +16,9 @@ define('notifications', ['translator', 'components', 'navigator', 'tinycon', 'ho
         new Promise(resolve => {
             translator.toggleTimeagoShorthand(function () {
                 for (let i = 0; i < notifs.length; i += 1) {
-                    notifs[i].timeago = $.timeago(new Date(parseInt(notifs[i].datetime, 10)));
+                    notifs[i].timeago = $.timeago(
+                        new Date(parseInt(notifs[i].datetime, 10))
+                    );
                 }
                 translator.toggleTimeagoShorthand();
                 resolve({ notifications: notifs });
@@ -25,46 +34,64 @@ define('notifications', ['translator', 'components', 'navigator', 'tinycon', 'ho
             }
 
             const notifs = data.unread.concat(data.read).sort(function (a, b) {
-                return parseInt(a.datetime, 10) > parseInt(b.datetime, 10) ? -1 : 1;
+                return parseInt(a.datetime, 10) > parseInt(b.datetime, 10)
+                    ? -1
+                    : 1;
             });
 
-            hooks.fire('filter:notifications.load', { notifications: notifs }).then(({ notifications }) => {
-                app.parseAndTranslate('partials/notifications_list', { notifications }, function (html) {
-                    notifList.html(html);
-                    notifList.off('click').on('click', '[data-nid]', function (ev) {
-                        const notifEl = $(this);
-                        if (scrollToPostIndexIfOnPage(notifEl)) {
-                            ev.stopPropagation();
-                            ev.preventDefault();
-                            components.get('notifications/list').dropdown('toggle');
+            hooks
+                .fire('filter:notifications.load', { notifications: notifs })
+                .then(({ notifications }) => {
+                    app.parseAndTranslate(
+                        'partials/notifications_list',
+                        { notifications },
+                        function (html) {
+                            notifList.html(html);
+                            notifList
+                                .off('click')
+                                .on('click', '[data-nid]', function (ev) {
+                                    const notifEl = $(this);
+                                    if (scrollToPostIndexIfOnPage(notifEl)) {
+                                        ev.stopPropagation();
+                                        ev.preventDefault();
+                                        components
+                                            .get('notifications/list')
+                                            .dropdown('toggle');
+                                    }
+
+                                    const unread = notifEl.hasClass('unread');
+                                    if (!unread) {
+                                        return;
+                                    }
+                                    const nid = notifEl.attr('data-nid');
+                                    markNotification(nid, true);
+                                });
+                            components
+                                .get('notifications')
+                                .on(
+                                    'click',
+                                    '.mark-all-read',
+                                    Notifications.markAllRead
+                                );
+
+                            notifList.on('click', '.mark-read', function () {
+                                const liEl = $(this).parents('li');
+                                const unread = liEl.hasClass('unread');
+                                const nid = liEl.attr('data-nid');
+                                markNotification(nid, unread, function () {
+                                    liEl.toggleClass('unread');
+                                });
+                                return false;
+                            });
+
+                            hooks.fire('action:notifications.loaded', {
+                                notifications: notifs,
+                                list: notifList,
+                            });
+                            callback();
                         }
-
-                        const unread = notifEl.hasClass('unread');
-                        if (!unread) {
-                            return;
-                        }
-                        const nid = notifEl.attr('data-nid');
-                        markNotification(nid, true);
-                    });
-                    components.get('notifications').on('click', '.mark-all-read', Notifications.markAllRead);
-
-                    notifList.on('click', '.mark-read', function () {
-                        const liEl = $(this).parents('li');
-                        const unread = liEl.hasClass('unread');
-                        const nid = liEl.attr('data-nid');
-                        markNotification(nid, unread, function () {
-                            liEl.toggleClass('unread');
-                        });
-                        return false;
-                    });
-
-                    hooks.fire('action:notifications.loaded', {
-                        notifications: notifs,
-                        list: notifList,
-                    });
-                    callback();
+                    );
                 });
-            });
         });
     };
 
@@ -87,18 +114,22 @@ define('notifications', ['translator', 'components', 'navigator', 'tinycon', 'ho
     };
 
     function markNotification(nid, read, callback) {
-        socket.emit('notifications.mark' + (read ? 'Read' : 'Unread'), nid, function (err) {
-            if (err) {
-                return alerts.error(err);
-            }
+        socket.emit(
+            'notifications.mark' + (read ? 'Read' : 'Unread'),
+            nid,
+            function (err) {
+                if (err) {
+                    return alerts.error(err);
+                }
 
-            if (read && unreadNotifs[nid]) {
-                delete unreadNotifs[nid];
+                if (read && unreadNotifs[nid]) {
+                    delete unreadNotifs[nid];
+                }
+                if (callback) {
+                    callback();
+                }
             }
-            if (callback) {
-                callback();
-            }
-        });
+        );
     }
 
     function scrollToPostIndexIfOnPage(notifEl) {
@@ -106,7 +137,12 @@ define('notifications', ['translator', 'components', 'navigator', 'tinycon', 'ho
         const pid = notifEl.attr('data-pid');
         const path = notifEl.attr('data-path');
         const postEl = components.get('post', 'pid', pid);
-        if (path.startsWith(config.relative_path + '/post/') && pid && postEl.length && ajaxify.data.template.topic) {
+        if (
+            path.startsWith(config.relative_path + '/post/') &&
+            pid &&
+            postEl.length &&
+            ajaxify.data.template.topic
+        ) {
             navigator.scrollToIndex(postEl.attr('data-index'), true);
             return true;
         }

@@ -43,7 +43,9 @@ define('autocomplete', ['api', 'alerts'], function (api, alerts) {
 
                     if (result && result.users) {
                         const names = result.users.map(function (user) {
-                            const username = $('<div></div>').html(user.username).text();
+                            const username = $('<div></div>')
+                                .html(user.username)
+                                .text();
                             return (
                                 user && {
                                     label: username,

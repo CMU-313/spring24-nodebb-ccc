@@ -41,7 +41,8 @@ describe('Search', () => {
                                 categories.create(
                                     {
                                         name: 'Test Category',
-                                        description: 'Test category created by testing script',
+                                        description:
+                                            'Test category created by testing script',
                                     },
                                     next
                                 );
@@ -50,7 +51,8 @@ describe('Search', () => {
                                 categories.create(
                                     {
                                         name: 'Test Category',
-                                        description: 'Test category created by testing script',
+                                        description:
+                                            'Test category created by testing script',
                                     },
                                     next
                                 );
@@ -71,7 +73,8 @@ describe('Search', () => {
                                 categories.create(
                                     {
                                         name: 'Child Test Category',
-                                        description: 'Test category created by testing script',
+                                        description:
+                                            'Test category created by testing script',
                                         parentCid: cid2,
                                     },
                                     next
@@ -84,8 +87,15 @@ describe('Search', () => {
                                         uid: phoebeUid,
                                         cid: cid1,
                                         title: 'nodebb mongodb bugs',
-                                        content: 'avocado cucumber apple orange fox',
-                                        tags: ['nodebb', 'bug', 'plugin', 'nodebb-plugin', 'jquery'],
+                                        content:
+                                            'avocado cucumber apple orange fox',
+                                        tags: [
+                                            'nodebb',
+                                            'bug',
+                                            'plugin',
+                                            'nodebb-plugin',
+                                            'jquery',
+                                        ],
                                     },
                                     next
                                 );
@@ -99,8 +109,15 @@ describe('Search', () => {
                                         uid: gingerUid,
                                         cid: cid2,
                                         title: 'java mongodb redis',
-                                        content: 'avocado cucumber carrot armadillo',
-                                        tags: ['nodebb', 'bug', 'plugin', 'nodebb-plugin', 'javascript'],
+                                        content:
+                                            'avocado cucumber carrot armadillo',
+                                        tags: [
+                                            'nodebb',
+                                            'bug',
+                                            'plugin',
+                                            'nodebb-plugin',
+                                            'javascript',
+                                        ],
                                     },
                                     next
                                 );
@@ -148,7 +165,11 @@ describe('Search', () => {
                     assert.equal(body.posts[0].pid, post1Data.pid);
                     assert.equal(body.posts[0].uid, phoebeUid);
 
-                    privileges.global.rescind(['groups:search:content'], 'guests', done);
+                    privileges.global.rescind(
+                        ['groups:search:content'],
+                        'guests',
+                        done
+                    );
                 }
             );
         });
@@ -209,9 +230,15 @@ describe('Search', () => {
 
     it('should search for categories', async () => {
         const socketCategories = require('../src/socket.io/categories');
-        let data = await socketCategories.categorySearch({ uid: phoebeUid }, { query: 'baz', parentCid: 0 });
+        let data = await socketCategories.categorySearch(
+            { uid: phoebeUid },
+            { query: 'baz', parentCid: 0 }
+        );
         assert.strictEqual(data[0].name, 'baz category');
-        data = await socketCategories.categorySearch({ uid: phoebeUid }, { query: '', parentCid: 0 });
+        data = await socketCategories.categorySearch(
+            { uid: phoebeUid },
+            { query: '', parentCid: 0 }
+        );
         assert.strictEqual(data.length, 5);
     });
 
@@ -301,8 +328,12 @@ describe('Search', () => {
                 },
                 function (result, next) {
                     assert(result.posts.length, 2);
-                    assert(result.posts[0].topic.title === 'child category topic');
-                    assert(result.posts[1].topic.title === 'java mongodb redis');
+                    assert(
+                        result.posts[0].topic.title === 'child category topic'
+                    );
+                    assert(
+                        result.posts[1].topic.title === 'java mongodb redis'
+                    );
                     next();
                 },
             ],
@@ -328,7 +359,11 @@ describe('Search', () => {
                     assert(body.hasOwnProperty('posts'));
                     assert(!body.hasOwnProperty('categories'));
 
-                    privileges.global.rescind(['groups:search:content'], 'guests', done);
+                    privileges.global.rescind(
+                        ['groups:search:content'],
+                        'guests',
+                        done
+                    );
                 }
             );
         });
@@ -347,7 +382,11 @@ describe('Search', () => {
                     assert.ifError(err);
                     assert(body);
                     assert.strictEqual(response.statusCode, 200);
-                    privileges.global.rescind(['groups:search:content'], 'guests', done);
+                    privileges.global.rescind(
+                        ['groups:search:content'],
+                        'guests',
+                        done
+                    );
                 }
             );
         });

@@ -18,7 +18,11 @@ search.search = async function (data) {
     data.sortBy = data.sortBy || 'relevance';
 
     let result;
-    if (data.searchIn === 'posts' || data.searchIn === 'titles' || data.searchIn === 'titlesposts') {
+    if (
+        data.searchIn === 'posts' ||
+        data.searchIn === 'titles' ||
+        data.searchIn === 'titlesposts'
+    ) {
         result = await searchInContent(data);
     } else if (data.searchIn === 'users') {
         result = await user.search(data);
@@ -41,7 +45,10 @@ search.search = async function (data) {
 async function searchInContent(data) {
     data.uid = data.uid || 0;
 
-    const [searchCids, searchUids] = await Promise.all([getSearchCids(data), getSearchUids(data)]);
+    const [searchCids, searchUids] = await Promise.all([
+        getSearchCids(data),
+        getSearchUids(data),
+    ]);
 
     async function doSearch(type, searchIn) {
         if (searchIn.includes(data.searchIn)) {
@@ -66,7 +73,10 @@ async function searchInContent(data) {
         const cleanedTerm = data.query.replace(inTopic[0], '');
         pids = await topics.search(tid, cleanedTerm);
     } else {
-        [pids, tids] = await Promise.all([doSearch('post', ['posts', 'titlesposts']), doSearch('topic', ['titles', 'titlesposts'])]);
+        [pids, tids] = await Promise.all([
+            doSearch('post', ['posts', 'titlesposts']),
+            doSearch('topic', ['titles', 'titlesposts']),
+        ]);
     }
 
     const mainPids = await topics.getMainPids(tids);
@@ -86,7 +96,9 @@ async function searchInContent(data) {
         const mainPidToTid = _.zipObject(mainPids, tids);
         const pidsSet = new Set(pids);
         const returnPids = allPids.filter(pid => pidsSet.has(pid));
-        const returnTids = allPids.filter(pid => mainPidsSet.has(pid)).map(pid => mainPidToTid[pid]);
+        const returnTids = allPids
+            .filter(pid => mainPidsSet.has(pid))
+            .map(pid => mainPidToTid[pid]);
         return { pids: returnPids, tids: returnTids };
     }
 
@@ -94,7 +106,10 @@ async function searchInContent(data) {
     const returnData = {
         posts: [],
         matchCount: metadata.pids.length,
-        pageCount: Math.max(1, Math.ceil(parseInt(metadata.pids.length, 10) / itemsPerPage)),
+        pageCount: Math.max(
+            1,
+            Math.ceil(parseInt(metadata.pids.length, 10) / itemsPerPage)
+        ),
     };
 
     if (data.page) {
@@ -102,7 +117,11 @@ async function searchInContent(data) {
         metadata.pids = metadata.pids.slice(start, start + itemsPerPage);
     }
 
-    returnData.posts = await posts.getPostSummaryByPids(metadata.pids, data.uid, {});
+    returnData.posts = await posts.getPostSummaryByPids(
+        metadata.pids,
+        data.uid,
+        {}
+    );
     await plugins.hooks.fire('filter:search.contentGetResult', {
         result: returnData,
         data: data,
@@ -113,7 +132,13 @@ async function searchInContent(data) {
 }
 
 async function filterAndSort(pids, data) {
-    if (data.sortBy === 'relevance' && !data.replies && !data.timeRange && !data.hasTags && !plugins.hooks.hasListeners('filter:search.filterAndSort')) {
+    if (
+        data.sortBy === 'relevance' &&
+        !data.replies &&
+        !data.timeRange &&
+        !data.hasTags &&
+        !plugins.hooks.hasListeners('filter:search.filterAndSort')
+    ) {
         return pids;
     }
     let postsData = await getMatchedPosts(pids, data);
@@ -137,14 +162,25 @@ async function filterAndSort(pids, data) {
 }
 
 async function getMatchedPosts(pids, data) {
-    const postFields = ['pid', 'uid', 'tid', 'timestamp', 'deleted', 'upvotes', 'downvotes'];
+    const postFields = [
+        'pid',
+        'uid',
+        'tid',
+        'timestamp',
+        'deleted',
+        'upvotes',
+        'downvotes',
+    ];
 
     let postsData = await posts.getPostsFields(pids, postFields);
     postsData = postsData.filter(post => post && !post.deleted);
     const uids = _.uniq(postsData.map(post => post.uid));
     const tids = _.uniq(postsData.map(post => post.tid));
 
-    const [users, topics] = await Promise.all([getUsers(uids, data), getTopics(tids, data)]);
+    const [users, topics] = await Promise.all([
+        getUsers(uids, data),
+        getTopics(tids, data),
+    ]);
 
     const tidToTopic = _.zipObject(tids, topics);
     const uidToUser = _.zipObject(uids, users);
@@ -209,9 +245,13 @@ function filterByPostcount(posts, postCount, repliesFilter) {
     postCount = parseInt(postCount, 10);
     if (postCount) {
         if (repliesFilter === 'atleast') {
-            posts = posts.filter(post => post.topic && post.topic.postcount >= postCount);
+            posts = posts.filter(
+                post => post.topic && post.topic.postcount >= postCount
+            );
         } else {
-            posts = posts.filter(post => post.topic && post.topic.postcount <= postCount);
+            posts = posts.filter(
+                post => post.topic && post.topic.postcount <= postCount
+            );
         }
     }
     return posts;
@@ -234,8 +274,15 @@ function filterByTags(posts, hasTags) {
     if (Array.isArray(hasTags) && hasTags.length) {
         posts = posts.filter(post => {
             let hasAllTags = false;
-            if (post && post.topic && Array.isArray(post.topic.tags) && post.topic.tags.length) {
-                hasAllTags = hasTags.every(tag => post.topic.tags.includes(tag));
+            if (
+                post &&
+                post.topic &&
+                Array.isArray(post.topic.tags) &&
+                post.topic.tags.length
+            ) {
+                hasAllTags = hasTags.every(tag =>
+                    post.topic.tags.includes(tag)
+                );
             }
             return hasAllTags;
         });
@@ -252,18 +299,29 @@ function sortPosts(posts, data) {
     const direction = data.sortDirection === 'desc' ? 1 : -1;
     const fields = data.sortBy.split('.');
     if (fields.length === 1) {
-        return posts.sort((p1, p2) => direction * (p2[fields[0]] - p1[fields[0]]));
+        return posts.sort(
+            (p1, p2) => direction * (p2[fields[0]] - p1[fields[0]])
+        );
     }
 
     const firstPost = posts[0];
-    if (!fields || fields.length !== 2 || !firstPost[fields[0]] || !firstPost[fields[0]][fields[1]]) {
+    if (
+        !fields ||
+        fields.length !== 2 ||
+        !firstPost[fields[0]] ||
+        !firstPost[fields[0]][fields[1]]
+    ) {
         return;
     }
 
     const isNumeric = utils.isNumber(firstPost[fields[0]][fields[1]]);
 
     if (isNumeric) {
-        posts.sort((p1, p2) => direction * (p2[fields[0]][fields[1]] - p1[fields[0]][fields[1]]));
+        posts.sort(
+            (p1, p2) =>
+                direction *
+                (p2[fields[0]][fields[1]] - p1[fields[0]][fields[1]])
+        );
     } else {
         posts.sort((p1, p2) => {
             if (p1[fields[0]][fields[1]] > p2[fields[0]][fields[1]]) {
@@ -282,11 +340,20 @@ async function getSearchCids(data) {
     }
 
     if (data.categories.includes('all')) {
-        return await categories.getCidsByPrivilege('categories:cid', data.uid, 'read');
+        return await categories.getCidsByPrivilege(
+            'categories:cid',
+            data.uid,
+            'read'
+        );
     }
 
-    const [watchedCids, childrenCids] = await Promise.all([getWatchedCids(data), getChildrenCids(data)]);
-    return _.uniq(watchedCids.concat(childrenCids).concat(data.categories).filter(Boolean));
+    const [watchedCids, childrenCids] = await Promise.all([
+        getWatchedCids(data),
+        getChildrenCids(data),
+    ]);
+    return _.uniq(
+        watchedCids.concat(childrenCids).concat(data.categories).filter(Boolean)
+    );
 }
 
 async function getWatchedCids(data) {
@@ -300,15 +367,23 @@ async function getChildrenCids(data) {
     if (!data.searchChildren) {
         return [];
     }
-    const childrenCids = await Promise.all(data.categories.map(cid => categories.getChildrenCids(cid)));
-    return await privileges.categories.filterCids('find', _.uniq(_.flatten(childrenCids)), data.uid);
+    const childrenCids = await Promise.all(
+        data.categories.map(cid => categories.getChildrenCids(cid))
+    );
+    return await privileges.categories.filterCids(
+        'find',
+        _.uniq(_.flatten(childrenCids)),
+        data.uid
+    );
 }
 
 async function getSearchUids(data) {
     if (!data.postedBy) {
         return [];
     }
-    return await user.getUidsByUsernames(Array.isArray(data.postedBy) ? data.postedBy : [data.postedBy]);
+    return await user.getUidsByUsernames(
+        Array.isArray(data.postedBy) ? data.postedBy : [data.postedBy]
+    );
 }
 
 require('./promisify')(search);

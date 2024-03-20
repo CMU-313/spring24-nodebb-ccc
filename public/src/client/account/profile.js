@@ -1,6 +1,9 @@
 'use strict';
 
-define('forum/account/profile', ['forum/account/header', 'bootbox'], function (header, bootbox) {
+define('forum/account/profile', ['forum/account/header', 'bootbox'], function (
+    header,
+    bootbox
+) {
     const Account = {};
 
     Account.init = function () {
@@ -19,7 +22,9 @@ define('forum/account/profile', ['forum/account/header', 'bootbox'], function (h
     };
 
     function processPage() {
-        $('[component="posts"] [component="post/content"] img:not(.not-responsive), [component="aboutme"] img:not(.not-responsive)').addClass('img-responsive');
+        $(
+            '[component="posts"] [component="post/content"] img:not(.not-responsive), [component="aboutme"] img:not(.not-responsive)'
+        ).addClass('img-responsive');
     }
 
     function onUserStatusChange(data) {
@@ -27,7 +32,14 @@ define('forum/account/profile', ['forum/account/header', 'bootbox'], function (h
             return;
         }
 
-        app.updateUserStatus($('.account [data-uid="' + data.uid + '"] [component="user/status"]'), data.status);
+        app.updateUserStatus(
+            $(
+                '.account [data-uid="' +
+                    data.uid +
+                    '"] [component="user/status"]'
+            ),
+            data.status
+        );
     }
 
     return Account;

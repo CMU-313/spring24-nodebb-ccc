@@ -14,12 +14,17 @@ globalModsController.ipBlacklist = async function (req, res, next) {
         return next();
     }
 
-    const [rules, analyticsData] = await Promise.all([meta.blacklist.get(), analytics.getBlacklistAnalytics()]);
+    const [rules, analyticsData] = await Promise.all([
+        meta.blacklist.get(),
+        analytics.getBlacklistAnalytics(),
+    ]);
     res.render('ip-blacklist', {
         title: '[[pages:ip-blacklist]]',
         rules: rules,
         analytics: analyticsData,
-        breadcrumbs: helpers.buildBreadcrumbs([{ text: '[[pages:ip-blacklist]]' }]),
+        breadcrumbs: helpers.buildBreadcrumbs([
+            { text: '[[pages:ip-blacklist]]' },
+        ]),
     });
 };
 

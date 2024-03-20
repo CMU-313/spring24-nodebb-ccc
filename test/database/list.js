@@ -166,7 +166,16 @@ describe('List methods', () => {
 
     describe('listRemoveAll()', () => {
         before(done => {
-            async.series([async.apply(db.listAppend, 'testList5', 1), async.apply(db.listAppend, 'testList5', 1), async.apply(db.listAppend, 'testList5', 1), async.apply(db.listAppend, 'testList5', 2), async.apply(db.listAppend, 'testList5', 5)], done);
+            async.series(
+                [
+                    async.apply(db.listAppend, 'testList5', 1),
+                    async.apply(db.listAppend, 'testList5', 1),
+                    async.apply(db.listAppend, 'testList5', 1),
+                    async.apply(db.listAppend, 'testList5', 2),
+                    async.apply(db.listAppend, 'testList5', 5),
+                ],
+                done
+            );
         });
 
         it('should remove all the matching elements of list', done => {

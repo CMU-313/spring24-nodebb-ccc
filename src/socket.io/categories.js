@@ -15,16 +15,34 @@ SocketCategories.getRecentReplies = async function (socket, cid) {
 
 SocketCategories.get = async function (socket) {
     async function getCategories() {
-        const cids = await categories.getCidsByPrivilege('categories:cid', socket.uid, 'find');
+        const cids = await categories.getCidsByPrivilege(
+            'categories:cid',
+            socket.uid,
+            'find'
+        );
         return await categories.getCategoriesData(cids);
     }
-    const [isAdmin, categoriesData] = await Promise.all([user.isAdministrator(socket.uid), getCategories()]);
-    return categoriesData.filter(category => category && (!category.disabled || isAdmin));
+    const [isAdmin, categoriesData] = await Promise.all([
+        user.isAdministrator(socket.uid),
+        getCategories(),
+    ]);
+    return categoriesData.filter(
+        category => category && (!category.disabled || isAdmin)
+    );
 };
 
 SocketCategories.getWatchedCategories = async function (socket) {
-    const [categoriesData, ignoredCids] = await Promise.all([categories.getCategoriesByPrivilege('cid:0:children', socket.uid, 'find'), user.getIgnoredCategories(socket.uid)]);
-    return categoriesData.filter(category => category && !ignoredCids.includes(String(category.cid)));
+    const [categoriesData, ignoredCids] = await Promise.all([
+        categories.getCategoriesByPrivilege(
+            'cid:0:children',
+            socket.uid,
+            'find'
+        ),
+        user.getIgnoredCategories(socket.uid),
+    ]);
+    return categoriesData.filter(
+        category => category && !ignoredCids.includes(String(category.cid))
+    );
 };
 
 SocketCategories.loadMore = async function (socket, data) {
@@ -32,7 +50,11 @@ SocketCategories.loadMore = async function (socket, data) {
         throw new Error('[[error:invalid-data]]');
     }
     data.query = data.query || {};
-    const [userPrivileges, settings, targetUid] = await Promise.all([privileges.categories.get(data.cid, socket.uid), user.getSettings(socket.uid), user.getUidByUserslug(data.query.author)]);
+    const [userPrivileges, settings, targetUid] = await Promise.all([
+        privileges.categories.get(data.cid, socket.uid),
+        user.getSettings(socket.uid),
+        user.getUidByUserslug(data.query.author),
+    ]);
 
     if (!userPrivileges.read) {
         throw new Error('[[error:no-privileges]]');
@@ -77,7 +99,11 @@ SocketCategories.getTopicCount = async function (socket, cid) {
 };
 
 SocketCategories.getCategoriesByPrivilege = async function (socket, privilege) {
-    return await categories.getCategoriesByPrivilege('categories:cid', socket.uid, privilege);
+    return await categories.getCategoriesByPrivilege(
+        'categories:cid',
+        socket.uid,
+        privilege
+    );
 };
 
 SocketCategories.getMoveCategories = async function (socket, data) {
@@ -85,8 +111,14 @@ SocketCategories.getMoveCategories = async function (socket, data) {
 };
 
 SocketCategories.getSelectCategories = async function (socket) {
-    const [isAdmin, categoriesData] = await Promise.all([user.isAdministrator(socket.uid), categories.buildForSelect(socket.uid, 'find', ['disabled', 'link'])]);
-    return categoriesData.filter(category => category && (!category.disabled || isAdmin) && !category.link);
+    const [isAdmin, categoriesData] = await Promise.all([
+        user.isAdministrator(socket.uid),
+        categories.buildForSelect(socket.uid, 'find', ['disabled', 'link']),
+    ]);
+    return categoriesData.filter(
+        category =>
+            category && (!category.disabled || isAdmin) && !category.link
+    );
 };
 
 SocketCategories.setWatchState = async function (socket, data) {
@@ -95,7 +127,11 @@ SocketCategories.setWatchState = async function (socket, data) {
     }
     return await ignoreOrWatch(
         async (uid, cids) => {
-            await user.setCategoryWatchState(uid, cids, categories.watchStates[data.state]);
+            await user.setCategoryWatchState(
+                uid,
+                cids,
+                categories.watchStates[data.state]
+            );
         },
         socket,
         data
@@ -112,18 +148,25 @@ SocketCategories.ignore = async function (socket, data) {
 
 async function ignoreOrWatch(fn, socket, data) {
     let targetUid = socket.uid;
-    const cids = Array.isArray(data.cid) ? data.cid.map(cid => parseInt(cid, 10)) : [parseInt(data.cid, 10)];
+    const cids = Array.isArray(data.cid)
+        ? data.cid.map(cid => parseInt(cid, 10))
+        : [parseInt(data.cid, 10)];
     if (data.hasOwnProperty('uid')) {
         targetUid = data.uid;
     }
     await user.isAdminOrGlobalModOrSelf(socket.uid, targetUid);
     const allCids = await categories.getAllCidsFromSet('categories:cid');
-    const categoryData = await categories.getCategoriesFields(allCids, ['cid', 'parentCid']);
+    const categoryData = await categories.getCategoriesFields(allCids, [
+        'cid',
+        'parentCid',
+    ]);
 
     // filter to subcategories of cid
     let cat;
     do {
-        cat = categoryData.find(c => !cids.includes(c.cid) && cids.includes(c.parentCid));
+        cat = categoryData.find(
+            c => !cids.includes(c.cid) && cids.includes(c.parentCid)
+        );
         if (cat) {
             cids.push(cat.cid);
         }
@@ -142,7 +185,11 @@ SocketCategories.loadMoreSubCategories = async function (socket, data) {
     if (!data || !data.cid || !(parseInt(data.start, 10) > 0)) {
         throw new Error('[[error:invalid-data]]');
     }
-    const allowed = await privileges.categories.can('read', data.cid, socket.uid);
+    const allowed = await privileges.categories.can(
+        'read',
+        data.cid,
+        socket.uid
+    );
     if (!allowed) {
         throw new Error('[[error:no-privileges]]');
     }
@@ -152,7 +199,10 @@ SocketCategories.loadMoreSubCategories = async function (socket, data) {
     categories.flattenCategories(allCategories, category.children);
     await categories.getRecentTopicReplies(allCategories, socket.uid);
     const start = parseInt(data.start, 10);
-    return category.children.slice(start, start + category.subCategoriesPerPage);
+    return category.children.slice(
+        start,
+        start + category.subCategoriesPerPage
+    );
 };
 
 require('../promisify')(SocketCategories);

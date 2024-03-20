@@ -21,7 +21,11 @@ module.exports = function (Categories) {
             { alwaysStartAt: 0 }
         );
 
-        const pinnedTids = await db.getSortedSetRevRange(`cid:${cid}:tids:pinned`, 0, -1);
+        const pinnedTids = await db.getSortedSetRevRange(
+            `cid:${cid}:tids:pinned`,
+            0,
+            -1
+        );
         await async.eachLimit(pinnedTids, 10, async tid => {
             await topics.purgePostsAndTopic(tid, uid);
         });
@@ -37,19 +41,41 @@ module.exports = function (Categories) {
     async function purgeCategory(cid, categoryData) {
         const bulkRemove = [['categories:cid', cid]];
         if (categoryData && categoryData.name) {
-            bulkRemove.push(['categories:name', `${categoryData.name.slice(0, 200).toLowerCase()}:${cid}`]);
+            bulkRemove.push([
+                'categories:name',
+                `${categoryData.name.slice(0, 200).toLowerCase()}:${cid}`,
+            ]);
         }
         await db.sortedSetRemoveBulk(bulkRemove);
 
         await removeFromParent(cid);
         await deleteTags(cid);
-        await db.deleteAll([`cid:${cid}:tids`, `cid:${cid}:tids:pinned`, `cid:${cid}:tids:posts`, `cid:${cid}:tids:votes`, `cid:${cid}:tids:views`, `cid:${cid}:tids:lastposttime`, `cid:${cid}:recent_tids`, `cid:${cid}:pids`, `cid:${cid}:read_by_uid`, `cid:${cid}:uid:watch:state`, `cid:${cid}:children`, `cid:${cid}:tag:whitelist`, `category:${cid}`]);
+        await db.deleteAll([
+            `cid:${cid}:tids`,
+            `cid:${cid}:tids:pinned`,
+            `cid:${cid}:tids:posts`,
+            `cid:${cid}:tids:votes`,
+            `cid:${cid}:tids:views`,
+            `cid:${cid}:tids:lastposttime`,
+            `cid:${cid}:recent_tids`,
+            `cid:${cid}:pids`,
+            `cid:${cid}:read_by_uid`,
+            `cid:${cid}:uid:watch:state`,
+            `cid:${cid}:children`,
+            `cid:${cid}:tag:whitelist`,
+            `category:${cid}`,
+        ]);
         const privilegeList = await privileges.categories.getPrivilegeList();
-        await groups.destroy(privilegeList.map(privilege => `cid:${cid}:privileges:${privilege}`));
+        await groups.destroy(
+            privilegeList.map(privilege => `cid:${cid}:privileges:${privilege}`)
+        );
     }
 
     async function removeFromParent(cid) {
-        const [parentCid, children] = await Promise.all([Categories.getCategoryField(cid, 'parentCid'), db.getSortedSetRange(`cid:${cid}:children`, 0, -1)]);
+        const [parentCid, children] = await Promise.all([
+            Categories.getCategoryField(cid, 'parentCid'),
+            db.getSortedSetRange(`cid:${cid}:children`, 0, -1),
+        ]);
 
         const bulkAdd = [];
         const childrenKeys = children.map(cid => {
@@ -57,9 +83,21 @@ module.exports = function (Categories) {
             return `category:${cid}`;
         });
 
-        await Promise.all([db.sortedSetRemove(`cid:${parentCid}:children`, cid), db.setObjectField(childrenKeys, 'parentCid', 0), db.sortedSetAddBulk(bulkAdd)]);
+        await Promise.all([
+            db.sortedSetRemove(`cid:${parentCid}:children`, cid),
+            db.setObjectField(childrenKeys, 'parentCid', 0),
+            db.sortedSetAddBulk(bulkAdd),
+        ]);
 
-        cache.del(['categories:cid', 'cid:0:children', `cid:${parentCid}:children`, `cid:${parentCid}:children:all`, `cid:${cid}:children`, `cid:${cid}:children:all`, `cid:${cid}:tag:whitelist`]);
+        cache.del([
+            'categories:cid',
+            'cid:0:children',
+            `cid:${parentCid}:children`,
+            `cid:${parentCid}:children:all`,
+            `cid:${cid}:children`,
+            `cid:${cid}:children:all`,
+            `cid:${cid}:tag:whitelist`,
+        ]);
     }
 
     async function deleteTags(cid) {

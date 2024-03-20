@@ -1,6 +1,12 @@
 'use strict';
 
-define('forum/account/edit/password', ['forum/account/header', 'translator', 'zxcvbn', 'api', 'alerts'], function (header, translator, zxcvbn, api, alerts) {
+define('forum/account/edit/password', [
+    'forum/account/header',
+    'translator',
+    'zxcvbn',
+    'api',
+    'alerts',
+], function (header, translator, zxcvbn, api, alerts) {
     const AccountEditPassword = {};
 
     AccountEditPassword.init = function () {
@@ -39,13 +45,18 @@ define('forum/account/edit/password', ['forum/account/header', 'translator', 'zx
 
         function onPasswordConfirmChanged() {
             if (password.val() !== password_confirm.val()) {
-                showError(password_confirm_notify, '[[user:change_password_error_match]]');
+                showError(
+                    password_confirm_notify,
+                    '[[user:change_password_error_match]]'
+                );
                 passwordsmatch = false;
             } else {
                 if (password.val()) {
                     showSuccess(password_confirm_notify);
                 } else {
-                    password_confirm_notify.parent().removeClass('alert-success alert-danger');
+                    password_confirm_notify
+                        .parent()
+                        .removeClass('alert-success alert-danger');
                     password_confirm_notify.children().show();
                     password_confirm_notify.find('.msg').html('');
                 }
@@ -69,10 +80,16 @@ define('forum/account/edit/password', ['forum/account/header', 'translator', 'zx
                     newPassword: password.val(),
                 })
                     .then(() => {
-                        if (parseInt(app.user.uid, 10) === parseInt(ajaxify.data.uid, 10)) {
-                            window.location.href = config.relative_path + '/login';
+                        if (
+                            parseInt(app.user.uid, 10) ===
+                            parseInt(ajaxify.data.uid, 10)
+                        ) {
+                            window.location.href =
+                                config.relative_path + '/login';
                         } else {
-                            ajaxify.go('user/' + ajaxify.data.userslug + '/edit');
+                            ajaxify.go(
+                                'user/' + ajaxify.data.userslug + '/edit'
+                            );
                         }
                     })
                     .finally(() => {
@@ -80,8 +97,12 @@ define('forum/account/edit/password', ['forum/account/header', 'translator', 'zx
                         currentPassword.val('');
                         password.val('');
                         password_confirm.val('');
-                        password_notify.parent().removeClass('show-success show-danger');
-                        password_confirm_notify.parent().removeClass('show-success show-danger');
+                        password_notify
+                            .parent()
+                            .removeClass('show-success show-danger');
+                        password_confirm_notify
+                            .parent()
+                            .removeClass('show-success show-danger');
                         passwordsmatch = false;
                         passwordvalid = false;
                     });
@@ -102,7 +123,10 @@ define('forum/account/edit/password', ['forum/account/header', 'translator', 'zx
         translator.translate(msg, function (msg) {
             element.html(msg);
 
-            element.parent().removeClass('show-success').addClass('show-danger');
+            element
+                .parent()
+                .removeClass('show-success')
+                .addClass('show-danger');
         });
     }
 

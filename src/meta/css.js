@@ -16,7 +16,24 @@ const minifier = require('./minifier');
 
 const CSS = module.exports;
 
-CSS.supportedSkins = ['cerulean', 'cyborg', 'flatly', 'journal', 'lumen', 'paper', 'simplex', 'spacelab', 'united', 'cosmo', 'darkly', 'readable', 'sandstone', 'slate', 'superhero', 'yeti'];
+CSS.supportedSkins = [
+    'cerulean',
+    'cyborg',
+    'flatly',
+    'journal',
+    'lumen',
+    'paper',
+    'simplex',
+    'spacelab',
+    'united',
+    'cosmo',
+    'darkly',
+    'readable',
+    'sandstone',
+    'slate',
+    'superhero',
+    'yeti',
+];
 
 const buildImports = {
     client: function (source) {
@@ -30,7 +47,9 @@ const buildImports = {
 async function filterMissingFiles(filepaths) {
     const exists = await Promise.all(
         filepaths.map(async filepath => {
-            const exists = await file.exists(path.join(__dirname, '../../node_modules', filepath));
+            const exists = await file.exists(
+                path.join(__dirname, '../../node_modules', filepath)
+            );
             if (!exists) {
                 winston.warn(`[meta/css] File not found! ${filepath}`);
             }
@@ -63,7 +82,11 @@ async function getImports(files, prefix, extension) {
 }
 
 async function getBundleMetadata(target) {
-    const paths = [path.join(__dirname, '../../node_modules'), path.join(__dirname, '../../public/less'), path.join(__dirname, '../../public/vendor/fontawesome/less')];
+    const paths = [
+        path.join(__dirname, '../../node_modules'),
+        path.join(__dirname, '../../public/less'),
+        path.join(__dirname, '../../public/vendor/fontawesome/less'),
+    ];
 
     // Skin support
     let skin;
@@ -76,20 +99,39 @@ async function getBundleMetadata(target) {
     }
     let skinImport = [];
     if (target === 'client') {
-        const themeData = await db.getObjectFields('config', ['theme:type', 'theme:id', 'bootswatchSkin']);
+        const themeData = await db.getObjectFields('config', [
+            'theme:type',
+            'theme:id',
+            'bootswatchSkin',
+        ]);
         const themeId = themeData['theme:id'] || 'nodebb-theme-persona';
-        const baseThemePath = path.join(nconf.get('themes_path'), themeData['theme:type'] && themeData['theme:type'] === 'local' ? themeId : 'nodebb-theme-vanilla');
+        const baseThemePath = path.join(
+            nconf.get('themes_path'),
+            themeData['theme:type'] && themeData['theme:type'] === 'local'
+                ? themeId
+                : 'nodebb-theme-vanilla'
+        );
         paths.unshift(baseThemePath);
 
         themeData.bootswatchSkin = skin || themeData.bootswatchSkin;
         if (themeData && themeData.bootswatchSkin) {
-            skinImport.push(`\n@import "./@nodebb/bootswatch/${themeData.bootswatchSkin}/variables.less";`);
-            skinImport.push(`\n@import "./@nodebb/bootswatch/${themeData.bootswatchSkin}/bootswatch.less";`);
+            skinImport.push(
+                `\n@import "./@nodebb/bootswatch/${themeData.bootswatchSkin}/variables.less";`
+            );
+            skinImport.push(
+                `\n@import "./@nodebb/bootswatch/${themeData.bootswatchSkin}/bootswatch.less";`
+            );
         }
         skinImport = skinImport.join('');
     }
 
-    const [lessImports, cssImports, acpLessImports] = await Promise.all([filterGetImports(plugins.lessFiles, '\n@import ".', '.less'), filterGetImports(plugins.cssFiles, '\n@import (inline) ".', '.css'), target === 'client' ? '' : filterGetImports(plugins.acpLessFiles, '\n@import ".', '.less')]);
+    const [lessImports, cssImports, acpLessImports] = await Promise.all([
+        filterGetImports(plugins.lessFiles, '\n@import ".', '.less'),
+        filterGetImports(plugins.cssFiles, '\n@import (inline) ".', '.css'),
+        target === 'client'
+            ? ''
+            : filterGetImports(plugins.acpLessFiles, '\n@import ".', '.less'),
+    ]);
 
     async function filterGetImports(files, prefix, extension) {
         const filteredFiles = await filterMissingFiles(files);
@@ -109,9 +151,17 @@ CSS.buildBundle = async function (target, fork) {
 
     const data = await getBundleMetadata(target);
     const minify = process.env.NODE_ENV !== 'development';
-    const bundle = await minifier.css.bundle(data.imports, data.paths, minify, fork);
+    const bundle = await minifier.css.bundle(
+        data.imports,
+        data.paths,
+        minify,
+        fork
+    );
 
     const filename = `${target}.css`;
-    await fs.promises.writeFile(path.join(__dirname, '../../build/public', filename), bundle.code);
+    await fs.promises.writeFile(
+        path.join(__dirname, '../../build/public', filename),
+        bundle.code
+    );
     return bundle.code;
 };

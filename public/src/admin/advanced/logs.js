@@ -30,7 +30,9 @@ define('admin/advanced/logs', ['alerts'], function (alerts) {
                     case 'clear':
                         socket.emit('admin.logs.clear', function (err) {
                             if (!err) {
-                                alerts.success('[[admin/advanced/logs:clear-success]]');
+                                alerts.success(
+                                    '[[admin/advanced/logs:clear-success]]'
+                                );
                                 btnEl.prev().click();
                             } else {
                                 alerts.error(err);

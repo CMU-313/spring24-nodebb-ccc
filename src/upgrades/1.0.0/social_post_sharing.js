@@ -11,10 +11,17 @@ module.exports = {
         async.parallel(
             [
                 async function () {
-                    await social.setActivePostSharingNetworks(['facebook', 'google', 'twitter']);
+                    await social.setActivePostSharingNetworks([
+                        'facebook',
+                        'google',
+                        'twitter',
+                    ]);
                 },
                 async function () {
-                    await db.deleteObjectField('config', 'disableSocialButtons');
+                    await db.deleteObjectField(
+                        'config',
+                        'disableSocialButtons'
+                    );
                 },
             ],
             callback

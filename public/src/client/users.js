@@ -1,6 +1,12 @@
 'use strict';
 
-define('forum/users', ['translator', 'benchpress', 'api', 'alerts', 'accounts/invite'], function (translator, Benchpress, api, alerts, AccountInvite) {
+define('forum/users', [
+    'translator',
+    'benchpress',
+    'api',
+    'alerts',
+    'accounts/invite',
+], function (translator, Benchpress, api, alerts, AccountInvite) {
     const Users = {};
 
     let searchResultCount = 0;
@@ -8,7 +14,9 @@ define('forum/users', ['translator', 'benchpress', 'api', 'alerts', 'accounts/in
     Users.init = function () {
         app.enterRoom('user_list');
 
-        const section = utils.param('section') ? '?section=' + utils.param('section') : '';
+        const section = utils.param('section')
+            ? '?section=' + utils.param('section')
+            : '';
         $('.nav-pills li')
             .removeClass('active')
             .find('a[href="' + window.location.pathname + section + '"]')
@@ -26,14 +34,19 @@ define('forum/users', ['translator', 'benchpress', 'api', 'alerts', 'accounts/in
     Users.handleSearch = function (params) {
         searchResultCount = params && params.resultCount;
         $('#search-user').on('keyup', utils.debounce(doSearch, 250));
-        $('.search select, .search input[type="checkbox"]').on('change', doSearch);
+        $('.search select, .search input[type="checkbox"]').on(
+            'change',
+            doSearch
+        );
     };
 
     function doSearch() {
         if (!ajaxify.data.template.users) {
             return;
         }
-        $('[component="user/search/icon"]').removeClass('fa-search').addClass('fa-spinner fa-spin');
+        $('[component="user/search/icon"]')
+            .removeClass('fa-search')
+            .addClass('fa-spinner fa-spin');
         const username = $('#search-user').val();
         const activeSection = getActiveSection();
 
@@ -49,7 +62,10 @@ define('forum/users', ['translator', 'benchpress', 'api', 'alerts', 'accounts/in
         query.query = username;
         query.sortBy = getSortBy();
         const filters = [];
-        if ($('.search .online-only').is(':checked') || activeSection === 'online') {
+        if (
+            $('.search .online-only').is(':checked') ||
+            activeSection === 'online'
+        ) {
             filters.push('online');
         }
         if (activeSection === 'banned') {
@@ -79,7 +95,9 @@ define('forum/users', ['translator', 'benchpress', 'api', 'alerts', 'accounts/in
     }
 
     function loadPage(query) {
-        api.get('/api/users', query).then(renderSearchResults).catch(alerts.error);
+        api.get('/api/users', query)
+            .then(renderSearchResults)
+            .catch(alerts.error);
     }
 
     function renderSearchResults(data) {
@@ -97,7 +115,9 @@ define('forum/users', ['translator', 'benchpress', 'api', 'alerts', 'accounts/in
         app.parseAndTranslate('users', 'users', data, function (html) {
             $('#users-container').html(html);
             html.find('span.timeago').timeago();
-            $('[component="user/search/icon"]').addClass('fa-search').removeClass('fa-spinner fa-spin');
+            $('[component="user/search/icon"]')
+                .addClass('fa-search')
+                .removeClass('fa-spinner fa-spin');
         });
     }
 
@@ -110,7 +130,14 @@ define('forum/users', ['translator', 'benchpress', 'api', 'alerts', 'accounts/in
     }
 
     function updateUser(data) {
-        app.updateUserStatus($('#users-container [data-uid="' + data.uid + '"] [component="user/status"]'), data.status);
+        app.updateUserStatus(
+            $(
+                '#users-container [data-uid="' +
+                    data.uid +
+                    '"] [component="user/status"]'
+            ),
+            data.status
+        );
     }
 
     function getActiveSection() {

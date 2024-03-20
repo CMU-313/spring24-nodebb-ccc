@@ -1,10 +1,16 @@
 'use strict';
 
-define('alerts', ['translator', 'components', 'hooks'], function (translator, components, hooks) {
+define('alerts', ['translator', 'components', 'hooks'], function (
+    translator,
+    components,
+    hooks
+) {
     const module = {};
 
     module.alert = function (params) {
-        params.alert_id = 'alert_button_' + (params.alert_id ? params.alert_id : new Date().getTime());
+        params.alert_id =
+            'alert_button_' +
+            (params.alert_id ? params.alert_id : new Date().getTime());
         params.title = params.title ? params.title.trim() || '' : '';
         params.message = params.message ? params.message.trim() : '';
         params.type = params.type || 'info';
@@ -88,7 +94,10 @@ define('alerts', ['translator', 'components', 'hooks'], function (translator, co
     function updateAlert(alert, params) {
         alert.find('strong').translateHtml(params.title);
         alert.find('p').translateHtml(params.message);
-        alert.attr('class', 'alert alert-dismissable alert-' + params.type + ' clearfix');
+        alert.attr(
+            'class',
+            'alert alert-dismissable alert-' + params.type + ' clearfix'
+        );
 
         clearTimeout(parseInt(alert.attr('timeoutId'), 10));
         if (params.timeout) {
@@ -134,7 +143,14 @@ define('alerts', ['translator', 'components', 'hooks'], function (translator, co
 
         setTimeout(function () {
             alert.css('transition-property', '');
-            alert.css('transition', 'width ' + (timeout + 450) + 'ms linear, background-color ' + (timeout + 450) + 'ms ease-in');
+            alert.css(
+                'transition',
+                'width ' +
+                    (timeout + 450) +
+                    'ms linear, background-color ' +
+                    (timeout + 450) +
+                    'ms ease-in'
+            );
             alert.addClass('animate');
             hooks.fire('action:alert.animate', { alert, params });
         }, 50);

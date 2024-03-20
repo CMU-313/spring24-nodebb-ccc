@@ -99,13 +99,17 @@ describe('Categories', () => {
     });
 
     it('should load a category route', done => {
-        request(`${nconf.get('url')}/api/category/${categoryObj.cid}/test-category`, { json: true }, (err, response, body) => {
-            assert.ifError(err);
-            assert.equal(response.statusCode, 200);
-            assert.equal(body.name, 'Test Category &amp; NodeBB');
-            assert(body);
-            done();
-        });
+        request(
+            `${nconf.get('url')}/api/category/${categoryObj.cid}/test-category`,
+            { json: true },
+            (err, response, body) => {
+                assert.ifError(err);
+                assert.equal(response.statusCode, 200);
+                assert.equal(body.name, 'Test Category &amp; NodeBB');
+                assert(body);
+                done();
+            }
+        );
     });
 
     describe('Categories.getRecentTopicReplies', () => {
@@ -121,10 +125,15 @@ describe('Categories', () => {
                 },
                 (err, categoryData) => {
                     assert.ifError(err);
-                    Categories.getRecentTopicReplies(categoryData, 0, {}, err => {
-                        assert.ifError(err);
-                        done();
-                    });
+                    Categories.getRecentTopicReplies(
+                        categoryData,
+                        0,
+                        {},
+                        err => {
+                            assert.ifError(err);
+                            done();
+                        }
+                    );
                 }
             );
         });
@@ -144,7 +153,9 @@ describe('Categories', () => {
                     assert.equal(err, null);
 
                     assert(Array.isArray(result.topics));
-                    assert(result.topics.every(topic => topic instanceof Object));
+                    assert(
+                        result.topics.every(topic => topic instanceof Object)
+                    );
 
                     done();
                 }
@@ -164,7 +175,12 @@ describe('Categories', () => {
                 (err, result) => {
                     assert.equal(err, null);
                     assert(Array.isArray(result.topics));
-                    assert(result.topics.every(topic => topic instanceof Object && topic.uid === '1'));
+                    assert(
+                        result.topics.every(
+                            topic =>
+                                topic instanceof Object && topic.uid === '1'
+                        )
+                    );
 
                     done();
                 }
@@ -182,7 +198,8 @@ describe('Categories', () => {
                         Categories.create(
                             {
                                 name: 'Test Category 2',
-                                description: 'Test category created by testing script',
+                                description:
+                                    'Test category created by testing script',
                             },
                             next
                         );
@@ -205,26 +222,44 @@ describe('Categories', () => {
                     }
                     moveCid = results.category.cid;
                     moveTid = results.topic.topicData.tid;
-                    Topics.reply({ uid: posterUid, content: 'test post', tid: moveTid }, err => {
-                        done(err);
-                    });
+                    Topics.reply(
+                        { uid: posterUid, content: 'test post', tid: moveTid },
+                        err => {
+                            done(err);
+                        }
+                    );
                 }
             );
         });
 
         it('should move posts from one category to another', done => {
-            Categories.moveRecentReplies(moveTid, categoryObj.cid, moveCid, err => {
-                assert.ifError(err);
-                db.getSortedSetRange(`cid:${categoryObj.cid}:pids`, 0, -1, (err, pids) => {
+            Categories.moveRecentReplies(
+                moveTid,
+                categoryObj.cid,
+                moveCid,
+                err => {
                     assert.ifError(err);
-                    assert.equal(pids.length, 0);
-                    db.getSortedSetRange(`cid:${moveCid}:pids`, 0, -1, (err, pids) => {
-                        assert.ifError(err);
-                        assert.equal(pids.length, 2);
-                        done();
-                    });
-                });
-            });
+                    db.getSortedSetRange(
+                        `cid:${categoryObj.cid}:pids`,
+                        0,
+                        -1,
+                        (err, pids) => {
+                            assert.ifError(err);
+                            assert.equal(pids.length, 0);
+                            db.getSortedSetRange(
+                                `cid:${moveCid}:pids`,
+                                0,
+                                -1,
+                                (err, pids) => {
+                                    assert.ifError(err);
+                                    assert.equal(pids.length, 2);
+                                    done();
+                                }
+                            );
+                        }
+                    );
+                }
+            );
         });
     });
 
@@ -249,11 +284,15 @@ describe('Categories', () => {
         });
 
         it('should get recent replies in category', done => {
-            socketCategories.getRecentReplies({ uid: posterUid }, categoryObj.cid, (err, data) => {
-                assert.ifError(err);
-                assert(Array.isArray(data));
-                done();
-            });
+            socketCategories.getRecentReplies(
+                { uid: posterUid },
+                categoryObj.cid,
+                (err, data) => {
+                    assert.ifError(err);
+                    assert(Array.isArray(data));
+                    done();
+                }
+            );
         });
 
         it('should get categories', done => {
@@ -265,11 +304,15 @@ describe('Categories', () => {
         });
 
         it('should get watched categories', done => {
-            socketCategories.getWatchedCategories({ uid: posterUid }, {}, (err, data) => {
-                assert.ifError(err);
-                assert(Array.isArray(data));
-                done();
-            });
+            socketCategories.getWatchedCategories(
+                { uid: posterUid },
+                {},
+                (err, data) => {
+                    assert.ifError(err);
+                    assert(Array.isArray(data));
+                    done();
+                }
+            );
         });
 
         it('should load more topics', done => {
@@ -305,77 +348,125 @@ describe('Categories', () => {
 
             assert.deepStrictEqual(
                 data.topics.map(t => t.title),
-                ['[[topic:topic_is_deleted]]', 'Test Topic Title', 'Test Topic Title']
+                [
+                    '[[topic:topic_is_deleted]]',
+                    'Test Topic Title',
+                    'Test Topic Title',
+                ]
             );
         });
 
         it('should load topic count', done => {
-            socketCategories.getTopicCount({ uid: posterUid }, categoryObj.cid, (err, topicCount) => {
-                assert.ifError(err);
-                assert.strictEqual(topicCount, 3);
-                done();
-            });
+            socketCategories.getTopicCount(
+                { uid: posterUid },
+                categoryObj.cid,
+                (err, topicCount) => {
+                    assert.ifError(err);
+                    assert.strictEqual(topicCount, 3);
+                    done();
+                }
+            );
         });
 
         it('should load category by privilege', done => {
-            socketCategories.getCategoriesByPrivilege({ uid: posterUid }, 'find', (err, data) => {
-                assert.ifError(err);
-                assert(Array.isArray(data));
-                done();
-            });
+            socketCategories.getCategoriesByPrivilege(
+                { uid: posterUid },
+                'find',
+                (err, data) => {
+                    assert.ifError(err);
+                    assert(Array.isArray(data));
+                    done();
+                }
+            );
         });
 
         it('should get move categories', done => {
-            socketCategories.getMoveCategories({ uid: posterUid }, {}, (err, data) => {
-                assert.ifError(err);
-                assert(Array.isArray(data));
-                done();
-            });
+            socketCategories.getMoveCategories(
+                { uid: posterUid },
+                {},
+                (err, data) => {
+                    assert.ifError(err);
+                    assert(Array.isArray(data));
+                    done();
+                }
+            );
         });
 
         it('should ignore category', done => {
-            socketCategories.ignore({ uid: posterUid }, { cid: categoryObj.cid }, err => {
-                assert.ifError(err);
-                Categories.isIgnored([categoryObj.cid], posterUid, (err, isIgnored) => {
+            socketCategories.ignore(
+                { uid: posterUid },
+                { cid: categoryObj.cid },
+                err => {
                     assert.ifError(err);
-                    assert.equal(isIgnored[0], true);
-                    Categories.getIgnorers(categoryObj.cid, 0, -1, (err, ignorers) => {
-                        assert.ifError(err);
-                        assert.deepEqual(ignorers, [posterUid]);
-                        done();
-                    });
-                });
-            });
+                    Categories.isIgnored(
+                        [categoryObj.cid],
+                        posterUid,
+                        (err, isIgnored) => {
+                            assert.ifError(err);
+                            assert.equal(isIgnored[0], true);
+                            Categories.getIgnorers(
+                                categoryObj.cid,
+                                0,
+                                -1,
+                                (err, ignorers) => {
+                                    assert.ifError(err);
+                                    assert.deepEqual(ignorers, [posterUid]);
+                                    done();
+                                }
+                            );
+                        }
+                    );
+                }
+            );
         });
 
         it('should watch category', done => {
-            socketCategories.watch({ uid: posterUid }, { cid: categoryObj.cid }, err => {
-                assert.ifError(err);
-                Categories.isIgnored([categoryObj.cid], posterUid, (err, isIgnored) => {
+            socketCategories.watch(
+                { uid: posterUid },
+                { cid: categoryObj.cid },
+                err => {
                     assert.ifError(err);
-                    assert.equal(isIgnored[0], false);
-                    done();
-                });
-            });
+                    Categories.isIgnored(
+                        [categoryObj.cid],
+                        posterUid,
+                        (err, isIgnored) => {
+                            assert.ifError(err);
+                            assert.equal(isIgnored[0], false);
+                            done();
+                        }
+                    );
+                }
+            );
         });
 
         it('should error if watch state does not exist', done => {
-            socketCategories.setWatchState({ uid: posterUid }, { cid: categoryObj.cid, state: 'invalid-state' }, err => {
-                assert.equal(err.message, '[[error:invalid-watch-state]]');
-                done();
-            });
+            socketCategories.setWatchState(
+                { uid: posterUid },
+                { cid: categoryObj.cid, state: 'invalid-state' },
+                err => {
+                    assert.equal(err.message, '[[error:invalid-watch-state]]');
+                    done();
+                }
+            );
         });
 
         it('should check if user is moderator', done => {
-            socketCategories.isModerator({ uid: posterUid }, {}, (err, isModerator) => {
-                assert.ifError(err);
-                assert(!isModerator);
-                done();
-            });
+            socketCategories.isModerator(
+                { uid: posterUid },
+                {},
+                (err, isModerator) => {
+                    assert.ifError(err);
+                    assert(!isModerator);
+                    done();
+                }
+            );
         });
 
         it('should get category data', async () => {
-            const data = await apiCategories.get({ uid: posterUid }, { cid: categoryObj.cid });
+            const data = await apiCategories.get(
+                { uid: posterUid },
+                { cid: categoryObj.cid }
+            );
             assert.equal(categoryObj.cid, data.cid);
         });
     });
@@ -419,7 +510,10 @@ describe('Categories', () => {
             } catch (_err) {
                 err = _err;
             }
-            assert.strictEqual(err.message, '[[error:cant-set-self-as-parent]]');
+            assert.strictEqual(
+                err.message,
+                '[[error:cant-set-self-as-parent]]'
+            );
         });
 
         it('should error if you try to set child as parent', async () => {
@@ -444,7 +538,10 @@ describe('Categories', () => {
             } catch (_err) {
                 err = _err;
             }
-            assert.strictEqual(err.message, '[[error:cant-set-child-as-parent]]');
+            assert.strictEqual(
+                err.message,
+                '[[error:cant-set-child-as-parent]]'
+            );
         });
 
         it('should update category data', async () => {
@@ -492,12 +589,22 @@ describe('Categories', () => {
                 order: 3,
             });
             // move c1 to second place
-            await apiCategories.update({ uid: adminUid }, { [c1.cid]: { order: 2 } });
-            let cids = await db.getSortedSetRange(`cid:${p1.cid}:children`, 0, -1);
+            await apiCategories.update(
+                { uid: adminUid },
+                { [c1.cid]: { order: 2 } }
+            );
+            let cids = await db.getSortedSetRange(
+                `cid:${p1.cid}:children`,
+                0,
+                -1
+            );
             assert.deepStrictEqual(cids.map(Number), [c2.cid, c1.cid, c3.cid]);
 
             // move c3 to front
-            await apiCategories.update({ uid: adminUid }, { [c3.cid]: { order: 1 } });
+            await apiCategories.update(
+                { uid: adminUid },
+                { [c3.cid]: { order: 1 } }
+            );
             cids = await db.getSortedSetRange(`cid:${p1.cid}:children`, 0, -1);
             assert.deepStrictEqual(cids.map(Number), [c3.cid, c2.cid, c1.cid]);
         });
@@ -514,14 +621,22 @@ describe('Categories', () => {
             await Categories.update(updateData);
             let data = await Categories.getCategoryData(cid);
             assert.equal(data.parentCid, updateData[cid].parentCid);
-            let childrenCids = await db.getSortedSetRange(`cid:${parentCat.cid}:children`, 0, -1);
+            let childrenCids = await db.getSortedSetRange(
+                `cid:${parentCat.cid}:children`,
+                0,
+                -1
+            );
             assert(childrenCids.includes(String(cid)));
 
             // update again to same parent
             await Categories.update(updateData);
             data = await Categories.getCategoryData(cid);
             assert.equal(data.parentCid, updateData[cid].parentCid);
-            childrenCids = await db.getSortedSetRange(`cid:${parentCat.cid}:children`, 0, -1);
+            childrenCids = await db.getSortedSetRange(
+                `cid:${parentCat.cid}:children`,
+                0,
+                -1
+            );
             assert(childrenCids.includes(String(cid)));
         });
 
@@ -536,7 +651,10 @@ describe('Categories', () => {
                 title: 'Test Topic Title',
                 content: 'The content of test topic',
             });
-            await apiCategories.delete({ uid: adminUid }, { cid: category.cid });
+            await apiCategories.delete(
+                { uid: adminUid },
+                { cid: category.cid }
+            );
             const data = await Categories.getCategoryById(category.cid);
             assert.strictEqual(data, null);
         });
@@ -559,7 +677,11 @@ describe('Categories', () => {
                     member: 'registered-users',
                 }
             );
-            const canDeleteTopics = await privileges.categories.can('topics:delete', categoryObj.cid, posterUid);
+            const canDeleteTopics = await privileges.categories.can(
+                'topics:delete',
+                categoryObj.cid,
+                posterUid
+            );
             assert(canDeleteTopics);
         });
 
@@ -573,12 +695,19 @@ describe('Categories', () => {
                     member: 'registered-users',
                 }
             );
-            const canDeleteTopics = await privileges.categories.can('topics:delete', categoryObj.cid, posterUid);
+            const canDeleteTopics = await privileges.categories.can(
+                'topics:delete',
+                categoryObj.cid,
+                posterUid
+            );
             assert(!canDeleteTopics);
         });
 
         it('should get privilege settings', async () => {
-            const data = await apiCategories.getPrivileges({ uid: adminUid }, categoryObj.cid);
+            const data = await apiCategories.getPrivileges(
+                { uid: adminUid },
+                categoryObj.cid
+            );
             assert(data.labels);
             assert(data.labels.users);
             assert(data.labels.groups);
@@ -608,8 +737,15 @@ describe('Categories', () => {
                     member: 'registered-users',
                 }
             );
-            await socketCategories.copyPrivilegesToChildren({ uid: adminUid }, { cid: parentCid, group: '' });
-            const canDelete = await privileges.categories.can('topics:delete', child2.cid, posterUid);
+            await socketCategories.copyPrivilegesToChildren(
+                { uid: adminUid },
+                { cid: parentCid, group: '' }
+            );
+            const canDelete = await privileges.categories.can(
+                'topics:delete',
+                child2.cid,
+                posterUid
+            );
             assert(canDelete);
         });
 
@@ -619,7 +755,10 @@ describe('Categories', () => {
             async.waterfall(
                 [
                     function (next) {
-                        Categories.create({ name: 'copy from', description: 'copy me' }, next);
+                        Categories.create(
+                            { name: 'copy from', description: 'copy me' },
+                            next
+                        );
                     },
                     function (category, next) {
                         parentCid = category.cid;
@@ -648,7 +787,10 @@ describe('Categories', () => {
             async.waterfall(
                 [
                     function (next) {
-                        Categories.create({ name: 'parent', description: 'copy me' }, next);
+                        Categories.create(
+                            { name: 'parent', description: 'copy me' },
+                            next
+                        );
                     },
                     function (category, next) {
                         parentCid = category.cid;
@@ -667,7 +809,11 @@ describe('Categories', () => {
                         );
                     },
                     function (destinationCategory, next) {
-                        Categories.getCategoryField(child1Cid, 'description', next);
+                        Categories.getCategoryField(
+                            child1Cid,
+                            'description',
+                            next
+                        );
                     },
                     function (description, next) {
                         assert.equal(description, 'copy me');
@@ -694,8 +840,15 @@ describe('Categories', () => {
                     member: 'registered-users',
                 }
             );
-            await socketCategories.copyPrivilegesFrom({ uid: adminUid }, { fromCid: parentCid, toCid: child1.cid });
-            const canDelete = await privileges.categories.can('topics:delete', child1.cid, posterUid);
+            await socketCategories.copyPrivilegesFrom(
+                { uid: adminUid },
+                { fromCid: parentCid, toCid: child1.cid }
+            );
+            const canDelete = await privileges.categories.can(
+                'topics:delete',
+                child1.cid,
+                posterUid
+            );
             assert(canDelete);
         });
 
@@ -723,7 +876,11 @@ describe('Categories', () => {
                     group: 'registered-users',
                 }
             );
-            const canDelete = await privileges.categories.can('topics:delete', child1.cid, 0);
+            const canDelete = await privileges.categories.can(
+                'topics:delete',
+                child1.cid,
+                0
+            );
             assert(!canDelete);
         });
     });
@@ -779,11 +936,15 @@ describe('Categories', () => {
         });
 
         it('should return true if category whitelist is empty', done => {
-            socketTopics.isTagAllowed({ uid: posterUid }, { tag: 'notallowed', cid: cid }, (err, allowed) => {
-                assert.ifError(err);
-                assert(allowed);
-                done();
-            });
+            socketTopics.isTagAllowed(
+                { uid: posterUid },
+                { tag: 'notallowed', cid: cid },
+                (err, allowed) => {
+                    assert.ifError(err);
+                    assert(allowed);
+                    done();
+                }
+            );
         });
 
         it('should add tags to category whitelist', done => {
@@ -793,28 +954,44 @@ describe('Categories', () => {
             };
             Categories.update(data, err => {
                 assert.ifError(err);
-                db.getSortedSetRange(`cid:${cid}:tag:whitelist`, 0, -1, (err, tagWhitelist) => {
-                    assert.ifError(err);
-                    assert.deepEqual(['nodebb', 'jquery', 'javascript'], tagWhitelist);
-                    done();
-                });
+                db.getSortedSetRange(
+                    `cid:${cid}:tag:whitelist`,
+                    0,
+                    -1,
+                    (err, tagWhitelist) => {
+                        assert.ifError(err);
+                        assert.deepEqual(
+                            ['nodebb', 'jquery', 'javascript'],
+                            tagWhitelist
+                        );
+                        done();
+                    }
+                );
             });
         });
 
         it('should return false if category whitelist does not have tag', done => {
-            socketTopics.isTagAllowed({ uid: posterUid }, { tag: 'notallowed', cid: cid }, (err, allowed) => {
-                assert.ifError(err);
-                assert(!allowed);
-                done();
-            });
+            socketTopics.isTagAllowed(
+                { uid: posterUid },
+                { tag: 'notallowed', cid: cid },
+                (err, allowed) => {
+                    assert.ifError(err);
+                    assert(!allowed);
+                    done();
+                }
+            );
         });
 
         it('should return true if category whitelist has tag', done => {
-            socketTopics.isTagAllowed({ uid: posterUid }, { tag: 'nodebb', cid: cid }, (err, allowed) => {
-                assert.ifError(err);
-                assert(allowed);
-                done();
-            });
+            socketTopics.isTagAllowed(
+                { uid: posterUid },
+                { tag: 'nodebb', cid: cid },
+                (err, allowed) => {
+                    assert.ifError(err);
+                    assert(allowed);
+                    done();
+                }
+            );
         });
 
         it('should post a topic with only allowed tags', done => {
@@ -839,45 +1016,59 @@ describe('Categories', () => {
         const privileges = require('../src/privileges');
 
         it('should return empty array if uids is empty array', done => {
-            privileges.categories.filterUids('find', categoryObj.cid, [], (err, uids) => {
-                assert.ifError(err);
-                assert.equal(uids.length, 0);
-                done();
-            });
+            privileges.categories.filterUids(
+                'find',
+                categoryObj.cid,
+                [],
+                (err, uids) => {
+                    assert.ifError(err);
+                    assert.equal(uids.length, 0);
+                    done();
+                }
+            );
         });
 
         it('should filter uids by privilege', done => {
-            privileges.categories.filterUids('find', categoryObj.cid, [1, 2, 3, 4], (err, uids) => {
-                assert.ifError(err);
-                assert.deepEqual(uids, [1, 2]);
-                done();
-            });
+            privileges.categories.filterUids(
+                'find',
+                categoryObj.cid,
+                [1, 2, 3, 4],
+                (err, uids) => {
+                    assert.ifError(err);
+                    assert.deepEqual(uids, [1, 2]);
+                    done();
+                }
+            );
         });
 
         it('should load category user privileges', done => {
-            privileges.categories.userPrivileges(categoryObj.cid, 1, (err, data) => {
-                assert.ifError(err);
-                assert.deepEqual(data, {
-                    find: false,
-                    'posts:delete': false,
-                    read: false,
-                    'topics:reply': false,
-                    'topics:read': false,
-                    'topics:create': false,
-                    'topics:tag': false,
-                    'topics:delete': false,
-                    'topics:schedule': false,
-                    'posts:edit': false,
-                    'posts:history': false,
-                    'posts:upvote': false,
-                    'posts:downvote': false,
-                    purge: false,
-                    'posts:view_deleted': false,
-                    moderate: false,
-                });
+            privileges.categories.userPrivileges(
+                categoryObj.cid,
+                1,
+                (err, data) => {
+                    assert.ifError(err);
+                    assert.deepEqual(data, {
+                        find: false,
+                        'posts:delete': false,
+                        read: false,
+                        'topics:reply': false,
+                        'topics:read': false,
+                        'topics:create': false,
+                        'topics:tag': false,
+                        'topics:delete': false,
+                        'topics:schedule': false,
+                        'posts:edit': false,
+                        'posts:history': false,
+                        'posts:upvote': false,
+                        'posts:downvote': false,
+                        purge: false,
+                        'posts:view_deleted': false,
+                        moderate: false,
+                    });
 
-                done();
-            });
+                    done();
+                }
+            );
         });
 
         it('should load global user privileges', done => {
@@ -907,68 +1098,91 @@ describe('Categories', () => {
         });
 
         it('should load category group privileges', done => {
-            privileges.categories.groupPrivileges(categoryObj.cid, 'registered-users', (err, data) => {
-                assert.ifError(err);
-                assert.deepEqual(data, {
-                    'groups:find': true,
-                    'groups:posts:edit': true,
-                    'groups:posts:history': true,
-                    'groups:posts:upvote': true,
-                    'groups:posts:downvote': true,
-                    'groups:topics:delete': false,
-                    'groups:topics:create': true,
-                    'groups:topics:reply': true,
-                    'groups:topics:tag': true,
-                    'groups:topics:schedule': false,
-                    'groups:posts:delete': true,
-                    'groups:read': true,
-                    'groups:topics:read': true,
-                    'groups:purge': false,
-                    'groups:posts:view_deleted': false,
-                    'groups:moderate': false,
-                });
+            privileges.categories.groupPrivileges(
+                categoryObj.cid,
+                'registered-users',
+                (err, data) => {
+                    assert.ifError(err);
+                    assert.deepEqual(data, {
+                        'groups:find': true,
+                        'groups:posts:edit': true,
+                        'groups:posts:history': true,
+                        'groups:posts:upvote': true,
+                        'groups:posts:downvote': true,
+                        'groups:topics:delete': false,
+                        'groups:topics:create': true,
+                        'groups:topics:reply': true,
+                        'groups:topics:tag': true,
+                        'groups:topics:schedule': false,
+                        'groups:posts:delete': true,
+                        'groups:read': true,
+                        'groups:topics:read': true,
+                        'groups:purge': false,
+                        'groups:posts:view_deleted': false,
+                        'groups:moderate': false,
+                    });
 
-                done();
-            });
+                    done();
+                }
+            );
         });
 
         it('should load global group privileges', done => {
-            privileges.global.groupPrivileges('registered-users', (err, data) => {
-                assert.ifError(err);
-                assert.deepEqual(data, {
-                    'groups:ban': false,
-                    'groups:mute': false,
-                    'groups:invite': false,
-                    'groups:chat': true,
-                    'groups:search:content': true,
-                    'groups:search:users': true,
-                    'groups:search:tags': true,
-                    'groups:view:users': true,
-                    'groups:view:users:info': false,
-                    'groups:view:tags': true,
-                    'groups:view:groups': true,
-                    'groups:upload:post:image': true,
-                    'groups:upload:post:file': false,
-                    'groups:signature': true,
-                    'groups:local:login': true,
-                    'groups:group:create': false,
-                });
+            privileges.global.groupPrivileges(
+                'registered-users',
+                (err, data) => {
+                    assert.ifError(err);
+                    assert.deepEqual(data, {
+                        'groups:ban': false,
+                        'groups:mute': false,
+                        'groups:invite': false,
+                        'groups:chat': true,
+                        'groups:search:content': true,
+                        'groups:search:users': true,
+                        'groups:search:tags': true,
+                        'groups:view:users': true,
+                        'groups:view:users:info': false,
+                        'groups:view:tags': true,
+                        'groups:view:groups': true,
+                        'groups:upload:post:image': true,
+                        'groups:upload:post:file': false,
+                        'groups:signature': true,
+                        'groups:local:login': true,
+                        'groups:group:create': false,
+                    });
 
-                done();
-            });
+                    done();
+                }
+            );
         });
 
         it('should return false if cid is falsy', done => {
-            privileges.categories.isUserAllowedTo('find', null, adminUid, (err, isAllowed) => {
-                assert.ifError(err);
-                assert.equal(isAllowed, false);
-                done();
-            });
+            privileges.categories.isUserAllowedTo(
+                'find',
+                null,
+                adminUid,
+                (err, isAllowed) => {
+                    assert.ifError(err);
+                    assert.equal(isAllowed, false);
+                    done();
+                }
+            );
         });
 
         describe('Categories.getModeratorUids', () => {
             before(done => {
-                async.series([async.apply(groups.create, { name: 'testGroup' }), async.apply(groups.join, 'cid:1:privileges:groups:moderate', 'testGroup'), async.apply(groups.join, 'testGroup', 1)], done);
+                async.series(
+                    [
+                        async.apply(groups.create, { name: 'testGroup' }),
+                        async.apply(
+                            groups.join,
+                            'cid:1:privileges:groups:moderate',
+                            'testGroup'
+                        ),
+                        async.apply(groups.join, 'testGroup', 1),
+                    ],
+                    done
+                );
             });
 
             it('should retrieve all users with moderator bit in category privilege', done => {
@@ -985,7 +1199,11 @@ describe('Categories', () => {
                 async.series(
                     [
                         async.apply(groups.create, { name: 'testGroup2' }),
-                        async.apply(groups.join, 'cid:1:privileges:groups:moderate', 'testGroup2'),
+                        async.apply(
+                            groups.join,
+                            'cid:1:privileges:groups:moderate',
+                            'testGroup2'
+                        ),
                         async.apply(groups.join, 'testGroup2', 1),
                         function (next) {
                             Categories.getModeratorUids([1, 2], (err, uids) => {
@@ -1000,7 +1218,23 @@ describe('Categories', () => {
             });
 
             after(done => {
-                async.series([async.apply(groups.leave, 'cid:1:privileges:groups:moderate', 'testGroup'), async.apply(groups.leave, 'cid:1:privileges:groups:moderate', 'testGroup2'), async.apply(groups.destroy, 'testGroup'), async.apply(groups.destroy, 'testGroup2')], done);
+                async.series(
+                    [
+                        async.apply(
+                            groups.leave,
+                            'cid:1:privileges:groups:moderate',
+                            'testGroup'
+                        ),
+                        async.apply(
+                            groups.leave,
+                            'cid:1:privileges:groups:moderate',
+                            'testGroup2'
+                        ),
+                        async.apply(groups.destroy, 'testGroup'),
+                        async.apply(groups.destroy, 'testGroup2'),
+                    ],
+                    done
+                );
             });
         });
     });
@@ -1027,7 +1261,11 @@ describe('Categories', () => {
                 (err, tids) => {
                     assert.ifError(err);
                     assert.deepEqual(tids, [1, 2, 3]);
-                    plugins.hooks.unregister('my-test-plugin', 'filter:categories.getTopicIds', method);
+                    plugins.hooks.unregister(
+                        'my-test-plugin',
+                        'filter:categories.getTopicIds',
+                        method
+                    );
                     done();
                 }
             );

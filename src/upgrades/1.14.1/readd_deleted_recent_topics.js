@@ -16,14 +16,25 @@ module.exports = {
                 progress.incr(tids.length);
                 const topicData = await db.getObjectsFields(
                     tids.map(tid => `topic:${tid}`),
-                    ['tid', 'lastposttime', 'viewcount', 'postcount', 'upvotes', 'downvotes']
+                    [
+                        'tid',
+                        'lastposttime',
+                        'viewcount',
+                        'postcount',
+                        'upvotes',
+                        'downvotes',
+                    ]
                 );
                 if (!topicData.tid) {
                     return;
                 }
                 topicData.forEach(t => {
-                    if (t.hasOwnProperty('upvotes') && t.hasOwnProperty('downvotes')) {
-                        t.votes = parseInt(t.upvotes, 10) - parseInt(t.downvotes, 10);
+                    if (
+                        t.hasOwnProperty('upvotes') &&
+                        t.hasOwnProperty('downvotes')
+                    ) {
+                        t.votes =
+                            parseInt(t.upvotes, 10) - parseInt(t.downvotes, 10);
                     }
                 });
 

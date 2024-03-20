@@ -1,6 +1,11 @@
 'use strict';
 
-define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/widgets/sortable'], function (benchpress, bootbox, hooks) {
+define('settings/sorted-list', [
+    'benchpress',
+    'bootbox',
+    'hooks',
+    'jquery-ui/widgets/sortable',
+], function (benchpress, bootbox, hooks) {
     let Settings;
 
     const SortedList = {
@@ -15,27 +20,43 @@ define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/wid
             $container.find('[data-type="item"]').each(function (idx, item) {
                 const itemUUID = $(item).attr('data-sorted-list-uuid');
 
-                const formData = Settings.helper.serializeForm($('[data-sorted-list-object="' + key + '"][data-sorted-list-uuid="' + itemUUID + '"]'));
+                const formData = Settings.helper.serializeForm(
+                    $(
+                        '[data-sorted-list-object="' +
+                            key +
+                            '"][data-sorted-list-uuid="' +
+                            itemUUID +
+                            '"]'
+                    )
+                );
                 stripTags(formData);
                 values[key].push(formData);
             });
         },
         get: async ($container, hash) => {
-            const { listEl, key, formTpl, formValues } = await hooks.fire('filter:settings.sorted-list.load', {
-                listEl: $container.find('[data-type="list"]'),
-                key: $container.attr('data-sorted-list'),
-                formTpl: $container.attr('data-form-template'),
-                formValues: {},
-            });
+            const { listEl, key, formTpl, formValues } = await hooks.fire(
+                'filter:settings.sorted-list.load',
+                {
+                    listEl: $container.find('[data-type="list"]'),
+                    key: $container.attr('data-sorted-list'),
+                    formTpl: $container.attr('data-form-template'),
+                    formValues: {},
+                }
+            );
 
             const formHtml = await benchpress.render(formTpl, formValues);
 
-            const addBtn = $('[data-sorted-list="' + key + '"] [data-type="add"]');
+            const addBtn = $(
+                '[data-sorted-list="' + key + '"] [data-type="add"]'
+            );
 
             addBtn.on('click', function () {
                 const modal = bootbox.confirm(formHtml, function (save) {
                     if (save) {
-                        SortedList.addItem(modal.find('form').children(), $container);
+                        SortedList.addItem(
+                            modal.find('form').children(),
+                            $container
+                        );
                     }
                 });
                 hooks.fire('action:settings.sorted-list.modal', { modal });
@@ -47,7 +68,10 @@ define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/wid
             if (Array.isArray(list) && typeof list[0] !== 'string') {
                 const items = await Promise.all(
                     list.map(async item => {
-                        ({ item } = await hooks.fire('filter:settings.sorted-list.loadItem', { item }));
+                        ({ item } = await hooks.fire(
+                            'filter:settings.sorted-list.loadItem',
+                            { item }
+                        ));
 
                         const itemUUID = utils.generateUUID();
                         const form = $(formHtml).deserialize(item);
@@ -82,19 +106,30 @@ define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/wid
         addItem: async ($formElements, $target) => {
             const key = $target.attr('data-sorted-list');
             const itemUUID = utils.generateUUID();
-            const form = $('<form class="" data-sorted-list-uuid="' + itemUUID + '" data-sorted-list-object="' + key + '"></form>');
+            const form = $(
+                '<form class="" data-sorted-list-uuid="' +
+                    itemUUID +
+                    '" data-sorted-list-object="' +
+                    key +
+                    '"></form>'
+            );
             form.append($formElements);
 
             $('#content').append(form.hide());
 
             let data = Settings.helper.serializeForm(form);
-            ({ item: data } = await hooks.fire('filter:settings.sorted-list.loadItem', { item: data }));
+            ({ item: data } = await hooks.fire(
+                'filter:settings.sorted-list.loadItem',
+                { item: data }
+            ));
             parse($target, itemUUID, data);
         },
     };
 
     function setupRemoveButton($container, itemUUID) {
-        const removeBtn = $container.find('[data-sorted-list-uuid="' + itemUUID + '"] [data-type="remove"]');
+        const removeBtn = $container.find(
+            '[data-sorted-list-uuid="' + itemUUID + '"] [data-type="remove"]'
+        );
         removeBtn.on('click', function () {
             $('[data-sorted-list-uuid="' + itemUUID + '"]').remove();
         });
@@ -103,10 +138,18 @@ define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/wid
     function setupEditButton($container, itemUUID) {
         const $list = $container.find('[data-type="list"]');
         const key = $container.attr('data-sorted-list');
-        const editBtn = $('[data-sorted-list-uuid="' + itemUUID + '"] [data-type="edit"]');
+        const editBtn = $(
+            '[data-sorted-list-uuid="' + itemUUID + '"] [data-type="edit"]'
+        );
 
         editBtn.on('click', function () {
-            const form = $('[data-sorted-list-uuid="' + itemUUID + '"][data-sorted-list-object="' + key + '"]');
+            const form = $(
+                '[data-sorted-list-uuid="' +
+                    itemUUID +
+                    '"][data-sorted-list-object="' +
+                    key +
+                    '"]'
+            );
             const clone = form.clone(true).show();
 
             // .clone() doesn't preserve the state of `select` elements, fixing after the fact
@@ -116,19 +159,36 @@ define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/wid
 
             const modal = bootbox.confirm(clone, async save => {
                 if (save) {
-                    const form = $('<form class="" data-sorted-list-uuid="' + itemUUID + '" data-sorted-list-object="' + key + '"></form>');
+                    const form = $(
+                        '<form class="" data-sorted-list-uuid="' +
+                            itemUUID +
+                            '" data-sorted-list-object="' +
+                            key +
+                            '"></form>'
+                    );
                     form.append(modal.find('form').children());
 
                     $('#content')
-                        .find('[data-sorted-list-uuid="' + itemUUID + '"][data-sorted-list-object="' + key + '"]')
+                        .find(
+                            '[data-sorted-list-uuid="' +
+                                itemUUID +
+                                '"][data-sorted-list-object="' +
+                                key +
+                                '"]'
+                        )
                         .remove();
                     $('#content').append(form.hide());
 
                     let data = Settings.helper.serializeForm(form);
-                    ({ item: data } = await hooks.fire('filter:settings.sorted-list.loadItem', { item: data }));
+                    ({ item: data } = await hooks.fire(
+                        'filter:settings.sorted-list.loadItem',
+                        { item: data }
+                    ));
                     stripTags(data);
 
-                    const oldItem = $list.find('[data-sorted-list-uuid="' + itemUUID + '"]');
+                    const oldItem = $list.find(
+                        '[data-sorted-list-uuid="' + itemUUID + '"]'
+                    );
                     parse($container, itemUUID, data, oldItem);
                 }
             });
@@ -163,7 +223,10 @@ define('settings/sorted-list', ['benchpress', 'bootbox', 'hooks', 'jquery-ui/wid
 
     function stripTags(data) {
         return Object.entries(data || {}).forEach(([field, value]) => {
-            data[field] = typeof value === 'string' ? utils.stripHTMLTags(value, utils.stripTags) : value;
+            data[field] =
+                typeof value === 'string'
+                    ? utils.stripHTMLTags(value, utils.stripTags)
+                    : value;
         });
     }
 

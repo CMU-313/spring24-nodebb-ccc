@@ -22,14 +22,25 @@ function generateXML() {
                     {
                         _attr: {
                             xmlns: 'http://a9.com/-/spec/opensearch/1.1/',
-                            'xmlns:moz': 'http://www.mozilla.org/2006/browser/search/',
+                            'xmlns:moz':
+                                'http://www.mozilla.org/2006/browser/search/',
                         },
                     },
                     {
-                        ShortName: trimToLength(String(meta.config.title || meta.config.browserTitle || 'NodeBB'), 16),
+                        ShortName: trimToLength(
+                            String(
+                                meta.config.title ||
+                                    meta.config.browserTitle ||
+                                    'NodeBB'
+                            ),
+                            16
+                        ),
                     },
                     {
-                        Description: trimToLength(String(meta.config.description || ''), 1024),
+                        Description: trimToLength(
+                            String(meta.config.description || ''),
+                            1024
+                        ),
                     },
                     { InputEncoding: 'UTF-8' },
                     {

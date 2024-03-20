@@ -21,9 +21,13 @@ define('admin/modules/checkboxRowSelector', function () {
         if (self.toggling) {
             return;
         }
-        const checkboxes = $checkboxEl.closest('tr').find('input:not([disabled]):visible').toArray();
+        const checkboxes = $checkboxEl
+            .closest('tr')
+            .find('input:not([disabled]):visible')
+            .toArray();
         const $toggler = $(checkboxes.shift());
-        const rowState = checkboxes.length && checkboxes.every(el => el.checked);
+        const rowState =
+            checkboxes.length && checkboxes.every(el => el.checked);
         $toggler.prop('checked', rowState);
     };
 
