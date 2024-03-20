@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 // This is one of the two example TypeScript files included with the NodeBB repository
 // It is meant to serve as an example to assist you with your HW1 translation
 var __awaiter =
@@ -21,7 +21,7 @@ var __awaiter =
             }
             function rejected(value) {
                 try {
-                    step(generator["throw"](value));
+                    step(generator['throw'](value));
                 } catch (e) {
                     reject(e);
                 }
@@ -41,22 +41,22 @@ var __importDefault =
     function (mod) {
         return mod && mod.__esModule ? mod : { default: mod };
     };
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.post = exports.get = void 0;
-const nconf_1 = __importDefault(require("nconf"));
-const user_1 = __importDefault(require("../user"));
-const plugins_1 = __importDefault(require("../plugins"));
-const topics_1 = __importDefault(require("../topics"));
-const posts_1 = __importDefault(require("../posts"));
-const helpers_1 = __importDefault(require("./helpers"));
+const nconf_1 = __importDefault(require('nconf'));
+const user_1 = __importDefault(require('../user'));
+const plugins_1 = __importDefault(require('../plugins'));
+const topics_1 = __importDefault(require('../topics'));
+const posts_1 = __importDefault(require('../posts'));
+const helpers_1 = __importDefault(require('./helpers'));
 function get(req, res, callback) {
     return __awaiter(this, void 0, void 0, function* () {
         res.locals.metaTags = Object.assign(
             Object.assign({}, res.locals.metaTags),
-            { name: "robots", content: "noindex" },
+            { name: 'robots', content: 'noindex' },
         );
         const data = yield plugins_1.default.hooks.fire(
-            "filter:composer.build",
+            'filter:composer.build',
             {
                 req: req,
                 res: res,
@@ -68,15 +68,15 @@ function get(req, res, callback) {
             return;
         }
         if (!data || !data.templateData) {
-            return callback(new Error("[[error:invalid-data]]"));
+            return callback(new Error('[[error:invalid-data]]'));
         }
         if (data.templateData.disabled) {
-            res.render("", {
-                title: "[[modules:composer.compose]]",
+            res.render('', {
+                title: '[[modules:composer.compose]]',
             });
         } else {
-            data.templateData.title = "[[modules:composer.compose]]";
-            res.render("compose", data.templateData);
+            data.templateData.title = '[[modules:composer.compose]]';
+            res.render('compose', data.templateData);
         }
     });
 }
@@ -91,12 +91,12 @@ function post(req, res) {
             content: body.content,
             fromQueue: false,
         };
-        req.body.noscript = "true";
+        req.body.noscript = 'true';
         if (!data.content) {
             return yield helpers_1.default.noScriptErrors(
                 req,
                 res,
-                "[[error:invalid-data]]",
+                '[[error:invalid-data]]',
                 400,
             );
         }
@@ -126,14 +126,14 @@ function post(req, res) {
                 data.cid = body.cid;
                 data.title = body.title;
                 data.tags = [];
-                data.thumb = "";
+                data.thumb = '';
                 result = yield queueOrPost(topics_1.default.post, data);
             } else {
-                throw new Error("[[error:invalid-data]]");
+                throw new Error('[[error:invalid-data]]');
             }
             if (result.queued) {
                 return res.redirect(
-                    `${nconf_1.default.get("relative_path") || "/"}?noScriptMessage=[[success:post-queued]]`,
+                    `${nconf_1.default.get('relative_path') || '/'}?noScriptMessage=[[success:post-queued]]`,
                 );
             }
             const uid = result.uid ? result.uid : result.topicData.uid;
@@ -143,7 +143,7 @@ function post(req, res) {
             const path = result.pid
                 ? `/post/${result.pid}`
                 : `/topic/${result.topicData.slug}`;
-            res.redirect(nconf_1.default.get("relative_path") + path);
+            res.redirect(nconf_1.default.get('relative_path') + path);
         } catch (err) {
             if (err instanceof Error) {
                 yield helpers_1.default.noScriptErrors(

@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const hooks = require("./modules/hooks");
-const { render } = require("./widgets");
+const hooks = require('./modules/hooks');
+const { render } = require('./widgets');
 
 window.ajaxify = window.ajaxify || {};
 ajaxify.widgets = { render: render };
@@ -10,7 +10,7 @@ ajaxify.widgets = { render: render };
     let ajaxifyTimer;
 
     let retry = true;
-    let previousBodyClass = "";
+    let previousBodyClass = '';
 
     ajaxify.count = 0;
     ajaxify.currentPage = null;
@@ -21,13 +21,13 @@ ajaxify.widgets = { render: render };
             app.reconnect();
 
             if (ajaxify.reconnectAction) {
-                $(window).off("action:reconnected", ajaxify.reconnectAction);
+                $(window).off('action:reconnected', ajaxify.reconnectAction);
             }
             ajaxify.reconnectAction = function (e) {
                 ajaxify.go(url, callback, quiet);
                 $(window).off(e);
             };
-            $(window).on("action:reconnected", ajaxify.reconnectAction);
+            $(window).on('action:reconnected', ajaxify.reconnectAction);
         }
 
         // Abort subsequent requests if clicked multiple times within a short window of time
@@ -52,11 +52,11 @@ ajaxify.widgets = { render: render };
 
         ajaxify.cleanup(url, ajaxify.data.template.name);
 
-        if ($("#content").hasClass("ajaxifying") && apiXHR) {
+        if ($('#content').hasClass('ajaxifying') && apiXHR) {
             apiXHR.abort();
         }
 
-        app.previousUrl = !["reset"].includes(ajaxify.currentPage)
+        app.previousUrl = !['reset'].includes(ajaxify.currentPage)
             ? window.location.pathname.slice(config.relative_path.length) +
               window.location.search
             : app.previousUrl;
@@ -65,7 +65,7 @@ ajaxify.widgets = { render: render };
 
         // If any listeners alter url and set it to an empty string, abort the ajaxification
         if (url === null) {
-            hooks.fire("action:ajaxify.end", {
+            hooks.fire('action:ajaxify.end', {
                 url: url,
                 tpl_url: ajaxify.data.template.name,
                 title: ajaxify.data.title,
@@ -74,7 +74,7 @@ ajaxify.widgets = { render: render };
         }
 
         previousBodyClass = ajaxify.data.bodyClass;
-        $("#footer, #content").removeClass("hide").addClass("ajaxifying");
+        $('#footer, #content').removeClass('hide').addClass('ajaxifying');
 
         ajaxify.loadData(url, function (err, data) {
             if (
@@ -113,7 +113,7 @@ ajaxify.widgets = { render: render };
         );
         ajaxify.updateHistory(url, true);
         ajaxify.end(url, ajaxify.data.template.name);
-        hooks.fire("action:ajaxify.coldLoad");
+        hooks.fire('action:ajaxify.coldLoad');
     };
 
     ajaxify.isCold = function () {
@@ -122,35 +122,35 @@ ajaxify.widgets = { render: render };
 
     ajaxify.handleRedirects = function (url) {
         url = ajaxify
-            .removeRelativePath(url.replace(/^\/|\/$/g, ""))
+            .removeRelativePath(url.replace(/^\/|\/$/g, ''))
             .toLowerCase();
         const isClientToAdmin =
-            url.startsWith("admin") &&
+            url.startsWith('admin') &&
             window.location.pathname.indexOf(
-                config.relative_path + "/admin",
+                config.relative_path + '/admin',
             ) !== 0;
         const isAdminToClient =
-            !url.startsWith("admin") &&
+            !url.startsWith('admin') &&
             window.location.pathname.indexOf(
-                config.relative_path + "/admin",
+                config.relative_path + '/admin',
             ) === 0;
 
         if (isClientToAdmin || isAdminToClient) {
-            window.open(config.relative_path + "/" + url, "_top");
+            window.open(config.relative_path + '/' + url, '_top');
             return true;
         }
         return false;
     };
 
     ajaxify.start = function (url) {
-        url = ajaxify.removeRelativePath(url.replace(/^\/|\/$/g, ""));
+        url = ajaxify.removeRelativePath(url.replace(/^\/|\/$/g, ''));
 
         const payload = {
             url: url,
         };
 
         hooks.logs.collect();
-        hooks.fire("action:ajaxify.start", payload);
+        hooks.fire('action:ajaxify.start', payload);
 
         ajaxify.count += 1;
 
@@ -160,12 +160,12 @@ ajaxify.widgets = { render: render };
     ajaxify.updateHistory = function (url, quiet) {
         ajaxify.currentPage = url.split(/[?#]/)[0];
         if (window.history && window.history.pushState) {
-            window.history[!quiet ? "pushState" : "replaceState"](
+            window.history[!quiet ? 'pushState' : 'replaceState'](
                 {
                     url: url,
                 },
                 url,
-                config.relative_path + "/" + url,
+                config.relative_path + '/' + url,
             );
         }
     };
@@ -189,9 +189,9 @@ ajaxify.widgets = { render: render };
                     data.responseJSON.config = config;
                 }
 
-                $("#footer, #content")
-                    .removeClass("hide")
-                    .addClass("ajaxifying");
+                $('#footer, #content')
+                    .removeClass('hide')
+                    .addClass('ajaxifying');
                 return renderTemplate(
                     url,
                     status.toString(),
@@ -199,21 +199,21 @@ ajaxify.widgets = { render: render };
                     callback,
                 );
             } else if (status === 401) {
-                require(["alerts"], function (alerts) {
-                    alerts.error("[[global:please_log_in]]");
+                require(['alerts'], function (alerts) {
+                    alerts.error('[[global:please_log_in]]');
                 });
                 app.previousUrl = url;
-                window.location.href = config.relative_path + "/login";
+                window.location.href = config.relative_path + '/login';
             } else if (status === 302 || status === 308) {
                 if (data.responseJSON && data.responseJSON.external) {
                     // this is used by sso plugins to redirect to the auth route
                     // cant use ajaxify.go for /auth/sso routes
                     window.location.href = data.responseJSON.external;
-                } else if (typeof data.responseJSON === "string") {
+                } else if (typeof data.responseJSON === 'string') {
                     ajaxifyTimer = undefined;
                     if (
-                        data.responseJSON.startsWith("http://") ||
-                        data.responseJSON.startsWith("https://")
+                        data.responseJSON.startsWith('http://') ||
+                        data.responseJSON.startsWith('https://')
                     ) {
                         window.location.href = data.responseJSON;
                     } else {
@@ -221,35 +221,35 @@ ajaxify.widgets = { render: render };
                     }
                 }
             }
-        } else if (textStatus !== "abort") {
-            require(["alerts"], function (alerts) {
+        } else if (textStatus !== 'abort') {
+            require(['alerts'], function (alerts) {
                 alerts.error(data.responseJSON.error);
             });
         }
     }
 
     function renderTemplate(url, tpl_url, data, callback) {
-        hooks.fire("action:ajaxify.loadingTemplates", {});
-        require(["translator", "benchpress"], function (
+        hooks.fire('action:ajaxify.loadingTemplates', {});
+        require(['translator', 'benchpress'], function (
             translator,
             Benchpress,
         ) {
             Benchpress.render(tpl_url, data)
-                .then((rendered) => translator.translate(rendered))
+                .then(rendered => translator.translate(rendered))
                 .then(function (translated) {
                     translated = translator.unescape(translated);
-                    $("body")
+                    $('body')
                         .removeClass(previousBodyClass)
                         .addClass(data.bodyClass);
-                    $("#content").html(translated);
+                    $('#content').html(translated);
 
                     ajaxify.end(url, tpl_url);
 
-                    if (typeof callback === "function") {
+                    if (typeof callback === 'function') {
                         callback();
                     }
 
-                    $("#content, #footer").removeClass("ajaxifying");
+                    $('#content, #footer').removeClass('ajaxifying');
 
                     // Only executed on ajaxify. Otherwise these'd be in ajaxify.end()
                     updateTitle(data.title);
@@ -262,23 +262,23 @@ ajaxify.widgets = { render: render };
         if (!title) {
             return;
         }
-        require(["translator"], function (translator) {
+        require(['translator'], function (translator) {
             title = config.titleLayout
-                .replace(/&#123;/g, "{")
-                .replace(/&#125;/g, "}")
-                .replace("{pageTitle}", function () {
+                .replace(/&#123;/g, '{')
+                .replace(/&#125;/g, '}')
+                .replace('{pageTitle}', function () {
                     return title;
                 })
-                .replace("{browserTitle}", function () {
+                .replace('{browserTitle}', function () {
                     return config.browserTitle;
                 });
 
             // Allow translation strings in title on ajaxify (#5927)
             title = translator.unescape(title);
             const data = { title: title };
-            hooks.fire("action:ajaxify.updateTitle", data);
+            hooks.fire('action:ajaxify.updateTitle', data);
             translator.translate(data.title, function (translated) {
-                window.document.title = $("<div></div>")
+                window.document.title = $('<div></div>')
                     .html(translated)
                     .text();
             });
@@ -287,22 +287,22 @@ ajaxify.widgets = { render: render };
 
     function updateTags() {
         const metaWhitelist = [
-            "title",
-            "description",
+            'title',
+            'description',
             /og:.+/,
             /article:.+/,
-            "robots",
+            'robots',
         ].map(function (val) {
             return new RegExp(val);
         });
-        const linkWhitelist = ["canonical", "alternate", "up"];
+        const linkWhitelist = ['canonical', 'alternate', 'up'];
 
         // Delete the old meta tags
         Array.prototype.slice
-            .call(document.querySelectorAll("head meta"))
+            .call(document.querySelectorAll('head meta'))
             .filter(function (el) {
                 const name =
-                    el.getAttribute("property") || el.getAttribute("name");
+                    el.getAttribute('property') || el.getAttribute('name');
                 return metaWhitelist.some(function (exp) {
                     return !!exp.test(name);
                 });
@@ -310,7 +310,7 @@ ajaxify.widgets = { render: render };
             .forEach(function (el) {
                 document.head.removeChild(el);
             });
-        require(["translator"], function (translator) {
+        require(['translator'], function (translator) {
             // Add new meta tags
             ajaxify.data._header.tags.meta
                 .filter(function (tagObj) {
@@ -325,7 +325,7 @@ ajaxify.widgets = { render: render };
                             tagObj.content,
                         );
                     }
-                    const metaEl = document.createElement("meta");
+                    const metaEl = document.createElement('meta');
                     Object.keys(tagObj).forEach(function (prop) {
                         metaEl.setAttribute(prop, tagObj[prop]);
                     });
@@ -335,9 +335,9 @@ ajaxify.widgets = { render: render };
 
         // Delete the old link tags
         Array.prototype.slice
-            .call(document.querySelectorAll("head link"))
+            .call(document.querySelectorAll('head link'))
             .filter(function (el) {
-                const name = el.getAttribute("rel");
+                const name = el.getAttribute('rel');
                 return linkWhitelist.some(function (item) {
                     return item === name;
                 });
@@ -354,7 +354,7 @@ ajaxify.widgets = { render: render };
                 });
             })
             .forEach(function (tagObj) {
-                const linkEl = document.createElement("link");
+                const linkEl = document.createElement('link');
                 Object.keys(tagObj).forEach(function (prop) {
                     linkEl.setAttribute(prop, tagObj[prop]);
                 });
@@ -368,7 +368,7 @@ ajaxify.widgets = { render: render };
             window.scrollTo(0, 0);
         }
         ajaxify.loadScript(tpl_url, function done() {
-            hooks.fire("action:ajaxify.end", {
+            hooks.fire('action:ajaxify.end', {
                 url: url,
                 tpl_url: tpl_url,
                 title: ajaxify.data.title,
@@ -377,13 +377,13 @@ ajaxify.widgets = { render: render };
         });
         ajaxify.widgets.render(tpl_url);
 
-        hooks.fire("action:ajaxify.contentLoaded", { url: url, tpl: tpl_url });
+        hooks.fire('action:ajaxify.contentLoaded', { url: url, tpl: tpl_url });
 
         app.processPage();
     };
 
     ajaxify.parseData = () => {
-        const dataEl = document.getElementById("ajaxify-data");
+        const dataEl = document.getElementById('ajaxify-data');
         if (dataEl) {
             try {
                 ajaxify.data = JSON.parse(dataEl.textContent);
@@ -412,10 +412,10 @@ ajaxify.widgets = { render: render };
     };
 
     ajaxify.loadScript = function (tpl_url, callback) {
-        let location = !app.inAdmin ? "forum/" : "";
+        let location = !app.inAdmin ? 'forum/' : '';
 
-        if (tpl_url.startsWith("admin")) {
-            location = "";
+        if (tpl_url.startsWith('admin')) {
+            location = '';
         }
         const data = {
             tpl_url: tpl_url,
@@ -423,26 +423,26 @@ ajaxify.widgets = { render: render };
         };
 
         // Hint: useful if you want to load a module on a specific page (append module name to `scripts`)
-        hooks.fire("action:script.load", data);
-        hooks.fire("filter:script.load", data).then((data) => {
+        hooks.fire('action:script.load', data);
+        hooks.fire('filter:script.load', data).then(data => {
             // Require and parse modules
             let outstanding = data.scripts.length;
 
             const scripts = data.scripts
                 .map(function (script) {
-                    if (typeof script === "function") {
+                    if (typeof script === 'function') {
                         return function (next) {
                             script();
                             next();
                         };
                     }
-                    if (typeof script === "string") {
+                    if (typeof script === 'string') {
                         return async function (next) {
                             const module = await app.require(script);
                             // Hint: useful if you want to override a loaded library (e.g. replace core client-side logic),
                             // or call a method other than .init()
                             hooks
-                                .fire("static:script.init", {
+                                .fire('static:script.init', {
                                     tpl_url,
                                     name: script,
                                     module,
@@ -477,33 +477,33 @@ ajaxify.widgets = { render: render };
     ajaxify.loadData = function (url, callback) {
         url = ajaxify.removeRelativePath(url);
 
-        hooks.fire("action:ajaxify.loadingData", { url: url });
+        hooks.fire('action:ajaxify.loadingData', { url: url });
 
         apiXHR = $.ajax({
-            url: config.relative_path + "/api/" + url,
+            url: config.relative_path + '/api/' + url,
             cache: false,
             headers: {
-                "X-Return-To": app.previousUrl,
+                'X-Return-To': app.previousUrl,
             },
             success: function (data, textStatus, xhr) {
                 if (!data) {
                     return;
                 }
 
-                if (xhr.getResponseHeader("X-Redirect")) {
+                if (xhr.getResponseHeader('X-Redirect')) {
                     return callback({
                         data: {
                             status: 302,
                             responseJSON: data,
                         },
-                        textStatus: "error",
+                        textStatus: 'error',
                     });
                 }
 
                 ajaxify.data = data;
                 data.config = config;
 
-                hooks.fire("action:ajaxify.dataLoaded", {
+                hooks.fire('action:ajaxify.dataLoaded', {
                     url: url,
                     data: data,
                 });
@@ -511,10 +511,10 @@ ajaxify.widgets = { render: render };
                 callback(null, data);
             },
             error: function (data, textStatus) {
-                if (data.status === 0 && textStatus === "error") {
+                if (data.status === 0 && textStatus === 'error') {
                     data.status = 500;
                     data.responseJSON = data.responseJSON || {};
-                    data.responseJSON.error = "[[error:no-connection]]";
+                    data.responseJSON.error = '[[error:no-connection]]';
                 }
                 callback({
                     data: data,
@@ -528,40 +528,40 @@ ajaxify.widgets = { render: render };
         $.ajax({
             url: `${config.asset_base_url}/templates/${template}.js`,
             cache: false,
-            dataType: "text",
+            dataType: 'text',
             success: function (script) {
                 // eslint-disable-next-line no-new-func
-                const renderFunction = new Function("module", script);
+                const renderFunction = new Function('module', script);
                 const moduleObj = { exports: {} };
                 renderFunction(moduleObj);
                 callback(moduleObj.exports);
             },
         }).fail(function () {
-            console.error("Unable to load template: " + template);
-            callback(new Error("[[error:unable-to-load-template]]"));
+            console.error('Unable to load template: ' + template);
+            callback(new Error('[[error:unable-to-load-template]]'));
         });
     };
 
     ajaxify.cleanup = (url, tpl_url) => {
         app.leaveCurrentRoom();
-        $(window).off("scroll");
-        hooks.fire("action:ajaxify.cleanup", { url, tpl_url });
+        $(window).off('scroll');
+        hooks.fire('action:ajaxify.cleanup', { url, tpl_url });
     };
 
-    require(["translator", "benchpress"], function (translator, Benchpress) {
-        translator.translate("[[error:no-connection]]");
-        translator.translate("[[error:socket-reconnect-failed]]");
+    require(['translator', 'benchpress'], function (translator, Benchpress) {
+        translator.translate('[[error:no-connection]]');
+        translator.translate('[[error:socket-reconnect-failed]]');
         translator.translate(
             `[[global:reconnecting-message, ${config.siteTitle}]]`,
         );
         Benchpress.registerLoader(ajaxify.loadTemplate);
-        Benchpress.setGlobal("config", config);
-        Benchpress.render("500", {}); // loads and caches the 500.tpl
+        Benchpress.setGlobal('config', config);
+        Benchpress.render('500', {}); // loads and caches the 500.tpl
     });
 })();
 
 $(document).ready(function () {
-    $(window).on("popstate", function (ev) {
+    $(window).on('popstate', function (ev) {
         ev = ev.originalEvent;
 
         if (ev !== null && ev.state) {
@@ -571,13 +571,13 @@ $(document).ready(function () {
                         url: ev.state.returnPath,
                     },
                     ev.state.returnPath,
-                    config.relative_path + "/" + ev.state.returnPath,
+                    config.relative_path + '/' + ev.state.returnPath,
                 );
             } else if (ev.state.url !== undefined) {
                 ajaxify.go(
                     ev.state.url,
                     function () {
-                        hooks.fire("action:popstate", { url: ev.state.url });
+                        hooks.fire('action:popstate', { url: ev.state.url });
                     },
                     true,
                 );
@@ -588,28 +588,28 @@ $(document).ready(function () {
     function ajaxifyAnchors() {
         function hrefEmpty(href) {
             // eslint-disable-next-line no-script-url
-            return href === undefined || href === "" || href === "javascript:;";
+            return href === undefined || href === '' || href === 'javascript:;';
         }
         const location = document.location || window.location;
         const rootUrl =
             location.protocol +
-            "//" +
+            '//' +
             (location.hostname || location.host) +
-            (location.port ? ":" + location.port : "");
-        const contentEl = document.getElementById("content");
+            (location.port ? ':' + location.port : '');
+        const contentEl = document.getElementById('content');
 
         // Enhancing all anchors to ajaxify...
-        $(document.body).on("click", "a", function (e) {
+        $(document.body).on('click', 'a', function (e) {
             const _self = this;
             if (
-                this.target !== "" ||
-                (this.protocol !== "http:" && this.protocol !== "https:")
+                this.target !== '' ||
+                (this.protocol !== 'http:' && this.protocol !== 'https:')
             ) {
                 return;
             }
 
             const $this = $(this);
-            const href = $this.attr("href");
+            const href = $this.attr('href');
             const internalLink = utils.isInternalURI(
                 this,
                 window.location,
@@ -622,7 +622,7 @@ $(document).ready(function () {
             const process = function () {
                 if (!e.ctrlKey && !e.shiftKey && !e.metaKey && e.which === 1) {
                     if (internalLink) {
-                        const pathname = this.href.replace(rootAndPath, "");
+                        const pathname = this.href.replace(rootAndPath, '');
 
                         // Special handling for urls with hashes
                         if (
@@ -635,7 +635,7 @@ $(document).ready(function () {
                         }
                     } else if (
                         window.location.pathname !==
-                        config.relative_path + "/outgoing"
+                        config.relative_path + '/outgoing'
                     ) {
                         if (
                             config.openOutgoingLinksInNewTab &&
@@ -658,7 +658,7 @@ $(document).ready(function () {
                                 })
                             ) {
                                 ajaxify.go(
-                                    "outgoing?url=" + encodeURIComponent(href),
+                                    'outgoing?url=' + encodeURIComponent(href),
                                 );
                                 e.preventDefault();
                             }
@@ -667,7 +667,7 @@ $(document).ready(function () {
                 }
             };
 
-            if ($this.attr("data-ajaxify") === "false") {
+            if ($this.attr('data-ajaxify') === 'false') {
                 if (!internalLink) {
                     return;
                 }
@@ -675,7 +675,7 @@ $(document).ready(function () {
             }
 
             // Default behaviour for rss feeds
-            if (internalLink && href && href.endsWith(".rss")) {
+            if (internalLink && href && href.endsWith('.rss')) {
                 return;
             }
 
@@ -684,9 +684,9 @@ $(document).ready(function () {
                 internalLink &&
                 href &&
                 String(_self.pathname).startsWith(
-                    config.relative_path + "/sitemap",
+                    config.relative_path + '/sitemap',
                 ) &&
-                href.endsWith(".xml")
+                href.endsWith('.xml')
             ) {
                 return;
             }
@@ -694,7 +694,7 @@ $(document).ready(function () {
             // Default behaviour for uploads and direct links to API urls
             if (
                 internalLink &&
-                ["/uploads", "/assets/", "/api/"].some(function (prefix) {
+                ['/uploads', '/assets/', '/api/'].some(function (prefix) {
                     return String(_self.pathname).startsWith(
                         config.relative_path + prefix,
                     );
@@ -706,25 +706,25 @@ $(document).ready(function () {
             // eslint-disable-next-line no-script-url
             if (
                 hrefEmpty(this.href) ||
-                this.protocol === "javascript:" ||
-                href === "#" ||
-                href === ""
+                this.protocol === 'javascript:' ||
+                href === '#' ||
+                href === ''
             ) {
                 return e.preventDefault();
             }
 
             if (
                 app.flags &&
-                app.flags.hasOwnProperty("_unsaved") &&
+                app.flags.hasOwnProperty('_unsaved') &&
                 app.flags._unsaved === true
             ) {
                 if (e.ctrlKey) {
                     return;
                 }
 
-                require(["bootbox"], function (bootbox) {
+                require(['bootbox'], function (bootbox) {
                     bootbox.confirm(
-                        "[[global:unsaved-changes]]",
+                        '[[global:unsaved-changes]]',
                         function (navigate) {
                             if (navigate) {
                                 app.flags._unsaved = false;

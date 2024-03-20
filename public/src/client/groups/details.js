@@ -1,17 +1,17 @@
-"use strict";
+'use strict';
 
-define("forum/groups/details", [
-    "forum/groups/memberlist",
-    "iconSelect",
-    "components",
-    "coverPhoto",
-    "pictureCropper",
-    "translator",
-    "api",
-    "slugify",
-    "categorySelector",
-    "bootbox",
-    "alerts",
+define('forum/groups/details', [
+    'forum/groups/memberlist',
+    'iconSelect',
+    'components',
+    'coverPhoto',
+    'pictureCropper',
+    'translator',
+    'api',
+    'slugify',
+    'categorySelector',
+    'bootbox',
+    'alerts',
 ], function (
     memberList,
     iconSelect,
@@ -29,7 +29,7 @@ define("forum/groups/details", [
     let groupName;
 
     Details.init = function () {
-        const detailsPage = components.get("groups/container");
+        const detailsPage = components.get('groups/container');
 
         groupName = ajaxify.data.group.name;
 
@@ -37,10 +37,10 @@ define("forum/groups/details", [
             Details.prepareSettings();
 
             coverPhoto.init(
-                components.get("groups/cover"),
+                components.get('groups/cover'),
                 function (imageData, position, callback) {
                     socket.emit(
-                        "groups.cover.update",
+                        'groups.cover.update',
                         {
                             groupName: groupName,
                             imageData: imageData,
@@ -52,27 +52,27 @@ define("forum/groups/details", [
                 function () {
                     pictureCropper.show(
                         {
-                            title: "[[groups:upload-group-cover]]",
-                            socketMethod: "groups.cover.update",
+                            title: '[[groups:upload-group-cover]]',
+                            socketMethod: 'groups.cover.update',
                             aspectRatio: NaN,
                             allowSkippingCrop: true,
                             restrictImageDimension: false,
-                            paramName: "groupName",
+                            paramName: 'groupName',
                             paramValue: groupName,
                         },
                         function (imageUrlOnServer) {
                             imageUrlOnServer =
-                                (!imageUrlOnServer.startsWith("http")
+                                (!imageUrlOnServer.startsWith('http')
                                     ? config.relative_path
-                                    : "") +
+                                    : '') +
                                 imageUrlOnServer +
-                                "?" +
+                                '?' +
                                 Date.now();
                             components
-                                .get("groups/cover")
+                                .get('groups/cover')
                                 .css(
-                                    "background-image",
-                                    "url(" + imageUrlOnServer + ")",
+                                    'background-image',
+                                    'url(' + imageUrlOnServer + ')',
                                 );
                         },
                     );
@@ -86,33 +86,33 @@ define("forum/groups/details", [
         handleMemberInvitations();
 
         components
-            .get("groups/activity")
-            .find(".content img:not(.not-responsive)")
-            .addClass("img-responsive");
+            .get('groups/activity')
+            .find('.content img:not(.not-responsive)')
+            .addClass('img-responsive');
 
-        detailsPage.on("click", "[data-action]", function () {
+        detailsPage.on('click', '[data-action]', function () {
             const btnEl = $(this);
-            const userRow = btnEl.parents("[data-uid]");
-            const ownerFlagEl = userRow.find(".member-name > i");
-            const isOwner = !ownerFlagEl.hasClass("invisible");
-            const uid = userRow.attr("data-uid");
-            const action = btnEl.attr("data-action");
+            const userRow = btnEl.parents('[data-uid]');
+            const ownerFlagEl = userRow.find('.member-name > i');
+            const isOwner = !ownerFlagEl.hasClass('invisible');
+            const uid = userRow.attr('data-uid');
+            const action = btnEl.attr('data-action');
 
             switch (action) {
-                case "toggleOwnership":
-                    api[isOwner ? "del" : "put"](
+                case 'toggleOwnership':
+                    api[isOwner ? 'del' : 'put'](
                         `/groups/${ajaxify.data.group.slug}/ownership/${uid}`,
                         {},
                     )
                         .then(() => {
-                            ownerFlagEl.toggleClass("invisible");
+                            ownerFlagEl.toggleClass('invisible');
                         })
                         .catch(alerts.error);
                     break;
 
-                case "kick":
+                case 'kick':
                     translator.translate(
-                        "[[groups:details.kick_confirm]]",
+                        '[[groups:details.kick_confirm]]',
                         function (translated) {
                             bootbox.confirm(translated, function (confirm) {
                                 if (!confirm) {
@@ -130,19 +130,19 @@ define("forum/groups/details", [
                     );
                     break;
 
-                case "update":
+                case 'update':
                     Details.update();
                     break;
 
-                case "delete":
+                case 'delete':
                     Details.deleteGroup();
                     break;
 
-                case "join":
+                case 'join':
                     api.put(
-                        "/groups/" +
+                        '/groups/' +
                             ajaxify.data.group.slug +
-                            "/membership/" +
+                            '/membership/' +
                             (uid || app.user.uid),
                         undefined,
                     )
@@ -150,11 +150,11 @@ define("forum/groups/details", [
                         .catch(alerts.error);
                     break;
 
-                case "leave":
+                case 'leave':
                     api.del(
-                        "/groups/" +
+                        '/groups/' +
                             ajaxify.data.group.slug +
-                            "/membership/" +
+                            '/membership/' +
                             (uid || app.user.uid),
                         undefined,
                     )
@@ -163,16 +163,16 @@ define("forum/groups/details", [
                     break;
 
                 // TODO (14/10/2020): rewrite these to use api module and merge with above 2 case blocks
-                case "accept": // intentional fall-throughs!
-                case "reject":
-                case "issueInvite":
-                case "rescindInvite":
-                case "acceptInvite":
-                case "rejectInvite":
-                case "acceptAll":
-                case "rejectAll":
+                case 'accept': // intentional fall-throughs!
+                case 'reject':
+                case 'issueInvite':
+                case 'rescindInvite':
+                case 'acceptInvite':
+                case 'rejectInvite':
+                case 'acceptAll':
+                case 'rejectAll':
                     socket.emit(
-                        "groups." + action,
+                        'groups.' + action,
                         {
                             toUid: uid,
                             groupName: groupName,
@@ -191,51 +191,51 @@ define("forum/groups/details", [
     };
 
     Details.prepareSettings = function () {
-        const settingsFormEl = components.get("groups/settings");
+        const settingsFormEl = components.get('groups/settings');
         const labelColorValueEl = settingsFormEl.find('[name="labelColor"]');
         const textColorValueEl = settingsFormEl.find('[name="textColor"]');
         const iconBtn = settingsFormEl.find('[data-action="icon-select"]');
-        const previewEl = settingsFormEl.find(".label");
-        const previewElText = settingsFormEl.find(".label-text");
-        const previewIcon = previewEl.find("i");
+        const previewEl = settingsFormEl.find('.label');
+        const previewElText = settingsFormEl.find('.label-text');
+        const previewIcon = previewEl.find('i');
         const userTitleEl = settingsFormEl.find('[name="userTitle"]');
         const userTitleEnabledEl = settingsFormEl.find(
             '[name="userTitleEnabled"]',
         );
         const iconValueEl = settingsFormEl.find('[name="icon"]');
 
-        labelColorValueEl.on("input", function () {
-            previewEl.css("background-color", labelColorValueEl.val());
+        labelColorValueEl.on('input', function () {
+            previewEl.css('background-color', labelColorValueEl.val());
         });
 
-        textColorValueEl.on("input", function () {
-            previewEl.css("color", textColorValueEl.val());
+        textColorValueEl.on('input', function () {
+            previewEl.css('color', textColorValueEl.val());
         });
 
         // Add icon selection interface
-        iconBtn.on("click", function () {
+        iconBtn.on('click', function () {
             iconSelect.init(previewIcon, function () {
                 iconValueEl.val(previewIcon.val());
             });
         });
 
         // If the user title changes, update that too
-        userTitleEl.on("keyup", function () {
+        userTitleEl.on('keyup', function () {
             previewElText.translateText(
-                this.value || settingsFormEl.find("#name").val(),
+                this.value || settingsFormEl.find('#name').val(),
             );
         });
 
         // Disable user title customisation options if the the user title itself is disabled
-        userTitleEnabledEl.on("change", function () {
-            const customOpts = components.get("groups/userTitleOption");
+        userTitleEnabledEl.on('change', function () {
+            const customOpts = components.get('groups/userTitleOption');
 
             if (this.checked) {
-                customOpts.removeAttr("disabled");
-                previewEl.removeClass("hide");
+                customOpts.removeAttr('disabled');
+                previewEl.removeClass('hide');
             } else {
-                customOpts.attr("disabled", "disabled");
-                previewEl.addClass("hide");
+                customOpts.attr('disabled', 'disabled');
+                previewEl.addClass('hide');
             }
         });
 
@@ -243,14 +243,14 @@ define("forum/groups/details", [
             $('.member-post-cids-selector [component="category-selector"]'),
             {
                 onSelect: function (selectedCategory) {
-                    let cids = ($("#memberPostCids").val() || "")
-                        .split(",")
-                        .map((cid) => parseInt(cid, 10));
+                    let cids = ($('#memberPostCids').val() || '')
+                        .split(',')
+                        .map(cid => parseInt(cid, 10));
                     cids.push(selectedCategory.cid);
                     cids = cids.filter(
                         (cid, index, array) => array.indexOf(cid) === index,
                     );
-                    $("#memberPostCids").val(cids.join(","));
+                    $('#memberPostCids').val(cids.join(','));
                     cidSelector.selectCategory(0);
                 },
             },
@@ -258,7 +258,7 @@ define("forum/groups/details", [
     };
 
     Details.update = function () {
-        const settingsFormEl = components.get("groups/settings");
+        const settingsFormEl = components.get('groups/settings');
         const checkboxes = settingsFormEl.find('input[type="checkbox"][name]');
 
         if (settingsFormEl.length) {
@@ -266,14 +266,14 @@ define("forum/groups/details", [
 
             // serializeObject doesnt return array for multi selects if only one item is selected
             if (!Array.isArray(settings.memberPostCids)) {
-                settings.memberPostCids = $("#memberPostCids").val();
+                settings.memberPostCids = $('#memberPostCids').val();
             }
 
             // Fix checkbox values
             checkboxes.each(function (idx, inputEl) {
                 inputEl = $(inputEl);
                 if (inputEl.length) {
-                    settings[inputEl.attr("name")] = inputEl.prop("checked");
+                    settings[inputEl.attr('name')] = inputEl.prop('checked');
                 }
             });
 
@@ -283,14 +283,14 @@ define("forum/groups/details", [
                         let pathname = window.location.pathname;
                         pathname = pathname.slice(
                             1,
-                            pathname.lastIndexOf("/") + 1,
+                            pathname.lastIndexOf('/') + 1,
                         );
                         ajaxify.go(pathname + slugify(settings.name));
                     } else {
                         ajaxify.refresh();
                     }
 
-                    alerts.success("[[groups:event.updated]]");
+                    alerts.success('[[groups:event.updated]]');
                 })
                 .catch(alerts.error);
         }
@@ -298,12 +298,12 @@ define("forum/groups/details", [
 
     Details.deleteGroup = function () {
         bootbox.confirm(
-            "Are you sure you want to delete the group: " +
+            'Are you sure you want to delete the group: ' +
                 utils.escapeHTML(groupName),
             function (confirm) {
                 if (confirm) {
                     bootbox.prompt(
-                        "Please enter the name of this group in order to delete it:",
+                        'Please enter the name of this group in order to delete it:',
                         function (response) {
                             if (response === groupName) {
                                 api.del(
@@ -312,11 +312,11 @@ define("forum/groups/details", [
                                 )
                                     .then(() => {
                                         alerts.success(
-                                            "[[groups:event.deleted, " +
+                                            '[[groups:event.deleted, ' +
                                                 utils.escapeHTML(groupName) +
-                                                "]]",
+                                                ']]',
                                         );
-                                        ajaxify.go("groups");
+                                        ajaxify.go('groups');
                                     })
                                     .catch(alerts.error);
                             }
@@ -333,10 +333,10 @@ define("forum/groups/details", [
         }
 
         const searchInput = $('[component="groups/members/invite"]');
-        require(["autocomplete"], function (autocomplete) {
+        require(['autocomplete'], function (autocomplete) {
             autocomplete.user(searchInput, function (event, selected) {
                 socket.emit(
-                    "groups.issueInvite",
+                    'groups.issueInvite',
                     {
                         toUid: selected.item.user.uid,
                         groupName: ajaxify.data.group.name,
@@ -352,7 +352,7 @@ define("forum/groups/details", [
         });
 
         $('[component="groups/members/bulk-invite-button"]').on(
-            "click",
+            'click',
             function () {
                 const usernames = $(
                     '[component="groups/members/bulk-invite"]',
@@ -361,7 +361,7 @@ define("forum/groups/details", [
                     return false;
                 }
                 socket.emit(
-                    "groups.issueMassInvite",
+                    'groups.issueMassInvite',
                     {
                         usernames: usernames,
                         groupName: ajaxify.data.group.name,
@@ -380,7 +380,7 @@ define("forum/groups/details", [
 
     function removeCover() {
         translator.translate(
-            "[[groups:remove_group_cover_confirm]]",
+            '[[groups:remove_group_cover_confirm]]',
             function (translated) {
                 bootbox.confirm(translated, function (confirm) {
                     if (!confirm) {
@@ -388,7 +388,7 @@ define("forum/groups/details", [
                     }
 
                     socket.emit(
-                        "groups.cover.remove",
+                        'groups.cover.remove',
                         {
                             groupName: ajaxify.data.group.name,
                         },

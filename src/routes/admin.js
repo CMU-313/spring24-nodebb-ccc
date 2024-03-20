@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-const helpers = require("./helpers");
+const helpers = require('./helpers');
 
 module.exports = function (app, name, middleware, controllers) {
     const middlewares = [middleware.pluginHooks];
@@ -283,7 +283,7 @@ function apiRoutes(router, name, middleware, controllers) {
         helpers.tryRoute(controllers.admin.cache.dump),
     );
 
-    const multipart = require("connect-multiparty");
+    const multipart = require('connect-multiparty');
     const multipartMiddleware = multipart();
 
     const middlewares = [

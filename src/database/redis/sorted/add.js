@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
 module.exports = function (module) {
-    const helpers = require("../helpers");
-    const utils = require("../../../utils");
+    const helpers = require('../helpers');
+    const utils = require('../../../utils');
 
     module.sortedSetAdd = async function (key, score, value) {
         if (!key) {
@@ -23,7 +23,7 @@ module.exports = function (module) {
         }
 
         if (scores.length !== values.length) {
-            throw new Error("[[error:invalid-data]]");
+            throw new Error('[[error:invalid-data]]');
         }
         for (let i = 0; i < scores.length; i += 1) {
             if (!utils.isNumber(scores[i])) {
@@ -45,13 +45,13 @@ module.exports = function (module) {
         if (
             (!isArrayOfScores && !utils.isNumber(scores)) ||
             (isArrayOfScores &&
-                scores.map((s) => utils.isNumber(s)).includes(false))
+                scores.map(s => utils.isNumber(s)).includes(false))
         ) {
             throw new Error(`[[error:invalid-score, ${scores}]]`);
         }
 
         if (isArrayOfScores && scores.length !== keys.length) {
-            throw new Error("[[error:invalid-data]]");
+            throw new Error('[[error:invalid-data]]');
         }
 
         const batch = module.client.batch();
@@ -72,7 +72,7 @@ module.exports = function (module) {
             return;
         }
         const batch = module.client.batch();
-        data.forEach((item) => {
+        data.forEach(item => {
             if (!utils.isNumber(item[1])) {
                 throw new Error(`[[error:invalid-score, ${item[1]}]]`);
             }

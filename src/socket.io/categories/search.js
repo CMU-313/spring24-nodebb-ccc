@@ -1,22 +1,22 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
+const _ = require('lodash');
 
-const meta = require("../../meta");
-const categories = require("../../categories");
-const privileges = require("../../privileges");
-const controllersHelpers = require("../../controllers/helpers");
-const plugins = require("../../plugins");
+const meta = require('../../meta');
+const categories = require('../../categories');
+const privileges = require('../../privileges');
+const controllersHelpers = require('../../controllers/helpers');
+const plugins = require('../../plugins');
 
 module.exports = function (SocketCategories) {
     // used by categorySearch module
     SocketCategories.categorySearch = async function (socket, data) {
         let cids = [];
         let matchedCids = [];
-        const privilege = data.privilege || "topics:read";
+        const privilege = data.privilege || 'topics:read';
         data.states = (
-            data.states || ["watching", "notwatching", "ignoring"]
-        ).map((state) => categories.watchStates[state]);
+            data.states || ['watching', 'notwatching', 'ignoring']
+        ).map(state => categories.watchStates[state]);
 
         if (data.search) {
             ({ cids, matchedCids } = await findMatchedCids(socket.uid, data));
@@ -36,19 +36,17 @@ module.exports = function (SocketCategories) {
         );
 
         if (Array.isArray(data.selectedCids)) {
-            data.selectedCids = data.selectedCids.map((cid) =>
-                parseInt(cid, 10),
-            );
+            data.selectedCids = data.selectedCids.map(cid => parseInt(cid, 10));
         }
 
         let categoriesData = categories.buildForSelectCategories(
             visibleCategories,
-            ["disabledClass"],
+            ['disabledClass'],
             data.parentCid,
         );
         categoriesData = categoriesData.slice(0, 200);
 
-        categoriesData.forEach((category) => {
+        categoriesData.forEach(category => {
             category.selected = data.selectedCids
                 ? data.selectedCids.includes(category.cid)
                 : false;
@@ -57,7 +55,7 @@ module.exports = function (SocketCategories) {
             }
         });
         const result = await plugins.hooks.fire(
-            "filter:categories.categorySearch",
+            'filter:categories.categorySearch',
             {
                 categories: categoriesData,
                 ...data,
@@ -75,10 +73,10 @@ module.exports = function (SocketCategories) {
             paginate: false,
         });
 
-        let matchedCids = result.categories.map((c) => c.cid);
+        let matchedCids = result.categories.map(c => c.cid);
         // no need to filter if all 3 states are used
         const filterByWatchState = !Object.values(categories.watchStates).every(
-            (state) => data.states.includes(state),
+            state => data.states.includes(state),
         );
 
         if (filterByWatchState) {
@@ -109,18 +107,18 @@ module.exports = function (SocketCategories) {
         let resultCids = [];
         async function getCidsRecursive(cids) {
             const categoryData = await categories.getCategoriesFields(cids, [
-                "subCategoriesPerPage",
+                'subCategoriesPerPage',
             ]);
             const cidToData = _.zipObject(cids, categoryData);
             await Promise.all(
-                cids.map(async (cid) => {
+                cids.map(async cid => {
                     const allChildCids = await categories.getAllCidsFromSet(
                         `cid:${cid}:children`,
                     );
                     if (allChildCids.length) {
                         const childCids =
                             await privileges.categories.filterCids(
-                                "find",
+                                'find',
                                 allChildCids,
                                 uid,
                             );
@@ -140,7 +138,7 @@ module.exports = function (SocketCategories) {
             `cid:${parentCid}:children`,
         );
         const rootCids = await privileges.categories.filterCids(
-            "find",
+            'find',
             allRootCids,
             uid,
         );

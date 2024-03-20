@@ -1,74 +1,74 @@
-"use strict";
+'use strict';
 
-const winston = require("winston");
-const nconf = require("nconf");
-const semver = require("semver");
-const prompt = require("prompt");
-const utils = require("../utils");
+const winston = require('winston');
+const nconf = require('nconf');
+const semver = require('semver');
+const prompt = require('prompt');
+const utils = require('../utils');
 
 let client;
 
-const connection = require("./mongo/connection");
+const connection = require('./mongo/connection');
 
 const mongoModule = module.exports;
 
 function isUriNotSpecified() {
-    return !prompt.history("mongo:uri").value;
+    return !prompt.history('mongo:uri').value;
 }
 
 mongoModule.questions = [
     {
-        name: "mongo:uri",
+        name: 'mongo:uri',
         description:
-            "MongoDB connection URI: (leave blank if you wish to specify host, port, username/password and database individually)\nFormat: mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]",
-        default: nconf.get("mongo:uri") || "",
+            'MongoDB connection URI: (leave blank if you wish to specify host, port, username/password and database individually)\nFormat: mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]',
+        default: nconf.get('mongo:uri') || '',
         hideOnWebInstall: true,
     },
     {
-        name: "mongo:host",
-        description: "Host IP or address of your MongoDB instance",
-        default: nconf.get("mongo:host") || "127.0.0.1",
+        name: 'mongo:host',
+        description: 'Host IP or address of your MongoDB instance',
+        default: nconf.get('mongo:host') || '127.0.0.1',
         ask: isUriNotSpecified,
     },
     {
-        name: "mongo:port",
-        description: "Host port of your MongoDB instance",
-        default: nconf.get("mongo:port") || 27017,
+        name: 'mongo:port',
+        description: 'Host port of your MongoDB instance',
+        default: nconf.get('mongo:port') || 27017,
         ask: isUriNotSpecified,
     },
     {
-        name: "mongo:username",
-        description: "MongoDB username",
-        default: nconf.get("mongo:username") || "",
+        name: 'mongo:username',
+        description: 'MongoDB username',
+        default: nconf.get('mongo:username') || '',
         ask: isUriNotSpecified,
     },
     {
-        name: "mongo:password",
-        description: "Password of your MongoDB database",
-        default: nconf.get("mongo:password") || "",
+        name: 'mongo:password',
+        description: 'Password of your MongoDB database',
+        default: nconf.get('mongo:password') || '',
         hidden: true,
         ask: isUriNotSpecified,
         before: function (value) {
-            value = value || nconf.get("mongo:password") || "";
+            value = value || nconf.get('mongo:password') || '';
             return value;
         },
     },
     {
-        name: "mongo:database",
-        description: "MongoDB database name",
-        default: nconf.get("mongo:database") || "nodebb",
+        name: 'mongo:database',
+        description: 'MongoDB database name',
+        default: nconf.get('mongo:database') || 'nodebb',
         ask: isUriNotSpecified,
     },
 ];
 
 mongoModule.init = async function () {
-    client = await connection.connect(nconf.get("mongo"));
+    client = await connection.connect(nconf.get('mongo'));
     mongoModule.client = client.db();
 };
 
 mongoModule.createSessionStore = async function (options) {
-    const MongoStore = require("connect-mongo");
-    const meta = require("../meta");
+    const MongoStore = require('connect-mongo');
+    const meta = require('../meta');
 
     const store = MongoStore.create({
         clientPromise: connection.connect(options),
@@ -80,12 +80,12 @@ mongoModule.createSessionStore = async function (options) {
 
 mongoModule.createIndices = async function () {
     if (!mongoModule.client) {
-        winston.warn("[database/createIndices] database not initialized");
+        winston.warn('[database/createIndices] database not initialized');
         return;
     }
 
-    winston.info("[database] Checking database indices.");
-    const collection = mongoModule.client.collection("objects");
+    winston.info('[database] Checking database indices.');
+    const collection = mongoModule.client.collection('objects');
     await collection.createIndex({ _key: 1, score: -1 }, { background: true });
     await collection.createIndex(
         { _key: 1, value: -1 },
@@ -95,19 +95,19 @@ mongoModule.createIndices = async function () {
         { expireAt: 1 },
         { expireAfterSeconds: 0, background: true },
     );
-    winston.info("[database] Checking database indices done!");
+    winston.info('[database] Checking database indices done!');
 };
 
 mongoModule.checkCompatibility = function (callback) {
-    const mongoPkg = require("mongodb/package.json");
+    const mongoPkg = require('mongodb/package.json');
     mongoModule.checkCompatibilityVersion(mongoPkg.version, callback);
 };
 
 mongoModule.checkCompatibilityVersion = function (version, callback) {
-    if (semver.lt(version, "2.0.0")) {
+    if (semver.lt(version, '2.0.0')) {
         return callback(
             new Error(
-                "The `mongodb` package is out-of-date, please run `./nodebb setup` again.",
+                'The `mongodb` package is out-of-date, please run `./nodebb setup` again.',
             ),
         );
     }
@@ -117,11 +117,11 @@ mongoModule.checkCompatibilityVersion = function (version, callback) {
 
 mongoModule.info = async function (db) {
     if (!db) {
-        const client = await connection.connect(nconf.get("mongo"));
+        const client = await connection.connect(nconf.get('mongo'));
         db = client.db();
     }
     mongoModule.client = mongoModule.client || db;
-    let serverStatusError = "";
+    let serverStatusError = '';
 
     async function getServerStatus() {
         try {
@@ -129,9 +129,9 @@ mongoModule.info = async function (db) {
         } catch (err) {
             serverStatusError = err.message;
             // Override mongo error with more human-readable error
-            if (err.name === "MongoError" && err.codeName === "Unauthorized") {
+            if (err.name === 'MongoError' && err.codeName === 'Unauthorized') {
                 serverStatusError =
-                    "[[admin/advanced/database:mongo.unauthorized]]";
+                    '[[admin/advanced/database:mongo.unauthorized]]';
             }
             winston.error(err.stack);
         }
@@ -147,7 +147,7 @@ mongoModule.info = async function (db) {
     stats.serverStatusError = serverStatusError;
     const scale = 1024 * 1024 * 1024;
 
-    listCollections = listCollections.map((collectionInfo) => ({
+    listCollections = listCollections.map(collectionInfo => ({
         name: collectionInfo.ns,
         count: collectionInfo.count,
         size: collectionInfo.size,
@@ -179,7 +179,7 @@ mongoModule.info = async function (db) {
     stats.indexSize = (stats.indexSize / scale).toFixed(3);
     stats.storageEngine = serverStatus.storageEngine
         ? serverStatus.storageEngine.name
-        : "mmapv1";
+        : 'mmapv1';
     stats.host = serverStatus.host;
     stats.version = serverStatus.version;
     stats.uptime = serverStatus.uptime;
@@ -190,20 +190,20 @@ mongoModule.info = async function (db) {
 async function getCollectionStats(db) {
     const items = await db.listCollections().toArray();
     return await Promise.all(
-        items.map((collection) => db.collection(collection.name).stats()),
+        items.map(collection => db.collection(collection.name).stats()),
     );
 }
 
 mongoModule.close = function (callback) {
     callback = callback || function () {};
-    client.close((err) => callback(err));
+    client.close(err => callback(err));
 };
 
-require("./mongo/main")(mongoModule);
-require("./mongo/hash")(mongoModule);
-require("./mongo/sets")(mongoModule);
-require("./mongo/sorted")(mongoModule);
-require("./mongo/list")(mongoModule);
-require("./mongo/transaction")(mongoModule);
+require('./mongo/main')(mongoModule);
+require('./mongo/hash')(mongoModule);
+require('./mongo/sets')(mongoModule);
+require('./mongo/sorted')(mongoModule);
+require('./mongo/list')(mongoModule);
+require('./mongo/transaction')(mongoModule);
 
-require("../promisify")(mongoModule, ["client", "sessionStore"]);
+require('../promisify')(mongoModule, ['client', 'sessionStore']);

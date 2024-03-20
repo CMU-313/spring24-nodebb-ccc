@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-define("forum/flags/list", [
-    "components",
-    "Chart",
-    "categoryFilter",
-    "autocomplete",
-    "api",
-    "alerts",
+define('forum/flags/list', [
+    'components',
+    'Chart',
+    'categoryFilter',
+    'autocomplete',
+    'api',
+    'alerts',
 ], function (components, Chart, categoryFilter, autocomplete, api, alerts) {
     const Flags = {};
 
@@ -18,14 +18,14 @@ define("forum/flags/list", [
         Flags.handleBulkActions();
 
         selectedCids = [];
-        if (ajaxify.data.filters.hasOwnProperty("cid")) {
+        if (ajaxify.data.filters.hasOwnProperty('cid')) {
             selectedCids = Array.isArray(ajaxify.data.filters.cid)
                 ? ajaxify.data.filters.cid
                 : [ajaxify.data.filters.cid];
         }
 
         categoryFilter.init($('[component="category/dropdown"]'), {
-            privilege: "moderate",
+            privilege: 'moderate',
             selectedCids: selectedCids,
             onHidden: function (data) {
                 selectedCids = data.selectedCids;
@@ -33,22 +33,22 @@ define("forum/flags/list", [
         });
 
         components
-            .get("flags/list")
-            .on("click", "[data-flag-id]", function (e) {
-                if (["BUTTON", "A"].includes(e.target.nodeName)) {
+            .get('flags/list')
+            .on('click', '[data-flag-id]', function (e) {
+                if (['BUTTON', 'A'].includes(e.target.nodeName)) {
                     return;
                 }
 
-                const flagId = this.getAttribute("data-flag-id");
-                ajaxify.go("flags/" + flagId);
+                const flagId = this.getAttribute('data-flag-id');
+                ajaxify.go('flags/' + flagId);
             });
 
-        $("#flags-daily-wrapper").one("shown.bs.collapse", function () {
+        $('#flags-daily-wrapper').one('shown.bs.collapse', function () {
             Flags.handleGraphs();
         });
 
         autocomplete.user(
-            $("#filter-assignee, #filter-targetUid, #filter-reporterId"),
+            $('#filter-assignee, #filter-targetUid, #filter-reporterId'),
             (ev, ui) => {
                 setTimeout(() => {
                     ev.target.value = ui.item.user.uid;
@@ -58,7 +58,7 @@ define("forum/flags/list", [
     };
 
     Flags.enableFilterForm = function () {
-        const $filtersEl = components.get("flags/filters");
+        const $filtersEl = components.get('flags/filters');
 
         // Parse ajaxify data to set form values to reflect current filters
         for (const filter in ajaxify.data.filters) {
@@ -71,25 +71,25 @@ define("forum/flags/list", [
         $filtersEl.find('[name="sort"]').val(ajaxify.data.sort);
 
         document
-            .getElementById("apply-filters")
-            .addEventListener("click", function () {
+            .getElementById('apply-filters')
+            .addEventListener('click', function () {
                 const payload = $filtersEl.serializeArray();
                 // cid is special comes from categoryFilter module
                 selectedCids.forEach(function (cid) {
-                    payload.push({ name: "cid", value: cid });
+                    payload.push({ name: 'cid', value: cid });
                 });
 
                 ajaxify.go(
-                    "flags?" + (payload.length ? $.param(payload) : "reset=1"),
+                    'flags?' + (payload.length ? $.param(payload) : 'reset=1'),
                 );
             });
 
-        $filtersEl.find('button[data-target="#more-filters"]').click((ev) => {
-            const textVariant = ev.target.getAttribute("data-text-variant");
+        $filtersEl.find('button[data-target="#more-filters"]').click(ev => {
+            const textVariant = ev.target.getAttribute('data-text-variant');
             if (!textVariant) {
                 return;
             }
-            ev.target.setAttribute("data-text-variant", ev.target.textContent);
+            ev.target.setAttribute('data-text-variant', ev.target.textContent);
             ev.target.firstChild.textContent = textVariant;
         });
     };
@@ -106,7 +106,7 @@ define("forum/flags/list", [
 
         document
             .querySelector('[data-action="toggle-all"]')
-            .addEventListener("click", function () {
+            .addEventListener('click', function () {
                 const state = this.checked;
 
                 checkboxes.forEach(function (el) {
@@ -115,7 +115,7 @@ define("forum/flags/list", [
                 bulkEl.disabled = !state;
             });
 
-        flagsList.addEventListener("click", function (e) {
+        flagsList.addEventListener('click', function (e) {
             const subselector = e.target.closest('input[type="checkbox"]');
             if (subselector) {
                 // Stop checkbox clicks from going into the flag details
@@ -162,31 +162,31 @@ define("forum/flags/list", [
     Flags.handleBulkActions = function () {
         document
             .querySelector('[component="flags/bulk-actions"]')
-            .addEventListener("click", function (e) {
-                const subselector = e.target.closest("[data-action]");
+            .addEventListener('click', function (e) {
+                const subselector = e.target.closest('[data-action]');
                 if (subselector) {
-                    const action = subselector.getAttribute("data-action");
+                    const action = subselector.getAttribute('data-action');
                     const flagIds = Flags.getSelected();
-                    const promises = flagIds.map((flagId) => {
+                    const promises = flagIds.map(flagId => {
                         const data = {};
-                        if (action === "bulk-assign") {
+                        if (action === 'bulk-assign') {
                             data.assignee = app.user.uid;
-                        } else if (action === "bulk-mark-resolved") {
-                            data.state = "resolved";
+                        } else if (action === 'bulk-mark-resolved') {
+                            data.state = 'resolved';
                         }
                         return api.put(`/flags/${flagId}`, data);
                     });
 
                     Promise.allSettled(promises).then(function (results) {
                         const fulfilled = results.filter(function (res) {
-                            return res.status === "fulfilled";
+                            return res.status === 'fulfilled';
                         }).length;
                         const errors = results.filter(function (res) {
-                            return res.status === "rejected";
+                            return res.status === 'rejected';
                         });
                         if (fulfilled) {
                             alerts.success(
-                                "[[flags:bulk-success, " + fulfilled + "]]",
+                                '[[flags:bulk-success, ' + fulfilled + ']]',
                             );
                             ajaxify.refresh();
                         }
@@ -207,7 +207,7 @@ define("forum/flags/list", [
         checkboxes.forEach(function (el) {
             if (el.checked) {
                 payload.push(
-                    el.closest("[data-flag-id]").getAttribute("data-flag-id"),
+                    el.closest('[data-flag-id]').getAttribute('data-flag-id'),
                 );
             }
         });
@@ -216,26 +216,26 @@ define("forum/flags/list", [
     };
 
     Flags.handleGraphs = function () {
-        const dailyCanvas = document.getElementById("flags:daily");
+        const dailyCanvas = document.getElementById('flags:daily');
         const dailyLabels = utils.getDaysArray().map(function (text, idx) {
-            return idx % 3 ? "" : text;
+            return idx % 3 ? '' : text;
         });
 
         if (utils.isMobile()) {
             Chart.defaults.global.tooltips.enabled = false;
         }
         const data = {
-            "flags:daily": {
+            'flags:daily': {
                 labels: dailyLabels,
                 datasets: [
                     {
-                        label: "",
-                        backgroundColor: "rgba(151,187,205,0.2)",
-                        borderColor: "rgba(151,187,205,1)",
-                        pointBackgroundColor: "rgba(151,187,205,1)",
-                        pointHoverBackgroundColor: "#fff",
-                        pointBorderColor: "#fff",
-                        pointHoverBorderColor: "rgba(151,187,205,1)",
+                        label: '',
+                        backgroundColor: 'rgba(151,187,205,0.2)',
+                        borderColor: 'rgba(151,187,205,1)',
+                        pointBackgroundColor: 'rgba(151,187,205,1)',
+                        pointHoverBackgroundColor: '#fff',
+                        pointBorderColor: '#fff',
+                        pointHoverBorderColor: 'rgba(151,187,205,1)',
                         data: ajaxify.data.analytics,
                     },
                 ],
@@ -243,9 +243,9 @@ define("forum/flags/list", [
         };
 
         dailyCanvas.width = $(dailyCanvas).parent().width();
-        new Chart(dailyCanvas.getContext("2d"), {
-            type: "line",
-            data: data["flags:daily"],
+        new Chart(dailyCanvas.getContext('2d'), {
+            type: 'line',
+            data: data['flags:daily'],
             options: {
                 responsive: true,
                 animation: false,

@@ -1,19 +1,19 @@
-"use strict";
+'use strict';
 
-const path = require("path");
-const winston = require("winston");
+const path = require('path');
+const winston = require('winston');
 
-const user = require("../user");
-const privileges = require("../privileges");
-const accountHelpers = require("./accounts/helpers");
+const user = require('../user');
+const privileges = require('../privileges');
+const accountHelpers = require('./accounts/helpers');
 
 const userController = module.exports;
 
 userController.getCurrentUser = async function (req, res) {
     if (!req.loggedIn) {
-        return res.status(401).json("not-authorized");
+        return res.status(401).json('not-authorized');
     }
-    const userslug = await user.getUserField(req.uid, "userslug");
+    const userslug = await user.getUserField(req.uid, 'userslug');
     const userData = await accountHelpers.getUserDataByUserSlug(
         userslug,
         req.uid,
@@ -23,15 +23,15 @@ userController.getCurrentUser = async function (req, res) {
 };
 
 userController.getUserByUID = async function (req, res, next) {
-    await byType("uid", req, res, next);
+    await byType('uid', req, res, next);
 };
 
 userController.getUserByUsername = async function (req, res, next) {
-    await byType("username", req, res, next);
+    await byType('username', req, res, next);
 };
 
 userController.getUserByEmail = async function (req, res, next) {
-    await byType("email", req, res, next);
+    await byType('email', req, res, next);
 };
 
 async function byType(type, req, res, next) {
@@ -52,11 +52,11 @@ userController.getUserDataByField = async function (
     fieldValue,
 ) {
     let uid = null;
-    if (field === "uid") {
+    if (field === 'uid') {
         uid = fieldValue;
-    } else if (field === "username") {
+    } else if (field === 'username') {
         uid = await user.getUidByUsername(fieldValue);
-    } else if (field === "email") {
+    } else if (field === 'email') {
         uid = await user.getUidByEmail(fieldValue);
         if (uid) {
             const isPrivileged = await user.isAdminOrGlobalMod(callerUid);
@@ -74,16 +74,16 @@ userController.getUserDataByField = async function (
 
 userController.getUserDataByUID = async function (callerUid, uid) {
     if (!parseInt(uid, 10)) {
-        throw new Error("[[error:no-user]]");
+        throw new Error('[[error:no-user]]');
     }
-    const canView = await privileges.global.can("view:users", callerUid);
+    const canView = await privileges.global.can('view:users', callerUid);
     if (!canView) {
-        throw new Error("[[error:no-privileges]]");
+        throw new Error('[[error:no-privileges]]');
     }
 
     let userData = await user.getUserData(uid);
     if (!userData) {
-        throw new Error("[[error:no-user]]");
+        throw new Error('[[error:no-user]]');
     }
 
     userData = await user.hidePrivateData(userData, callerUid);
@@ -92,15 +92,15 @@ userController.getUserDataByUID = async function (callerUid, uid) {
 };
 
 userController.exportPosts = async function (req, res, next) {
-    sendExport(`${res.locals.uid}_posts.csv`, "text/csv", res, next);
+    sendExport(`${res.locals.uid}_posts.csv`, 'text/csv', res, next);
 };
 
 userController.exportUploads = function (req, res, next) {
-    sendExport(`${res.locals.uid}_uploads.zip`, "application/zip", res, next);
+    sendExport(`${res.locals.uid}_uploads.zip`, 'application/zip', res, next);
 };
 
 userController.exportProfile = async function (req, res, next) {
-    sendExport(`${res.locals.uid}_profile.json`, "application/json", res, next);
+    sendExport(`${res.locals.uid}_profile.json`, 'application/json', res, next);
 };
 
 // DEPRECATED; Remove in NodeBB v3.0.0
@@ -112,15 +112,15 @@ function sendExport(filename, type, res, next) {
     res.sendFile(
         filename,
         {
-            root: path.join(__dirname, "../../build/export"),
+            root: path.join(__dirname, '../../build/export'),
             headers: {
-                "Content-Type": type,
-                "Content-Disposition": `attachment; filename=${filename}`,
+                'Content-Type': type,
+                'Content-Disposition': `attachment; filename=${filename}`,
             },
         },
-        (err) => {
+        err => {
             if (err) {
-                if (err.code === "ENOENT") {
+                if (err.code === 'ENOENT') {
                     res.locals.isAPI = false;
                     return next();
                 }
@@ -130,12 +130,12 @@ function sendExport(filename, type, res, next) {
     );
 }
 
-require("../promisify")(userController, [
-    "getCurrentUser",
-    "getUserByUID",
-    "getUserByUsername",
-    "getUserByEmail",
-    "exportPosts",
-    "exportUploads",
-    "exportProfile",
+require('../promisify')(userController, [
+    'getCurrentUser',
+    'getUserByUID',
+    'getUserByUsername',
+    'getUserByEmail',
+    'exportPosts',
+    'exportUploads',
+    'exportProfile',
 ]);

@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const router = require("express").Router();
-const middleware = require("../../middleware");
-const controllers = require("../../controllers");
-const routeHelpers = require("../helpers");
+const router = require('express').Router();
+const middleware = require('../../middleware');
+const controllers = require('../../controllers');
+const routeHelpers = require('../helpers');
 
 const { setupApiRoute } = routeHelpers;
 
@@ -15,23 +15,23 @@ module.exports = function () {
 
     setupApiRoute(
         router,
-        "put",
-        "/settings/:setting",
-        [...middlewares, middleware.checkRequired.bind(null, ["value"])],
+        'put',
+        '/settings/:setting',
+        [...middlewares, middleware.checkRequired.bind(null, ['value'])],
         controllers.write.admin.updateSetting,
     );
 
     setupApiRoute(
         router,
-        "get",
-        "/analytics",
+        'get',
+        '/analytics',
         [...middlewares],
         controllers.write.admin.getAnalyticsKeys,
     );
     setupApiRoute(
         router,
-        "get",
-        "/analytics/:set",
+        'get',
+        '/analytics/:set',
         [...middlewares],
         controllers.write.admin.getAnalyticsData,
     );

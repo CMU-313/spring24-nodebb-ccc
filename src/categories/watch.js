@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const db = require("../database");
-const user = require("../user");
+const db = require('../database');
+const user = require('../user');
 
 module.exports = function (Categories) {
     Categories.watchStates = {
@@ -15,7 +15,7 @@ module.exports = function (Categories) {
             return cids.map(() => false);
         }
         const states = await Categories.getWatchState(cids, uid);
-        return states.map((state) => state === Categories.watchStates.ignoring);
+        return states.map(state => state === Categories.watchStates.ignoring);
     };
 
     Categories.getWatchState = async function (cids, uid) {
@@ -25,13 +25,13 @@ module.exports = function (Categories) {
         if (!Array.isArray(cids) || !cids.length) {
             return [];
         }
-        const keys = cids.map((cid) => `cid:${cid}:uid:watch:state`);
+        const keys = cids.map(cid => `cid:${cid}:uid:watch:state`);
         const [userSettings, states] = await Promise.all([
             user.getSettings(uid),
             db.sortedSetsScore(keys, uid),
         ]);
         return states.map(
-            (state) =>
+            state =>
                 state ||
                 Categories.watchStates[userSettings.categoryWatchState],
         );

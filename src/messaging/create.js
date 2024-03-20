@@ -1,24 +1,24 @@
-"use strict";
+'use strict';
 
-const meta = require("../meta");
-const plugins = require("../plugins");
-const db = require("../database");
-const user = require("../user");
+const meta = require('../meta');
+const plugins = require('../plugins');
+const db = require('../database');
+const user = require('../user');
 
 module.exports = function (Messaging) {
-    Messaging.sendMessage = async (data) => {
+    Messaging.sendMessage = async data => {
         await Messaging.checkContent(data.content);
         const inRoom = await Messaging.isUserInRoom(data.uid, data.roomId);
         if (!inRoom) {
-            throw new Error("[[error:not-allowed]]");
+            throw new Error('[[error:not-allowed]]');
         }
 
         return await Messaging.addMessage(data);
     };
 
-    Messaging.checkContent = async (content) => {
+    Messaging.checkContent = async content => {
         if (!content) {
-            throw new Error("[[error:invalid-chat-message]]");
+            throw new Error('[[error:invalid-chat-message]]');
         }
 
         const maximumChatMessageLength =
@@ -26,11 +26,11 @@ module.exports = function (Messaging) {
         content = String(content).trim();
         let { length } = content;
         ({ content, length } = await plugins.hooks.fire(
-            "filter:messaging.checkContent",
+            'filter:messaging.checkContent',
             { content, length },
         ));
         if (!content) {
-            throw new Error("[[error:invalid-chat-message]]");
+            throw new Error('[[error:invalid-chat-message]]');
         }
         if (length > maximumChatMessageLength) {
             throw new Error(
@@ -39,8 +39,8 @@ module.exports = function (Messaging) {
         }
     };
 
-    Messaging.addMessage = async (data) => {
-        const mid = await db.incrObjectField("global", "nextMid");
+    Messaging.addMessage = async data => {
+        const mid = await db.incrObjectField('global', 'nextMid');
         const timestamp = data.timestamp || Date.now();
         let message = {
             content: String(data.content),
@@ -55,7 +55,7 @@ module.exports = function (Messaging) {
             message.ip = data.ip;
         }
 
-        message = await plugins.hooks.fire("filter:messaging.save", message);
+        message = await plugins.hooks.fire('filter:messaging.save', message);
         await db.setObject(`message:${mid}`, message);
         const isNewSet = await Messaging.isNewSet(
             data.uid,
@@ -73,7 +73,7 @@ module.exports = function (Messaging) {
             Messaging.addRoomToUsers(data.roomId, uids, timestamp),
             Messaging.addMessageToUsers(data.roomId, uids, mid, timestamp),
             Messaging.markUnread(
-                uids.filter((uid) => uid !== String(data.uid)),
+                uids.filter(uid => uid !== String(data.uid)),
                 data.roomId,
             ),
         ]);
@@ -91,7 +91,7 @@ module.exports = function (Messaging) {
         messages[0].newSet = isNewSet;
         messages[0].mid = mid;
         messages[0].roomId = data.roomId;
-        plugins.hooks.fire("action:messaging.save", {
+        plugins.hooks.fire('action:messaging.save', {
             message: messages[0],
             data: data,
         });
@@ -113,7 +113,7 @@ module.exports = function (Messaging) {
             return;
         }
 
-        const keys = uids.map((uid) => `uid:${uid}:chat:rooms`);
+        const keys = uids.map(uid => `uid:${uid}:chat:rooms`);
         await db.sortedSetsAdd(keys, timestamp, roomId);
     };
 
@@ -121,7 +121,7 @@ module.exports = function (Messaging) {
         if (!uids.length) {
             return;
         }
-        const keys = uids.map((uid) => `uid:${uid}:chat:room:${roomId}:mids`);
+        const keys = uids.map(uid => `uid:${uid}:chat:room:${roomId}:mids`);
         await db.sortedSetsAdd(keys, timestamp, mid);
     };
 };

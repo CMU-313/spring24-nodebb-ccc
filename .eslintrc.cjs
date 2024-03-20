@@ -1,15 +1,15 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
 // Directories that contain TypeScript files of note
-const tsDirs = ["public/src", "src", "test"];
+const tsDirs = ['public/src', 'src', 'test'];
 
 // Helper walk function to check all directories
 function walk(dir) {
   var results = [];
   var list = fs.readdirSync(dir);
   list.forEach(function (file) {
-    file = dir + "/" + file;
+    file = dir + '/' + file;
     var stat = fs.statSync(file);
     if (stat && stat.isDirectory()) {
       results = results.concat(walk(file));
@@ -24,49 +24,49 @@ function walk(dir) {
 function find_compiled_js() {
   let jsFilesList = [];
 
-  tsDirs.forEach((tsDir) => {
+  tsDirs.forEach(tsDir => {
     let filesList = walk(tsDir);
     const tsFilesList = filesList.filter(
-      (file) => path.extname(file).toLowerCase() === ".ts",
+      file => path.extname(file).toLowerCase() === '.ts',
     );
     jsFilesList = jsFilesList.concat(
       filesList.filter(
-        (file) =>
-          path.extname(file).toLowerCase() === ".js" &&
+        file =>
+          path.extname(file).toLowerCase() === '.js' &&
           tsFilesList.find(
-            (tsFile) => tsFile === file.replace(/\.[^/.]+$/, "") + ".ts",
+            tsFile => tsFile === file.replace(/\.[^/.]+$/, '') + '.ts',
           ) !== undefined,
       ),
     );
   });
 
-  if (jsFilesList.length == 0) return "";
+  if (jsFilesList.length == 0) return '';
   return jsFilesList;
 }
 
 module.exports = {
-  extends: ["nodebb"],
+  extends: ['nodebb'],
   root: true,
   ignorePatterns: find_compiled_js(),
   rules: {
-    indent: ["error", 4],
+    indent: ['error', 4],
   },
   overrides: [
     {
-      files: ["**/*.ts", "**/*.tsx"],
+      files: ['**/*.ts', '**/*.tsx'],
       extends: [
-        "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/recommended-requiring-type-checking',
       ],
-      parser: "@typescript-eslint/parser",
-      plugins: ["@typescript-eslint"],
+      parser: '@typescript-eslint/parser',
+      plugins: ['@typescript-eslint'],
       parserOptions: {
         ecmaFeatures: { jsx: true },
-        project: "./tsconfig.json",
+        project: './tsconfig.json',
       },
       rules: {
-        "no-use-before-define": "off",
-        "@typescript-eslint/no-use-before-define": "error",
+        'no-use-before-define': 'off',
+        '@typescript-eslint/no-use-before-define': 'error',
       },
     },
   ],

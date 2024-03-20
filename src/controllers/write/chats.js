@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const api = require("../../api");
-const messaging = require("../../messaging");
+const api = require('../../api');
+const messaging = require('../../messaging');
 
-const helpers = require("../helpers");
+const helpers = require('../helpers');
 
 const Chats = module.exports;
 

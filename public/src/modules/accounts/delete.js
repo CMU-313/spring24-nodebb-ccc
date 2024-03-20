@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-define("accounts/delete", ["api", "bootbox", "alerts"], function (
+define('accounts/delete', ['api', 'bootbox', 'alerts'], function (
     api,
     bootbox,
     alerts,
@@ -10,9 +10,9 @@ define("accounts/delete", ["api", "bootbox", "alerts"], function (
     Delete.account = function (uid, callback) {
         executeAction(
             uid,
-            "[[user:delete_this_account_confirm]]",
-            "/account",
-            "[[user:account-deleted]]",
+            '[[user:delete_this_account_confirm]]',
+            '/account',
+            '[[user:account-deleted]]',
             callback,
         );
     };
@@ -20,9 +20,9 @@ define("accounts/delete", ["api", "bootbox", "alerts"], function (
     Delete.content = function (uid, callback) {
         executeAction(
             uid,
-            "[[user:delete_account_content_confirm]]",
-            "/content",
-            "[[user:account-content-deleted]]",
+            '[[user:delete_account_content_confirm]]',
+            '/content',
+            '[[user:account-content-deleted]]',
             callback,
         );
     };
@@ -30,9 +30,9 @@ define("accounts/delete", ["api", "bootbox", "alerts"], function (
     Delete.purge = function (uid, callback) {
         executeAction(
             uid,
-            "[[user:delete_all_confirm]]",
-            "",
-            "[[user:account-deleted]]",
+            '[[user:delete_all_confirm]]',
+            '',
+            '[[user:account-deleted]]',
             callback,
         );
     };
@@ -47,7 +47,7 @@ define("accounts/delete", ["api", "bootbox", "alerts"], function (
                 .then(() => {
                     alerts.success(successText);
 
-                    if (typeof callback === "function") {
+                    if (typeof callback === 'function') {
                         return callback();
                     }
                 })

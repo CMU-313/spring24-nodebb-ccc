@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-const winston = require("winston");
+const winston = require('winston');
 
-const user = require("../user");
-const notifications = require("../notifications");
-const sockets = require("../socket.io");
-const plugins = require("../plugins");
-const meta = require("../meta");
+const user = require('../user');
+const notifications = require('../notifications');
+const sockets = require('../socket.io');
+const plugins = require('../plugins');
+const meta = require('../meta');
 
 module.exports = function (Messaging) {
     Messaging.notifyQueue = {}; // Only used to notify a user of a new chat message, see Messaging.notifyUser
@@ -21,16 +21,16 @@ module.exports = function (Messaging) {
             message: messageObj,
             uids: uids,
         };
-        data = await plugins.hooks.fire("filter:messaging.notify", data);
+        data = await plugins.hooks.fire('filter:messaging.notify', data);
         if (!data || !data.uids || !data.uids.length) {
             return;
         }
 
         uids = data.uids;
-        uids.forEach((uid) => {
+        uids.forEach(uid => {
             data.self = parseInt(uid, 10) === parseInt(fromUid, 10) ? 1 : 0;
             Messaging.pushUnreadCount(uid);
-            sockets.in(`uid_${uid}`).emit("event:chats.receive", data);
+            sockets.in(`uid_${uid}`).emit('event:chats.receive', data);
         });
         if (messageObj.system) {
             return;
@@ -77,7 +77,7 @@ module.exports = function (Messaging) {
 
         const isGroupChat = await Messaging.isGroupChat(roomId);
         const notification = await notifications.create({
-            type: isGroupChat ? "new-group-chat" : "new-chat",
+            type: isGroupChat ? 'new-group-chat' : 'new-chat',
             subject: `[[email:notif.chat.subject, ${displayname}]]`,
             bodyShort: `[[notifications:new_message_from, ${displayname}]]`,
             bodyLong: messageObj.content,

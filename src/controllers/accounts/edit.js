@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-const user = require("../../user");
-const meta = require("../../meta");
-const helpers = require("../helpers");
-const groups = require("../../groups");
-const accountHelpers = require("./helpers");
-const privileges = require("../../privileges");
-const file = require("../../file");
+const user = require('../../user');
+const meta = require('../../meta');
+const helpers = require('../helpers');
+const groups = require('../../groups');
+const accountHelpers = require('./helpers');
+const privileges = require('../../privileges');
+const file = require('../../file');
 
 const editController = module.exports;
 
@@ -17,7 +17,7 @@ editController.get = async function (req, res, next) {
             req.uid,
             req.query,
         ),
-        privileges.global.can("signature", req.uid),
+        privileges.global.can('signature', req.uid),
     ]);
     if (!userData) {
         return next();
@@ -27,41 +27,41 @@ editController.get = async function (req, res, next) {
     userData.maximumProfileImageSize = meta.config.maximumProfileImageSize;
     userData.allowProfilePicture =
         !userData.isSelf ||
-        !!meta.config["reputation:disabled"] ||
-        userData.reputation >= meta.config["min:rep:profile-picture"];
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:profile-picture'];
     userData.allowCoverPicture =
         !userData.isSelf ||
-        !!meta.config["reputation:disabled"] ||
-        userData.reputation >= meta.config["min:rep:cover-picture"];
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:cover-picture'];
     userData.allowProfileImageUploads = meta.config.allowProfileImageUploads;
     userData.allowedProfileImageExtensions = user
         .getAllowedProfileImageExtensions()
-        .map((ext) => `.${ext}`)
-        .join(", ");
+        .map(ext => `.${ext}`)
+        .join(', ');
     userData.allowMultipleBadges = meta.config.allowMultipleBadges === 1;
     userData.allowAccountDelete = meta.config.allowAccountDelete === 1;
     userData.allowWebsite =
         !userData.isSelf ||
-        !!meta.config["reputation:disabled"] ||
-        userData.reputation >= meta.config["min:rep:website"];
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:website'];
     userData.allowAboutMe =
         !userData.isSelf ||
-        !!meta.config["reputation:disabled"] ||
-        userData.reputation >= meta.config["min:rep:aboutme"];
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:aboutme'];
     userData.allowSignature =
         canUseSignature &&
         (!userData.isSelf ||
-            !!meta.config["reputation:disabled"] ||
-            userData.reputation >= meta.config["min:rep:signature"]);
+            !!meta.config['reputation:disabled'] ||
+            userData.reputation >= meta.config['min:rep:signature']);
     userData.profileImageDimension = meta.config.profileImageDimension;
     userData.defaultAvatar = user.getDefaultAvatar();
 
     userData.groups = userData.groups.filter(
-        (g) =>
+        g =>
             g &&
             g.userTitleEnabled &&
             !groups.isPrivilegeGroup(g.name) &&
-            g.name !== "registered-users",
+            g.name !== 'registered-users',
     );
 
     if (!userData.allowMultipleBadges) {
@@ -78,7 +78,7 @@ editController.get = async function (req, res, next) {
         }
         return i1 - i2;
     });
-    userData.groups.forEach((group) => {
+    userData.groups.forEach(group => {
         group.userTitle = group.userTitle || group.displayName;
         group.selected = userData.groupTitleArray.includes(group.name);
     });
@@ -94,19 +94,19 @@ editController.get = async function (req, res, next) {
             url: `/user/${userData.userslug}`,
         },
         {
-            text: "[[user:edit]]",
+            text: '[[user:edit]]',
         },
     ]);
     userData.editButtons = [];
-    res.render("account/edit", userData);
+    res.render('account/edit', userData);
 };
 
 editController.password = async function (req, res, next) {
-    await renderRoute("password", req, res, next);
+    await renderRoute('password', req, res, next);
 };
 
 editController.username = async function (req, res, next) {
-    await renderRoute("username", req, res, next);
+    await renderRoute('username', req, res, next);
 };
 
 editController.email = async function (req, res, next) {
@@ -128,7 +128,7 @@ editController.email = async function (req, res, next) {
     req.session.registration = req.session.registration || {};
     req.session.registration.updateEmail = true;
     req.session.registration.uid = targetUid;
-    helpers.redirect(res, "/register/complete");
+    helpers.redirect(res, '/register/complete');
 };
 
 async function renderRoute(name, req, res, next) {
@@ -140,7 +140,7 @@ async function renderRoute(name, req, res, next) {
         return helpers.notAllowed(req, res);
     }
 
-    if (name === "password") {
+    if (name === 'password') {
         userData.minimumPasswordLength = meta.config.minimumPasswordLength;
         userData.minimumPasswordStrength = meta.config.minimumPasswordStrength;
     }
@@ -152,7 +152,7 @@ async function renderRoute(name, req, res, next) {
             url: `/user/${userData.userslug}`,
         },
         {
-            text: "[[user:edit]]",
+            text: '[[user:edit]]',
             url: `/user/${userData.userslug}/edit`,
         },
         {
@@ -188,7 +188,7 @@ editController.uploadPicture = async function (req, res, next) {
         await user.checkMinReputation(
             req.uid,
             updateUid,
-            "min:rep:profile-picture",
+            'min:rep:profile-picture',
         );
 
         const image = await user.uploadCroppedPictureFile({

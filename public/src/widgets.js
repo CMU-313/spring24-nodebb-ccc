@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 module.exports.render = function (template) {
     if (template.match(/^admin/)) {
@@ -20,25 +20,25 @@ module.exports.render = function (template) {
         }
 
         const widgetsAtLocation = ajaxify.data.widgets[location] || [];
-        let html = "";
+        let html = '';
 
         widgetsAtLocation.forEach(function (widget) {
             html += widget.html;
         });
 
         if (
-            location === "footer" &&
+            location === 'footer' &&
             !$(
                 '#content [widget-area="footer"],#content [data-widget-area="footer"]',
             ).length
         ) {
-            $("#content").append(
+            $('#content').append(
                 $(
                     '<div class="row"><div data-widget-area="footer" class="col-xs-12"></div></div>',
                 ),
             );
         } else if (
-            location === "sidebar" &&
+            location === 'sidebar' &&
             !$(
                 '#content [widget-area="sidebar"],#content [data-widget-area="sidebar"]',
             ).length
@@ -60,19 +60,19 @@ module.exports.render = function (template) {
                         ),
                     );
             } else {
-                $("#content > *").wrapAll(
+                $('#content > *').wrapAll(
                     $(
                         '<div class="row"><div class="col-lg-9 col-xs-12"></div><div data-widget-area="sidebar" class="col-lg-3 col-xs-12"></div></div></div>',
                     ),
                 );
             }
         } else if (
-            location === "header" &&
+            location === 'header' &&
             !$(
                 '#content [widget-area="header"],#content [data-widget-area="header"]',
             ).length
         ) {
-            $("#content").prepend(
+            $('#content').prepend(
                 $(
                     '<div class="row"><div data-widget-area="header" class="col-xs-12"></div></div>',
                 ),
@@ -88,15 +88,15 @@ module.exports.render = function (template) {
         ).eq(0);
         if (html && area.length) {
             area.html(html);
-            area.find("img:not(.not-responsive)").addClass("img-responsive");
+            area.find('img:not(.not-responsive)').addClass('img-responsive');
         }
 
         if (widgetsAtLocation.length) {
-            area.removeClass("hidden");
+            area.removeClass('hidden');
         }
     });
 
-    require(["hooks"], function (hooks) {
-        hooks.fire("action:widgets.loaded", {});
+    require(['hooks'], function (hooks) {
+        hooks.fire('action:widgets.loaded', {});
     });
 };

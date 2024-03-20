@@ -1,45 +1,45 @@
-"use strict";
+'use strict';
 
-const user = require("../user");
-const db = require("../database");
-const plugins = require("../plugins");
-const slugify = require("../slugify");
+const user = require('../user');
+const db = require('../database');
+const plugins = require('../plugins');
+const slugify = require('../slugify');
 
 const Groups = module.exports;
 
-require("./data")(Groups);
-require("./create")(Groups);
-require("./delete")(Groups);
-require("./update")(Groups);
-require("./invite")(Groups);
-require("./membership")(Groups);
-require("./ownership")(Groups);
-require("./search")(Groups);
-require("./cover")(Groups);
-require("./posts")(Groups);
-require("./user")(Groups);
-require("./join")(Groups);
-require("./leave")(Groups);
-require("./cache")(Groups);
+require('./data')(Groups);
+require('./create')(Groups);
+require('./delete')(Groups);
+require('./update')(Groups);
+require('./invite')(Groups);
+require('./membership')(Groups);
+require('./ownership')(Groups);
+require('./search')(Groups);
+require('./cover')(Groups);
+require('./posts')(Groups);
+require('./user')(Groups);
+require('./join')(Groups);
+require('./leave')(Groups);
+require('./cache')(Groups);
 
-Groups.BANNED_USERS = "banned-users";
+Groups.BANNED_USERS = 'banned-users';
 
-Groups.ephemeralGroups = ["guests", "spiders"];
+Groups.ephemeralGroups = ['guests', 'spiders'];
 
 Groups.systemGroups = [
-    "registered-users",
-    "verified-users",
-    "unverified-users",
+    'registered-users',
+    'verified-users',
+    'unverified-users',
     Groups.BANNED_USERS,
-    "administrators",
-    "Global Moderators",
+    'administrators',
+    'Global Moderators',
 ];
 
 Groups.getEphemeralGroup = function (groupName) {
     return {
         name: groupName,
         slug: slugify(groupName),
-        description: "",
+        description: '',
         hidden: 0,
         system: 1,
     };
@@ -62,30 +62,30 @@ Groups.isPrivilegeGroup = function (groupName) {
 
 Groups.getGroupsFromSet = async function (set, start, stop) {
     let groupNames;
-    if (set === "groups:visible:name") {
+    if (set === 'groups:visible:name') {
         groupNames = await db.getSortedSetRangeByLex(
             set,
-            "-",
-            "+",
+            '-',
+            '+',
             start,
             stop - start + 1,
         );
     } else {
         groupNames = await db.getSortedSetRevRange(set, start, stop);
     }
-    if (set === "groups:visible:name") {
-        groupNames = groupNames.map((name) => name.split(":")[1]);
+    if (set === 'groups:visible:name') {
+        groupNames = groupNames.map(name => name.split(':')[1]);
     }
 
     return await Groups.getGroupsAndMembers(groupNames);
 };
 
 Groups.getGroupsBySort = async function (sort, start, stop) {
-    let set = "groups:visible:name";
-    if (sort === "count") {
-        set = "groups:visible:memberCount";
-    } else if (sort === "date") {
-        set = "groups:visible:createtime";
+    let set = 'groups:visible:name';
+    if (sort === 'count') {
+        set = 'groups:visible:memberCount';
+    } else if (sort === 'date') {
+        set = 'groups:visible:createtime';
     }
     return await Groups.getGroupsFromSet(set, start, stop);
 };
@@ -94,7 +94,7 @@ Groups.getNonPrivilegeGroups = async function (set, start, stop) {
     let groupNames = await db.getSortedSetRevRange(set, start, stop);
     groupNames = groupNames
         .concat(Groups.ephemeralGroups)
-        .filter((groupName) => !Groups.isPrivilegeGroup(groupName));
+        .filter(groupName => !Groups.isPrivilegeGroup(groupName));
     const groupsData = await Groups.getGroupsData(groupNames);
     return groupsData.filter(Boolean);
 };
@@ -119,7 +119,7 @@ Groups.getGroupsAndMembers = async function (groupNames) {
 
 Groups.get = async function (groupName, options) {
     if (!groupName) {
-        throw new Error("[[error:invalid-group]]");
+        throw new Error('[[error:invalid-group]]');
     }
 
     let stop = -1;
@@ -141,14 +141,14 @@ Groups.get = async function (groupName, options) {
         Groups.getGroupData(groupName),
         Groups.getOwnersAndMembers(groupName, options.uid, 0, stop),
         Groups.getUsersFromSet(`group:${groupName}:pending`, [
-            "username",
-            "userslug",
-            "picture",
+            'username',
+            'userslug',
+            'picture',
         ]),
         Groups.getUsersFromSet(`group:${groupName}:invited`, [
-            "username",
-            "userslug",
-            "picture",
+            'username',
+            'userslug',
+            'picture',
         ]),
         Groups.isMember(options.uid, groupName),
         Groups.isPending(options.uid, groupName),
@@ -160,8 +160,8 @@ Groups.get = async function (groupName, options) {
         return null;
     }
     const descriptionParsed = await plugins.hooks.fire(
-        "filter:parse.raw",
-        String(groupData.description || ""),
+        'filter:parse.raw',
+        String(groupData.description || ''),
     );
     groupData.descriptionParsed = descriptionParsed;
     groupData.members = members;
@@ -172,7 +172,7 @@ Groups.get = async function (groupName, options) {
     groupData.isPending = isPending;
     groupData.isInvited = isInvited;
     groupData.isOwner = isOwner;
-    const results = await plugins.hooks.fire("filter:group.get", {
+    const results = await plugins.hooks.fire('filter:group.get', {
         group: groupData,
     });
     return results.group;
@@ -190,7 +190,7 @@ Groups.getOwnersAndMembers = async function (groupName, uid, start, stop) {
         stop !== -1 ? stop + 1 : undefined,
     );
     const owners = await user.getUsers(ownerUidsOnPage, uid);
-    owners.forEach((user) => {
+    owners.forEach(user => {
         if (user) {
             user.isOwner = true;
         }
@@ -213,7 +213,7 @@ Groups.getOwnersAndMembers = async function (groupName, uid, start, stop) {
             done = true;
         }
         batch = batch.filter(
-            (user) =>
+            user =>
                 user && user.uid && !ownerUids.includes(user.uid.toString()),
         );
         returnUsers = returnUsers.concat(batch);
@@ -232,7 +232,7 @@ Groups.getOwnersAndMembers = async function (groupName, uid, start, stop) {
     returnUsers =
         countToReturn > 0 ? returnUsers.slice(0, countToReturn) : returnUsers;
     const result = await plugins.hooks.fire(
-        "filter:group.getOwnersAndMembers",
+        'filter:group.getOwnersAndMembers',
         {
             users: returnUsers,
             uid: uid,
@@ -245,23 +245,23 @@ Groups.getOwnersAndMembers = async function (groupName, uid, start, stop) {
 
 Groups.getByGroupslug = async function (slug, options) {
     options = options || {};
-    const groupName = await db.getObjectField("groupslug:groupname", slug);
+    const groupName = await db.getObjectField('groupslug:groupname', slug);
     if (!groupName) {
-        throw new Error("[[error:no-group]]");
+        throw new Error('[[error:no-group]]');
     }
     return await Groups.get(groupName, options);
 };
 
 Groups.getGroupNameByGroupSlug = async function (slug) {
-    return await db.getObjectField("groupslug:groupname", slug);
+    return await db.getObjectField('groupslug:groupname', slug);
 };
 
 Groups.isPrivate = async function (groupName) {
-    return await isFieldOn(groupName, "private");
+    return await isFieldOn(groupName, 'private');
 };
 
 Groups.isHidden = async function (groupName) {
-    return await isFieldOn(groupName, "hidden");
+    return await isFieldOn(groupName, 'hidden');
 };
 
 async function isFieldOn(groupName, field) {
@@ -271,12 +271,12 @@ async function isFieldOn(groupName, field) {
 
 Groups.exists = async function (name) {
     if (Array.isArray(name)) {
-        const slugs = name.map((groupName) => slugify(groupName));
+        const slugs = name.map(groupName => slugify(groupName));
         const isMembersOfRealGroups = await db.isSortedSetMembers(
-            "groups:createtime",
+            'groups:createtime',
             name,
         );
-        const isMembersOfEphemeralGroups = slugs.map((slug) =>
+        const isMembersOfEphemeralGroups = slugs.map(slug =>
             Groups.ephemeralGroups.includes(slug),
         );
         return name.map(
@@ -287,7 +287,7 @@ Groups.exists = async function (name) {
     }
     const slug = slugify(name);
     const isMemberOfRealGroups = await db.isSortedSetMember(
-        "groups:createtime",
+        'groups:createtime',
         name,
     );
     const isMemberOfEphemeralGroups = Groups.ephemeralGroups.includes(slug);
@@ -296,9 +296,9 @@ Groups.exists = async function (name) {
 
 Groups.existsBySlug = async function (slug) {
     if (Array.isArray(slug)) {
-        return await db.isObjectFields("groupslug:groupname", slug);
+        return await db.isObjectFields('groupslug:groupname', slug);
     }
-    return await db.isObjectField("groupslug:groupname", slug);
+    return await db.isObjectField('groupslug:groupname', slug);
 };
 
-require("../promisify")(Groups);
+require('../promisify')(Groups);

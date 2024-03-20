@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 
-define("admin/dashboard", [
-    "Chart",
-    "translator",
-    "benchpress",
-    "bootbox",
-    "alerts",
+define('admin/dashboard', [
+    'Chart',
+    'translator',
+    'benchpress',
+    'bootbox',
+    'alerts',
 ], function (Chart, translator, Benchpress, bootbox, alerts) {
     const Admin = {};
     const intervals = {
@@ -18,7 +18,7 @@ define("admin/dashboard", [
         traffic: {},
     };
     const currentGraph = {
-        units: "hours",
+        units: 'hours',
         until: undefined,
     };
 
@@ -30,7 +30,7 @@ define("admin/dashboard", [
 
     const usedTopicColors = [];
 
-    $(window).on("action:ajaxify.start", function () {
+    $(window).on('action:ajaxify.start', function () {
         clearInterval(intervals.rooms);
         clearInterval(intervals.graphs);
 
@@ -42,7 +42,7 @@ define("admin/dashboard", [
     });
 
     Admin.init = function () {
-        app.enterRoom("admin");
+        app.enterRoom('admin');
 
         isMobile =
             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -53,7 +53,7 @@ define("admin/dashboard", [
 
         setupRealtimeButton();
         setupGraphs(function () {
-            socket.emit("admin.rooms.getAll", Admin.updateRoomUsage);
+            socket.emit('admin.rooms.getAll', Admin.updateRoomUsage);
             initiateDashboard();
         });
         setupFullscreen();
@@ -74,27 +74,27 @@ define("admin/dashboard", [
             '<div class="text-center pull-left">' +
             '<span class="formatted-number">' +
             data.onlineRegisteredCount +
-            "</span>" +
+            '</span>' +
             '<div class="stat">[[admin/dashboard:active-users.users]]</div>' +
-            "</div>" +
+            '</div>' +
             '<div class="text-center pull-left">' +
             '<span class="formatted-number">' +
             data.onlineGuestCount +
-            "</span>" +
+            '</span>' +
             '<div class="stat">[[admin/dashboard:active-users.guests]]</div>' +
-            "</div>" +
+            '</div>' +
             '<div class="text-center pull-left">' +
             '<span class="formatted-number">' +
             (data.onlineRegisteredCount + data.onlineGuestCount) +
-            "</span>" +
+            '</span>' +
             '<div class="stat">[[admin/dashboard:active-users.total]]</div>' +
-            "</div>" +
+            '</div>' +
             '<div class="text-center pull-left">' +
             '<span class="formatted-number">' +
             data.socketCount +
-            "</span>" +
+            '</span>' +
             '<div class="stat">[[admin/dashboard:active-users.connections]]</div>' +
-            "</div>";
+            '</div>';
 
         updateRegisteredGraph(
             data.onlineRegisteredCount,
@@ -103,7 +103,7 @@ define("admin/dashboard", [
         updatePresenceGraph(data.users);
         updateTopicsGraph(data.topTenTopics);
 
-        $("#active-users").translateHtml(html);
+        $('#active-users').translateHtml(html);
     };
 
     const graphs = {
@@ -114,16 +114,16 @@ define("admin/dashboard", [
     };
 
     const topicColors = [
-        "#bf616a",
-        "#5B90BF",
-        "#d08770",
-        "#ebcb8b",
-        "#a3be8c",
-        "#96b5b4",
-        "#8fa1b3",
-        "#b48ead",
-        "#ab7967",
-        "#46BFBD",
+        '#bf616a',
+        '#5B90BF',
+        '#d08770',
+        '#ebcb8b',
+        '#a3be8c',
+        '#96b5b4',
+        '#8fa1b3',
+        '#b48ead',
+        '#ab7967',
+        '#46BFBD',
     ];
 
     /* eslint-disable */
@@ -131,7 +131,7 @@ define("admin/dashboard", [
     function lighten(col, amt) {
         let usePound = false;
 
-        if (col[0] === "#") {
+        if (col[0] === '#') {
             col = col.slice(1);
             usePound = true;
         }
@@ -153,22 +153,22 @@ define("admin/dashboard", [
         if (g > 255) g = 255;
         else if (g < 0) g = 0;
 
-        return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
+        return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
     }
     /* eslint-enable */
 
     function setupGraphs(callback) {
         callback = callback || function () {};
-        const trafficCanvas = document.getElementById("analytics-traffic");
+        const trafficCanvas = document.getElementById('analytics-traffic');
         const registeredCanvas = document.getElementById(
-            "analytics-registered",
+            'analytics-registered',
         );
-        const presenceCanvas = document.getElementById("analytics-presence");
-        const topicsCanvas = document.getElementById("analytics-topics");
-        const trafficCtx = trafficCanvas.getContext("2d");
-        const registeredCtx = registeredCanvas.getContext("2d");
-        const presenceCtx = presenceCanvas.getContext("2d");
-        const topicsCtx = topicsCanvas.getContext("2d");
+        const presenceCanvas = document.getElementById('analytics-presence');
+        const topicsCanvas = document.getElementById('analytics-topics');
+        const trafficCtx = trafficCanvas.getContext('2d');
+        const registeredCtx = registeredCanvas.getContext('2d');
+        const presenceCtx = presenceCanvas.getContext('2d');
+        const topicsCtx = topicsCanvas.getContext('2d');
         const trafficLabels = utils.getHoursArray();
 
         if (isMobile) {
@@ -177,30 +177,30 @@ define("admin/dashboard", [
 
         const t = translator.Translator.create();
         Promise.all([
-            t.translateKey("admin/dashboard:graphs.page-views", []),
-            t.translateKey("admin/dashboard:graphs.page-views-registered", []),
-            t.translateKey("admin/dashboard:graphs.page-views-guest", []),
-            t.translateKey("admin/dashboard:graphs.page-views-bot", []),
-            t.translateKey("admin/dashboard:graphs.unique-visitors", []),
-            t.translateKey("admin/dashboard:graphs.registered-users", []),
-            t.translateKey("admin/dashboard:graphs.guest-users", []),
-            t.translateKey("admin/dashboard:on-categories", []),
-            t.translateKey("admin/dashboard:reading-posts", []),
-            t.translateKey("admin/dashboard:browsing-topics", []),
-            t.translateKey("admin/dashboard:recent", []),
-            t.translateKey("admin/dashboard:unread", []),
+            t.translateKey('admin/dashboard:graphs.page-views', []),
+            t.translateKey('admin/dashboard:graphs.page-views-registered', []),
+            t.translateKey('admin/dashboard:graphs.page-views-guest', []),
+            t.translateKey('admin/dashboard:graphs.page-views-bot', []),
+            t.translateKey('admin/dashboard:graphs.unique-visitors', []),
+            t.translateKey('admin/dashboard:graphs.registered-users', []),
+            t.translateKey('admin/dashboard:graphs.guest-users', []),
+            t.translateKey('admin/dashboard:on-categories', []),
+            t.translateKey('admin/dashboard:reading-posts', []),
+            t.translateKey('admin/dashboard:browsing-topics', []),
+            t.translateKey('admin/dashboard:recent', []),
+            t.translateKey('admin/dashboard:unread', []),
         ]).then(function (translations) {
             const data = {
                 labels: trafficLabels,
                 datasets: [
                     {
                         label: translations[0],
-                        backgroundColor: "rgba(220,220,220,0.2)",
-                        borderColor: "rgba(220,220,220,1)",
-                        pointBackgroundColor: "rgba(220,220,220,1)",
-                        pointHoverBackgroundColor: "#fff",
-                        pointBorderColor: "#fff",
-                        pointHoverBorderColor: "rgba(220,220,220,1)",
+                        backgroundColor: 'rgba(220,220,220,0.2)',
+                        borderColor: 'rgba(220,220,220,1)',
+                        pointBackgroundColor: 'rgba(220,220,220,1)',
+                        pointHoverBackgroundColor: '#fff',
+                        pointBorderColor: '#fff',
+                        pointHoverBorderColor: 'rgba(220,220,220,1)',
                         data: [
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0, 0,
@@ -208,12 +208,12 @@ define("admin/dashboard", [
                     },
                     {
                         label: translations[1],
-                        backgroundColor: "#ab464233",
-                        borderColor: "#ab4642",
-                        pointBackgroundColor: "#ab4642",
-                        pointHoverBackgroundColor: "#ab4642",
-                        pointBorderColor: "#fff",
-                        pointHoverBorderColor: "#ab4642",
+                        backgroundColor: '#ab464233',
+                        borderColor: '#ab4642',
+                        pointBackgroundColor: '#ab4642',
+                        pointHoverBackgroundColor: '#ab4642',
+                        pointBorderColor: '#fff',
+                        pointHoverBorderColor: '#ab4642',
                         data: [
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0, 0,
@@ -221,12 +221,12 @@ define("admin/dashboard", [
                     },
                     {
                         label: translations[2],
-                        backgroundColor: "#ba8baf33",
-                        borderColor: "#ba8baf",
-                        pointBackgroundColor: "#ba8baf",
-                        pointHoverBackgroundColor: "#ba8baf",
-                        pointBorderColor: "#fff",
-                        pointHoverBorderColor: "#ba8baf",
+                        backgroundColor: '#ba8baf33',
+                        borderColor: '#ba8baf',
+                        pointBackgroundColor: '#ba8baf',
+                        pointHoverBackgroundColor: '#ba8baf',
+                        pointBorderColor: '#fff',
+                        pointHoverBorderColor: '#ba8baf',
                         data: [
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0, 0,
@@ -234,12 +234,12 @@ define("admin/dashboard", [
                     },
                     {
                         label: translations[3],
-                        backgroundColor: "#f7ca8833",
-                        borderColor: "#f7ca88",
-                        pointBackgroundColor: "#f7ca88",
-                        pointHoverBackgroundColor: "#f7ca88",
-                        pointBorderColor: "#fff",
-                        pointHoverBorderColor: "#f7ca88",
+                        backgroundColor: '#f7ca8833',
+                        borderColor: '#f7ca88',
+                        pointBackgroundColor: '#f7ca88',
+                        pointHoverBackgroundColor: '#f7ca88',
+                        pointBorderColor: '#fff',
+                        pointHoverBorderColor: '#f7ca88',
                         data: [
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0, 0,
@@ -247,12 +247,12 @@ define("admin/dashboard", [
                     },
                     {
                         label: translations[4],
-                        backgroundColor: "rgba(151,187,205,0.2)",
-                        borderColor: "rgba(151,187,205,1)",
-                        pointBackgroundColor: "rgba(151,187,205,1)",
-                        pointHoverBackgroundColor: "rgba(151,187,205,1)",
-                        pointBorderColor: "#fff",
-                        pointHoverBorderColor: "rgba(151,187,205,1)",
+                        backgroundColor: 'rgba(151,187,205,0.2)',
+                        borderColor: 'rgba(151,187,205,1)',
+                        pointBackgroundColor: 'rgba(151,187,205,1)',
+                        pointHoverBackgroundColor: 'rgba(151,187,205,1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBorderColor: 'rgba(151,187,205,1)',
                         data: [
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0, 0,
@@ -263,14 +263,14 @@ define("admin/dashboard", [
 
             trafficCanvas.width = $(trafficCanvas).parent().width();
 
-            data.datasets[0].yAxisID = "left-y-axis";
-            data.datasets[1].yAxisID = "left-y-axis";
-            data.datasets[2].yAxisID = "left-y-axis";
-            data.datasets[3].yAxisID = "left-y-axis";
-            data.datasets[4].yAxisID = "right-y-axis";
+            data.datasets[0].yAxisID = 'left-y-axis';
+            data.datasets[1].yAxisID = 'left-y-axis';
+            data.datasets[2].yAxisID = 'left-y-axis';
+            data.datasets[3].yAxisID = 'left-y-axis';
+            data.datasets[4].yAxisID = 'right-y-axis';
 
             graphs.traffic = new Chart(trafficCtx, {
-                type: "line",
+                type: 'line',
                 data: data,
                 options: {
                     responsive: true,
@@ -280,27 +280,27 @@ define("admin/dashboard", [
                     scales: {
                         yAxes: [
                             {
-                                id: "left-y-axis",
+                                id: 'left-y-axis',
                                 ticks: {
                                     beginAtZero: true,
                                     precision: 0,
                                 },
-                                type: "linear",
-                                position: "left",
+                                type: 'linear',
+                                position: 'left',
                                 scaleLabel: {
                                     display: true,
                                     labelString: translations[0],
                                 },
                             },
                             {
-                                id: "right-y-axis",
+                                id: 'right-y-axis',
                                 ticks: {
                                     beginAtZero: true,
                                     suggestedMax: 10,
                                     precision: 0,
                                 },
-                                type: "linear",
-                                position: "right",
+                                type: 'linear',
+                                position: 'right',
                                 scaleLabel: {
                                     display: true,
                                     labelString: translations[4],
@@ -309,20 +309,20 @@ define("admin/dashboard", [
                         ],
                     },
                     tooltips: {
-                        mode: "x",
+                        mode: 'x',
                     },
                 },
             });
 
             graphs.registered = new Chart(registeredCtx, {
-                type: "doughnut",
+                type: 'doughnut',
                 data: {
                     labels: translations.slice(5, 7),
                     datasets: [
                         {
                             data: [1, 1],
-                            backgroundColor: ["#F7464A", "#46BFBD"],
-                            hoverBackgroundColor: ["#FF5A5E", "#5AD3D1"],
+                            backgroundColor: ['#F7464A', '#46BFBD'],
+                            hoverBackgroundColor: ['#FF5A5E', '#5AD3D1'],
                         },
                     ],
                 },
@@ -335,25 +335,25 @@ define("admin/dashboard", [
             });
 
             graphs.presence = new Chart(presenceCtx, {
-                type: "doughnut",
+                type: 'doughnut',
                 data: {
                     labels: translations.slice(7, 12),
                     datasets: [
                         {
                             data: [1, 1, 1, 1, 1],
                             backgroundColor: [
-                                "#F7464A",
-                                "#46BFBD",
-                                "#FDB45C",
-                                "#949FB1",
-                                "#9FB194",
+                                '#F7464A',
+                                '#46BFBD',
+                                '#FDB45C',
+                                '#949FB1',
+                                '#9FB194',
                             ],
                             hoverBackgroundColor: [
-                                "#FF5A5E",
-                                "#5AD3D1",
-                                "#FFC870",
-                                "#A8B3C5",
-                                "#A8B3C5",
+                                '#FF5A5E',
+                                '#5AD3D1',
+                                '#FFC870',
+                                '#A8B3C5',
+                                '#A8B3C5',
                             ],
                         },
                     ],
@@ -367,7 +367,7 @@ define("admin/dashboard", [
             });
 
             graphs.topics = new Chart(topicsCtx, {
-                type: "doughnut",
+                type: 'doughnut',
                 data: {
                     labels: [],
                     datasets: [
@@ -388,27 +388,27 @@ define("admin/dashboard", [
 
             updateTrafficGraph();
 
-            $(window).on("resize", adjustPieCharts);
+            $(window).on('resize', adjustPieCharts);
             adjustPieCharts();
 
             $('[data-action="updateGraph"]:not([data-units="custom"])').on(
-                "click",
+                'click',
                 function () {
                     let until = new Date();
-                    const amount = $(this).attr("data-amount");
-                    if ($(this).attr("data-units") === "days") {
+                    const amount = $(this).attr('data-amount');
+                    if ($(this).attr('data-units') === 'days') {
                         until.setHours(0, 0, 0, 0);
                     }
                     until = until.getTime();
                     updateTrafficGraph(
-                        $(this).attr("data-units"),
+                        $(this).attr('data-units'),
                         until,
                         amount,
                     );
 
-                    require(["translator"], function (translator) {
+                    require(['translator'], function (translator) {
                         translator.translate(
-                            "[[admin/dashboard:page-views-custom]]",
+                            '[[admin/dashboard:page-views-custom]]',
                             function (translated) {
                                 $(
                                     '[data-action="updateGraph"][data-units="custom"]',
@@ -420,27 +420,27 @@ define("admin/dashboard", [
             );
 
             $('[data-action="updateGraph"][data-units="custom"]').on(
-                "click",
+                'click',
                 function () {
                     const targetEl = $(this);
 
                     Benchpress.render(
-                        "admin/partials/pageviews-range-select",
+                        'admin/partials/pageviews-range-select',
                         {},
                     ).then(function (html) {
                         const modal = bootbox
                             .dialog({
-                                title: "[[admin/dashboard:page-views-custom]]",
+                                title: '[[admin/dashboard:page-views-custom]]',
                                 message: html,
                                 buttons: {
                                     submit: {
-                                        label: "[[global:search]]",
-                                        className: "btn-primary",
+                                        label: '[[global:search]]',
+                                        className: 'btn-primary',
                                         callback: submit,
                                     },
                                 },
                             })
-                            .on("shown.bs.modal", function () {
+                            .on('shown.bs.modal', function () {
                                 const date = new Date();
                                 const today = date.toISOString().slice(0, 10);
                                 date.setDate(date.getDate() - 1);
@@ -449,29 +449,29 @@ define("admin/dashboard", [
                                     .slice(0, 10);
 
                                 modal
-                                    .find("#startRange")
+                                    .find('#startRange')
                                     .val(
-                                        targetEl.attr("data-startRange") ||
+                                        targetEl.attr('data-startRange') ||
                                             yesterday,
                                     );
                                 modal
-                                    .find("#endRange")
+                                    .find('#endRange')
                                     .val(
-                                        targetEl.attr("data-endRange") || today,
+                                        targetEl.attr('data-endRange') || today,
                                     );
                             });
 
                         function submit() {
                             // NEED TO ADD VALIDATION HERE FOR YYYY-MM-DD
                             const formData = modal
-                                .find("form")
+                                .find('form')
                                 .serializeObject();
                             const validRegexp = /\d{4}-\d{2}-\d{2}/;
 
                             // Input validation
                             if (!formData.startRange && !formData.endRange) {
                                 // No range? Assume last 30 days
-                                updateTrafficGraph("days");
+                                updateTrafficGraph('days');
                                 return;
                             } else if (
                                 !validRegexp.test(formData.startRange) ||
@@ -479,8 +479,8 @@ define("admin/dashboard", [
                             ) {
                                 // Invalid Input
                                 modal
-                                    .find(".alert-danger")
-                                    .removeClass("hidden");
+                                    .find('.alert-danger')
+                                    .removeClass('hidden');
                                 return false;
                             }
 
@@ -492,17 +492,17 @@ define("admin/dashboard", [
                                     new Date(formData.startRange).getTime()) /
                                 (1000 * 60 * 60 * 24);
 
-                            updateTrafficGraph("days", until, amount);
+                            updateTrafficGraph('days', until, amount);
 
                             // Update "custom range" label
                             targetEl.attr(
-                                "data-startRange",
+                                'data-startRange',
                                 formData.startRange,
                             );
-                            targetEl.attr("data-endRange", formData.endRange);
+                            targetEl.attr('data-endRange', formData.endRange);
                             targetEl.html(
                                 formData.startRange +
-                                    " &ndash; " +
+                                    ' &ndash; ' +
                                     formData.endRange,
                             );
                         }
@@ -510,20 +510,20 @@ define("admin/dashboard", [
                 },
             );
 
-            socket.emit("admin.rooms.getAll", Admin.updateRoomUsage);
+            socket.emit('admin.rooms.getAll', Admin.updateRoomUsage);
             initiateDashboard();
             callback();
         });
     }
 
     function adjustPieCharts() {
-        $(".pie-chart.legend-up").each(function () {
+        $('.pie-chart.legend-up').each(function () {
             const $this = $(this);
 
             if ($this.width() < 320) {
-                $this.addClass("compact");
+                $this.addClass('compact');
             } else {
-                $this.removeClass("compact");
+                $this.removeClass('compact');
             }
         });
     }
@@ -536,10 +536,10 @@ define("admin/dashboard", [
         }
 
         socket.emit(
-            "admin.analytics.get",
+            'admin.analytics.get',
             {
-                graph: "traffic",
-                units: units || "hours",
+                graph: 'traffic',
+                units: units || 'hours',
                 until: until,
                 amount: amount,
             },
@@ -555,7 +555,7 @@ define("admin/dashboard", [
 
                 graphData.traffic = data;
 
-                if (units === "days") {
+                if (units === 'days') {
                     graphs.traffic.data.xLabels = utils.getDaysArray(
                         until,
                         amount,
@@ -563,12 +563,12 @@ define("admin/dashboard", [
                 } else {
                     graphs.traffic.data.xLabels = utils.getHoursArray();
 
-                    $("#pageViewsThirty").html(data.summary.thirty);
-                    $("#pageViewsSeven").html(data.summary.seven);
-                    $("#pageViewsPastDay").html(data.pastDay);
-                    utils.addCommasToNumbers($("#pageViewsThirty"));
-                    utils.addCommasToNumbers($("#pageViewsSeven"));
-                    utils.addCommasToNumbers($("#pageViewsPastDay"));
+                    $('#pageViewsThirty').html(data.summary.thirty);
+                    $('#pageViewsSeven').html(data.summary.seven);
+                    $('#pageViewsPastDay').html(data.pastDay);
+                    utils.addCommasToNumbers($('#pageViewsThirty'));
+                    utils.addCommasToNumbers($('#pageViewsSeven'));
+                    utils.addCommasToNumbers($('#pageViewsPastDay'));
                 }
 
                 graphs.traffic.data.datasets[0].data = data.pageviews;
@@ -584,51 +584,51 @@ define("admin/dashboard", [
                 currentGraph.amount = amount;
 
                 // Update the View as JSON button url
-                const apiEl = $("#view-as-json");
+                const apiEl = $('#view-as-json');
                 const newHref = $.param({
-                    units: units || "hours",
+                    units: units || 'hours',
                     until: until,
                     count: amount,
                 });
                 apiEl.attr(
-                    "href",
-                    config.relative_path + "/api/admin/analytics?" + newHref,
+                    'href',
+                    config.relative_path + '/api/admin/analytics?' + newHref,
                 );
             },
         );
     }
 
     function updateRegisteredGraph(registered, guest) {
-        $("#analytics-legend .registered")
+        $('#analytics-legend .registered')
             .parent()
-            .find(".count")
+            .find('.count')
             .text(registered);
-        $("#analytics-legend .guest").parent().find(".count").text(guest);
+        $('#analytics-legend .guest').parent().find('.count').text(guest);
         graphs.registered.data.datasets[0].data[0] = registered;
         graphs.registered.data.datasets[0].data[1] = guest;
         graphs.registered.update();
     }
 
     function updatePresenceGraph(users) {
-        $("#analytics-presence-legend .on-categories")
+        $('#analytics-presence-legend .on-categories')
             .parent()
-            .find(".count")
+            .find('.count')
             .text(users.categories);
-        $("#analytics-presence-legend .reading-posts")
+        $('#analytics-presence-legend .reading-posts')
             .parent()
-            .find(".count")
+            .find('.count')
             .text(users.topics);
-        $("#analytics-presence-legend .browsing-topics")
+        $('#analytics-presence-legend .browsing-topics')
             .parent()
-            .find(".count")
+            .find('.count')
             .text(users.category);
-        $("#analytics-presence-legend .recent")
+        $('#analytics-presence-legend .recent')
             .parent()
-            .find(".count")
+            .find('.count')
             .text(users.recent);
-        $("#analytics-presence-legend .unread")
+        $('#analytics-presence-legend .unread')
             .parent()
-            .find(".count")
+            .find('.count')
             .text(users.unread);
         graphs.presence.data.datasets[0].data[0] = users.categories;
         graphs.presence.data.datasets[0].data[1] = users.topics;
@@ -642,7 +642,7 @@ define("admin/dashboard", [
     function updateTopicsGraph(topics) {
         if (!topics.length) {
             translator.translate(
-                "[[admin/dashboard:no-users-browsing]]",
+                '[[admin/dashboard:no-users-browsing]]',
                 function (translated) {
                     topics = [
                         {
@@ -671,34 +671,34 @@ define("admin/dashboard", [
         });
 
         function buildTopicsLegend() {
-            let html = "";
+            let html = '';
             topics.forEach(function (t, i) {
                 const link = t.tid
                     ? '<a title="' +
                       t.title +
                       '"href="' +
                       config.relative_path +
-                      "/topic/" +
+                      '/topic/' +
                       t.tid +
                       '" target="_blank"> ' +
                       t.title +
-                      "</a>"
+                      '</a>'
                     : t.title;
-                const label = t.count === "0" ? t.title : link;
+                const label = t.count === '0' ? t.title : link;
 
                 html +=
-                    "<li>" +
+                    '<li>' +
                     '<div style="background-color: ' +
                     topicColors[i] +
                     ';"></div>' +
-                    "<span> (" +
+                    '<span> (' +
                     t.count +
-                    ") " +
+                    ') ' +
                     label +
-                    "</span>" +
-                    "</li>";
+                    '</span>' +
+                    '</li>';
             });
-            $("#topics-legend").translateHtml(html);
+            $('#topics-legend').translateHtml(html);
         }
 
         buildTopicsLegend();
@@ -706,15 +706,15 @@ define("admin/dashboard", [
     }
 
     function setupRealtimeButton() {
-        $("#toggle-realtime .fa").on("click", function () {
+        $('#toggle-realtime .fa').on('click', function () {
             const $this = $(this);
-            if ($this.hasClass("fa-toggle-on")) {
-                $this.removeClass("fa-toggle-on").addClass("fa-toggle-off");
-                $this.parent().find("strong").html("OFF");
+            if ($this.hasClass('fa-toggle-on')) {
+                $this.removeClass('fa-toggle-on').addClass('fa-toggle-off');
+                $this.parent().find('strong').html('OFF');
                 initiateDashboard(false);
             } else {
-                $this.removeClass("fa-toggle-off").addClass("fa-toggle-on");
-                $this.parent().find("strong").html("ON");
+                $this.removeClass('fa-toggle-off').addClass('fa-toggle-on');
+                $this.parent().find('strong').html('ON');
                 initiateDashboard(true);
             }
         });
@@ -727,7 +727,7 @@ define("admin/dashboard", [
         intervals.rooms = setInterval(
             function () {
                 if (app.isFocused && socket.connected) {
-                    socket.emit("admin.rooms.getAll", Admin.updateRoomUsage);
+                    socket.emit('admin.rooms.getAll', Admin.updateRoomUsage);
                 }
             },
             realtime ? DEFAULTS.realtimeInterval : DEFAULTS.roomInterval,
@@ -746,35 +746,35 @@ define("admin/dashboard", [
     }
 
     function setupFullscreen() {
-        const container = document.getElementById("analytics-panel");
+        const container = document.getElementById('analytics-panel');
         const $container = $(container);
-        const btn = $container.find(".fa-expand");
+        const btn = $container.find('.fa-expand');
         let fsMethod;
         let exitMethod;
 
         if (container.requestFullscreen) {
-            fsMethod = "requestFullscreen";
-            exitMethod = "exitFullscreen";
+            fsMethod = 'requestFullscreen';
+            exitMethod = 'exitFullscreen';
         } else if (container.mozRequestFullScreen) {
-            fsMethod = "mozRequestFullScreen";
-            exitMethod = "mozCancelFullScreen";
+            fsMethod = 'mozRequestFullScreen';
+            exitMethod = 'mozCancelFullScreen';
         } else if (container.webkitRequestFullscreen) {
-            fsMethod = "webkitRequestFullscreen";
-            exitMethod = "webkitCancelFullScreen";
+            fsMethod = 'webkitRequestFullscreen';
+            exitMethod = 'webkitCancelFullScreen';
         } else if (container.msRequestFullscreen) {
-            fsMethod = "msRequestFullscreen";
-            exitMethod = "msCancelFullScreen";
+            fsMethod = 'msRequestFullscreen';
+            exitMethod = 'msCancelFullScreen';
         }
 
         if (fsMethod) {
-            btn.addClass("active");
-            btn.on("click", function () {
-                if ($container.hasClass("fullscreen")) {
+            btn.addClass('active');
+            btn.on('click', function () {
+                if ($container.hasClass('fullscreen')) {
                     document[exitMethod]();
-                    $container.removeClass("fullscreen");
+                    $container.removeClass('fullscreen');
                 } else {
                     container[fsMethod]();
-                    $container.addClass("fullscreen");
+                    $container.addClass('fullscreen');
                 }
             });
         }

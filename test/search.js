@@ -1,18 +1,18 @@
-"use strict";
+'use strict';
 
-const assert = require("assert");
-const async = require("async");
-const request = require("request");
-const nconf = require("nconf");
+const assert = require('assert');
+const async = require('async');
+const request = require('request');
+const nconf = require('nconf');
 
-const db = require("./mocks/databasemock");
-const topics = require("../src/topics");
-const categories = require("../src/categories");
-const user = require("../src/user");
-const search = require("../src/search");
-const privileges = require("../src/privileges");
+const db = require('./mocks/databasemock');
+const topics = require('../src/topics');
+const categories = require('../src/categories');
+const user = require('../src/user');
+const search = require('../src/search');
+const privileges = require('../src/privileges');
 
-describe("Search", () => {
+describe('Search', () => {
     let phoebeUid;
     let gingerUid;
 
@@ -25,24 +25,24 @@ describe("Search", () => {
     let cid2;
     let cid3;
 
-    before((done) => {
+    before(done => {
         async.waterfall(
             [
                 function (next) {
                     async.series(
                         {
                             phoebe: function (next) {
-                                user.create({ username: "phoebe" }, next);
+                                user.create({ username: 'phoebe' }, next);
                             },
                             ginger: function (next) {
-                                user.create({ username: "ginger" }, next);
+                                user.create({ username: 'ginger' }, next);
                             },
                             category1: function (next) {
                                 categories.create(
                                     {
-                                        name: "Test Category",
+                                        name: 'Test Category',
                                         description:
-                                            "Test category created by testing script",
+                                            'Test category created by testing script',
                                     },
                                     next,
                                 );
@@ -50,9 +50,9 @@ describe("Search", () => {
                             category2: function (next) {
                                 categories.create(
                                     {
-                                        name: "Test Category",
+                                        name: 'Test Category',
                                         description:
-                                            "Test category created by testing script",
+                                            'Test category created by testing script',
                                     },
                                     next,
                                 );
@@ -72,9 +72,9 @@ describe("Search", () => {
                             function (next) {
                                 categories.create(
                                     {
-                                        name: "Child Test Category",
+                                        name: 'Child Test Category',
                                         description:
-                                            "Test category created by testing script",
+                                            'Test category created by testing script',
                                         parentCid: cid2,
                                     },
                                     next,
@@ -86,15 +86,15 @@ describe("Search", () => {
                                     {
                                         uid: phoebeUid,
                                         cid: cid1,
-                                        title: "nodebb mongodb bugs",
+                                        title: 'nodebb mongodb bugs',
                                         content:
-                                            "avocado cucumber apple orange fox",
+                                            'avocado cucumber apple orange fox',
                                         tags: [
-                                            "nodebb",
-                                            "bug",
-                                            "plugin",
-                                            "nodebb-plugin",
-                                            "jquery",
+                                            'nodebb',
+                                            'bug',
+                                            'plugin',
+                                            'nodebb-plugin',
+                                            'jquery',
                                         ],
                                     },
                                     next,
@@ -108,15 +108,15 @@ describe("Search", () => {
                                     {
                                         uid: gingerUid,
                                         cid: cid2,
-                                        title: "java mongodb redis",
+                                        title: 'java mongodb redis',
                                         content:
-                                            "avocado cucumber carrot armadillo",
+                                            'avocado cucumber carrot armadillo',
                                         tags: [
-                                            "nodebb",
-                                            "bug",
-                                            "plugin",
-                                            "nodebb-plugin",
-                                            "javascript",
+                                            'nodebb',
+                                            'bug',
+                                            'plugin',
+                                            'nodebb-plugin',
+                                            'javascript',
                                         ],
                                     },
                                     next,
@@ -128,7 +128,7 @@ describe("Search", () => {
                                 topics.reply(
                                     {
                                         uid: phoebeUid,
-                                        content: "reply post apple",
+                                        content: 'reply post apple',
                                         tid: topic2Data.tid,
                                     },
                                     next,
@@ -147,14 +147,14 @@ describe("Search", () => {
         );
     });
 
-    it("should search term in titles and posts", (done) => {
-        const meta = require("../src/meta");
+    it('should search term in titles and posts', done => {
+        const meta = require('../src/meta');
         const qs = `/api/search?term=cucumber&in=titlesposts&categories[]=${cid1}&by=phoebe&replies=1&repliesFilter=atleast&sortBy=timestamp&sortDirection=desc&showAs=posts`;
-        privileges.global.give(["groups:search:content"], "guests", (err) => {
+        privileges.global.give(['groups:search:content'], 'guests', err => {
             assert.ifError(err);
             request(
                 {
-                    url: nconf.get("url") + qs,
+                    url: nconf.get('url') + qs,
                     json: true,
                 },
                 (err, response, body) => {
@@ -166,8 +166,8 @@ describe("Search", () => {
                     assert.equal(body.posts[0].uid, phoebeUid);
 
                     privileges.global.rescind(
-                        ["groups:search:content"],
-                        "guests",
+                        ['groups:search:content'],
+                        'guests',
                         done,
                     );
                 },
@@ -175,11 +175,11 @@ describe("Search", () => {
         });
     });
 
-    it("should search for a user", (done) => {
+    it('should search for a user', done => {
         search.search(
             {
-                query: "gin",
-                searchIn: "users",
+                query: 'gin',
+                searchIn: 'users',
             },
             (err, data) => {
                 assert.ifError(err);
@@ -187,80 +187,80 @@ describe("Search", () => {
                 assert.equal(data.matchCount, 1);
                 assert.equal(data.users.length, 1);
                 assert.equal(data.users[0].uid, gingerUid);
-                assert.equal(data.users[0].username, "ginger");
+                assert.equal(data.users[0].username, 'ginger');
                 done();
             },
         );
     });
 
-    it("should search for a tag", (done) => {
+    it('should search for a tag', done => {
         search.search(
             {
-                query: "plug",
-                searchIn: "tags",
+                query: 'plug',
+                searchIn: 'tags',
             },
             (err, data) => {
                 assert.ifError(err);
                 assert(data);
                 assert.equal(data.matchCount, 1);
                 assert.equal(data.tags.length, 1);
-                assert.equal(data.tags[0].value, "plugin");
+                assert.equal(data.tags[0].value, 'plugin');
                 assert.equal(data.tags[0].score, 2);
                 done();
             },
         );
     });
 
-    it("should search for a category", async () => {
+    it('should search for a category', async () => {
         await categories.create({
-            name: "foo category",
-            description: "Test category created by testing script",
+            name: 'foo category',
+            description: 'Test category created by testing script',
         });
         await categories.create({
-            name: "baz category",
-            description: "Test category created by testing script",
+            name: 'baz category',
+            description: 'Test category created by testing script',
         });
         const result = await search.search({
-            query: "baz",
-            searchIn: "categories",
+            query: 'baz',
+            searchIn: 'categories',
         });
         assert.strictEqual(result.matchCount, 1);
-        assert.strictEqual(result.categories[0].name, "baz category");
+        assert.strictEqual(result.categories[0].name, 'baz category');
     });
 
-    it("should search for categories", async () => {
-        const socketCategories = require("../src/socket.io/categories");
+    it('should search for categories', async () => {
+        const socketCategories = require('../src/socket.io/categories');
         let data = await socketCategories.categorySearch(
             { uid: phoebeUid },
-            { query: "baz", parentCid: 0 },
+            { query: 'baz', parentCid: 0 },
         );
-        assert.strictEqual(data[0].name, "baz category");
+        assert.strictEqual(data[0].name, 'baz category');
         data = await socketCategories.categorySearch(
             { uid: phoebeUid },
-            { query: "", parentCid: 0 },
+            { query: '', parentCid: 0 },
         );
         assert.strictEqual(data.length, 5);
     });
 
-    it("should fail if searchIn is wrong", (done) => {
+    it('should fail if searchIn is wrong', done => {
         search.search(
             {
-                query: "plug",
-                searchIn: "",
+                query: 'plug',
+                searchIn: '',
             },
-            (err) => {
-                assert.equal(err.message, "[[error:unknown-search-filter]]");
+            err => {
+                assert.equal(err.message, '[[error:unknown-search-filter]]');
                 done();
             },
         );
     });
 
-    it("should search with tags filter", (done) => {
+    it('should search with tags filter', done => {
         search.search(
             {
-                query: "mongodb",
-                searchIn: "titles",
-                hasTags: ["nodebb", "javascript"],
+                query: 'mongodb',
+                searchIn: 'titles',
+                hasTags: ['nodebb', 'javascript'],
             },
             (err, data) => {
                 assert.ifError(err);
@@ -270,12 +270,12 @@ describe("Search", () => {
         );
     });
 
-    it("should not crash if tags is not an array", (done) => {
+    it('should not crash if tags is not an array', done => {
         search.search(
             {
-                query: "mongodb",
-                searchIn: "titles",
-                hasTags: "nodebb,javascript",
+                query: 'mongodb',
+                searchIn: 'titles',
+                hasTags: 'nodebb,javascript',
             },
             (err, data) => {
                 assert.ifError(err);
@@ -284,11 +284,11 @@ describe("Search", () => {
         );
     });
 
-    it("should not find anything", (done) => {
+    it('should not find anything', done => {
         search.search(
             {
-                query: "xxxxxxxxxxxxxx",
-                searchIn: "titles",
+                query: 'xxxxxxxxxxxxxx',
+                searchIn: 'titles',
             },
             (err, data) => {
                 assert.ifError(err);
@@ -299,7 +299,7 @@ describe("Search", () => {
         );
     });
 
-    it("should search child categories", (done) => {
+    it('should search child categories', done => {
         async.waterfall(
             [
                 function (next) {
@@ -307,8 +307,8 @@ describe("Search", () => {
                         {
                             uid: gingerUid,
                             cid: cid3,
-                            title: "child category topic",
-                            content: "avocado cucumber carrot armadillo",
+                            title: 'child category topic',
+                            content: 'avocado cucumber carrot armadillo',
                         },
                         next,
                     );
@@ -316,12 +316,12 @@ describe("Search", () => {
                 function (result, next) {
                     search.search(
                         {
-                            query: "avocado",
-                            searchIn: "titlesposts",
+                            query: 'avocado',
+                            searchIn: 'titlesposts',
                             categories: [cid2],
                             searchChildren: true,
-                            sortBy: "topic.timestamp",
-                            sortDirection: "desc",
+                            sortBy: 'topic.timestamp',
+                            sortDirection: 'desc',
                         },
                         next,
                     );
@@ -329,10 +329,10 @@ describe("Search", () => {
                 function (result, next) {
                     assert(result.posts.length, 2);
                     assert(
-                        result.posts[0].topic.title === "child category topic",
+                        result.posts[0].topic.title === 'child category topic',
                     );
                     assert(
-                        result.posts[1].topic.title === "java mongodb redis",
+                        result.posts[1].topic.title === 'java mongodb redis',
                     );
                     next();
                 },
@@ -341,27 +341,27 @@ describe("Search", () => {
         );
     });
 
-    it("should return json search data with no categories", (done) => {
-        const qs = "/api/search?term=cucumber&in=titlesposts&searchOnly=1";
-        privileges.global.give(["groups:search:content"], "guests", (err) => {
+    it('should return json search data with no categories', done => {
+        const qs = '/api/search?term=cucumber&in=titlesposts&searchOnly=1';
+        privileges.global.give(['groups:search:content'], 'guests', err => {
             assert.ifError(err);
             request(
                 {
-                    url: nconf.get("url") + qs,
+                    url: nconf.get('url') + qs,
                     json: true,
                 },
                 (err, response, body) => {
                     assert.ifError(err);
                     assert(body);
-                    assert(body.hasOwnProperty("matchCount"));
-                    assert(body.hasOwnProperty("pagination"));
-                    assert(body.hasOwnProperty("pageCount"));
-                    assert(body.hasOwnProperty("posts"));
-                    assert(!body.hasOwnProperty("categories"));
+                    assert(body.hasOwnProperty('matchCount'));
+                    assert(body.hasOwnProperty('pagination'));
+                    assert(body.hasOwnProperty('pageCount'));
+                    assert(body.hasOwnProperty('posts'));
+                    assert(!body.hasOwnProperty('categories'));
 
                     privileges.global.rescind(
-                        ["groups:search:content"],
-                        "guests",
+                        ['groups:search:content'],
+                        'guests',
                         done,
                     );
                 },
@@ -369,13 +369,13 @@ describe("Search", () => {
         });
     });
 
-    it("should not crash without a search term", (done) => {
-        const qs = "/api/search";
-        privileges.global.give(["groups:search:content"], "guests", (err) => {
+    it('should not crash without a search term', done => {
+        const qs = '/api/search';
+        privileges.global.give(['groups:search:content'], 'guests', err => {
             assert.ifError(err);
             request(
                 {
-                    url: nconf.get("url") + qs,
+                    url: nconf.get('url') + qs,
                     json: true,
                 },
                 (err, response, body) => {
@@ -383,8 +383,8 @@ describe("Search", () => {
                     assert(body);
                     assert.strictEqual(response.statusCode, 200);
                     privileges.global.rescind(
-                        ["groups:search:content"],
-                        "guests",
+                        ['groups:search:content'],
+                        'guests',
                         done,
                     );
                 },

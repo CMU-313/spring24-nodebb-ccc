@@ -1,19 +1,19 @@
-"use strict";
+'use strict';
 
-define("autocomplete", ["api", "alerts"], function (api, alerts) {
+define('autocomplete', ['api', 'alerts'], function (api, alerts) {
     const module = {};
     const _default = {
         delay: 200,
     };
 
-    module.init = (params) => {
+    module.init = params => {
         const { input, source, onSelect, delay } = { ..._default, ...params };
 
         app.loadJQueryUI(function () {
             input.autocomplete({
                 delay,
                 open: function () {
-                    $(this).autocomplete("widget").css("z-index", 100005);
+                    $(this).autocomplete('widget').css('z-index', 100005);
                 },
                 select: function (event, ui) {
                     handleOnSelect(input, onSelect, event, ui);
@@ -24,7 +24,7 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
     };
 
     module.user = function (input, params, onSelect) {
-        if (typeof params === "function") {
+        if (typeof params === 'function') {
             onSelect = params;
             params = {};
         }
@@ -36,14 +36,14 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
             source: (request, response) => {
                 params.query = request.term;
 
-                api.get("/api/users", params, function (err, result) {
+                api.get('/api/users', params, function (err, result) {
                     if (err) {
                         return alerts.error(err);
                     }
 
                     if (result && result.users) {
                         const names = result.users.map(function (user) {
-                            const username = $("<div></div>")
+                            const username = $('<div></div>')
                                 .html(user.username)
                                 .text();
                             return (
@@ -58,8 +58,8 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
                                         userslug: user.userslug,
                                         picture: user.picture,
                                         banned: user.banned,
-                                        "icon:text": user["icon:text"],
-                                        "icon:bgColor": user["icon:bgColor"],
+                                        'icon:text': user['icon:text'],
+                                        'icon:bgColor': user['icon:bgColor'],
                                     },
                                 }
                             );
@@ -67,7 +67,7 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
                         response(names);
                     }
 
-                    $(".ui-autocomplete a").attr("data-ajaxify", "false");
+                    $('.ui-autocomplete a').attr('data-ajaxify', 'false');
                 });
             },
         });
@@ -79,7 +79,7 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
             onSelect,
             source: (request, response) => {
                 socket.emit(
-                    "groups.search",
+                    'groups.search',
                     {
                         query: request.term,
                     },
@@ -99,7 +99,7 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
                             });
                             response(names);
                         }
-                        $(".ui-autocomplete a").attr("data-ajaxify", "false");
+                        $('.ui-autocomplete a').attr('data-ajaxify', 'false');
                     },
                 );
             },
@@ -113,7 +113,7 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
             delay: 100,
             source: (request, response) => {
                 socket.emit(
-                    "topics.autocompleteTags",
+                    'topics.autocompleteTags',
                     {
                         query: request.term,
                         cid: ajaxify.data.cid || 0,
@@ -125,7 +125,7 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
                         if (tags) {
                             response(tags);
                         }
-                        $(".ui-autocomplete a").attr("data-ajaxify", "false");
+                        $('.ui-autocomplete a').attr('data-ajaxify', 'false');
                     },
                 );
             },
@@ -134,7 +134,7 @@ define("autocomplete", ["api", "alerts"], function (api, alerts) {
 
     function handleOnSelect(input, onselect, event, ui) {
         onselect = onselect || function () {};
-        const e = jQuery.Event("keypress");
+        const e = jQuery.Event('keypress');
         e.which = 13;
         e.keyCode = 13;
         setTimeout(function () {

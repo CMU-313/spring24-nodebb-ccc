@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-const os = require("os");
-const winston = require("winston");
-const nconf = require("nconf");
-const { exec } = require("child_process");
+const os = require('os');
+const winston = require('winston');
+const nconf = require('nconf');
+const { exec } = require('child_process');
 
-const pubsub = require("../../pubsub");
-const rooms = require("../../socket.io/admin/rooms");
+const pubsub = require('../../pubsub');
+const rooms = require('../../socket.io/admin/rooms');
 
 const infoController = module.exports;
 
@@ -16,11 +16,11 @@ let usageStartDate = Date.now();
 
 infoController.get = function (req, res) {
     info = {};
-    pubsub.publish("sync:node:info:start");
+    pubsub.publish('sync:node:info:start');
     const timeoutMS = 1000;
     setTimeout(() => {
         const data = [];
-        Object.keys(info).forEach((key) => data.push(info[key]));
+        Object.keys(info).forEach(key => data.push(info[key]));
         data.sort((a, b) => {
             if (a.id < b.id) {
                 return -1;
@@ -31,12 +31,12 @@ infoController.get = function (req, res) {
             return 0;
         });
 
-        let port = nconf.get("port");
+        let port = nconf.get('port');
         if (!Array.isArray(port) && !isNaN(parseInt(port, 10))) {
             port = [port];
         }
 
-        res.render("admin/development/info", {
+        res.render('admin/development/info', {
             info: data,
             infoJSON: JSON.stringify(data, null, 4),
             host: os.hostname(),
@@ -48,24 +48,24 @@ infoController.get = function (req, res) {
     }, timeoutMS);
 };
 
-pubsub.on("sync:node:info:start", async () => {
+pubsub.on('sync:node:info:start', async () => {
     try {
         const data = await getNodeInfo();
-        data.id = `${os.hostname()}:${nconf.get("port")}`;
-        pubsub.publish("sync:node:info:end", { data: data, id: data.id });
+        data.id = `${os.hostname()}:${nconf.get('port')}`;
+        pubsub.publish('sync:node:info:end', { data: data, id: data.id });
     } catch (err) {
         winston.error(err.stack);
     }
 });
 
-pubsub.on("sync:node:info:end", (data) => {
+pubsub.on('sync:node:info:end', data => {
     info[data.id] = data.data;
 });
 
 async function getNodeInfo() {
     const data = {
         process: {
-            port: nconf.get("port"),
+            port: nconf.get('port'),
             pid: process.pid,
             title: process.title,
             version: process.version,
@@ -81,16 +81,16 @@ async function getNodeInfo() {
             release: os.release(),
             load: os
                 .loadavg()
-                .map((load) => load.toFixed(2))
-                .join(", "),
+                .map(load => load.toFixed(2))
+                .join(', '),
             freemem: os.freemem(),
             totalmem: os.totalmem(),
         },
         nodebb: {
-            isCluster: nconf.get("isCluster"),
-            isPrimary: nconf.get("isPrimary"),
-            runJobs: nconf.get("runJobs"),
-            jobsDisabled: nconf.get("jobsDisabled"),
+            isCluster: nconf.get('isCluster'),
+            isPrimary: nconf.get('isPrimary'),
+            runJobs: nconf.get('runJobs'),
+            jobsDisabled: nconf.get('jobsDisabled'),
         },
     };
 
@@ -141,13 +141,13 @@ async function getGitInfo() {
             if (err) {
                 winston.error(err.stack);
             }
-            callback(null, stdout ? stdout.replace(/\n$/, "") : "no-git-info");
+            callback(null, stdout ? stdout.replace(/\n$/, '') : 'no-git-info');
         });
     }
-    const getAsync = require("util").promisify(get);
+    const getAsync = require('util').promisify(get);
     const [hash, branch] = await Promise.all([
-        getAsync("git rev-parse HEAD"),
-        getAsync("git rev-parse --abbrev-ref HEAD"),
+        getAsync('git rev-parse HEAD'),
+        getAsync('git rev-parse --abbrev-ref HEAD'),
     ]);
     return { hash: hash, hashShort: hash.slice(0, 6), branch: branch };
 }

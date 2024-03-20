@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const db = require("../database");
-const groups = require(".");
-const privileges = require("../privileges");
-const posts = require("../posts");
+const db = require('../database');
+const groups = require('.');
+const privileges = require('../privileges');
+const posts = require('../posts');
 
 module.exports = function (Groups) {
     Groups.onNewPostMade = async function (postData) {
@@ -12,14 +12,14 @@ module.exports = function (Groups) {
         }
 
         let groupNames = await Groups.getUserGroupMembership(
-            "groups:visible:createtime",
+            'groups:visible:createtime',
             [postData.uid],
         );
         groupNames = groupNames[0];
 
         // Only process those groups that have the cid in its memberPostCids setting (or no setting at all)
         const groupData = await groups.getGroupsFields(groupNames, [
-            "memberPostCids",
+            'memberPostCids',
         ]);
         groupNames = groupNames.filter(
             (groupName, idx) =>
@@ -28,10 +28,10 @@ module.exports = function (Groups) {
         );
 
         const keys = groupNames.map(
-            (groupName) => `group:${groupName}:member:pids`,
+            groupName => `group:${groupName}:member:pids`,
         );
         await db.sortedSetsAdd(keys, postData.timestamp, postData.pid);
-        await Promise.all(groupNames.map((name) => truncateMemberPosts(name)));
+        await Promise.all(groupNames.map(name => truncateMemberPosts(name)));
     };
 
     async function truncateMemberPosts(groupName) {
@@ -50,7 +50,7 @@ module.exports = function (Groups) {
         );
         await db.sortedSetsRemoveRangeByScore(
             [`group:${groupName}:member:pids`],
-            "-inf",
+            '-inf',
             score,
         );
     }
@@ -61,7 +61,7 @@ module.exports = function (Groups) {
             0,
             max - 1,
         );
-        pids = await privileges.posts.filter("topics:read", pids, uid);
+        pids = await privileges.posts.filter('topics:read', pids, uid);
         return await posts.getPostSummaryByPids(pids, uid, {
             stripTags: false,
         });

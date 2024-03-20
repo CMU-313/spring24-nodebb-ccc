@@ -1,18 +1,18 @@
-"use strict";
+'use strict';
 
-const user = require("../../user");
-const helpers = require("../helpers");
-const accountHelpers = require("./helpers");
-const pagination = require("../../pagination");
+const user = require('../../user');
+const helpers = require('../helpers');
+const accountHelpers = require('./helpers');
+const pagination = require('../../pagination');
 
 const followController = module.exports;
 
 followController.getFollowing = async function (req, res, next) {
-    await getFollow("account/following", "following", req, res, next);
+    await getFollow('account/following', 'following', req, res, next);
 };
 
 followController.getFollowers = async function (req, res, next) {
-    await getFollow("account/followers", "followers", req, res, next);
+    await getFollow('account/followers', 'followers', req, res, next);
 };
 
 async function getFollow(tpl, name, req, res, next) {
@@ -32,11 +32,11 @@ async function getFollow(tpl, name, req, res, next) {
 
     userData.title = `[[pages:${tpl}, ${userData.username}]]`;
 
-    const method = name === "following" ? "getFollowing" : "getFollowers";
+    const method = name === 'following' ? 'getFollowing' : 'getFollowers';
     userData.users = await user[method](userData.uid, start, stop);
 
     const count =
-        name === "following" ? userData.followingCount : userData.followerCount;
+        name === 'following' ? userData.followingCount : userData.followerCount;
     const pageCount = Math.ceil(count / resultsPerPage);
     userData.pagination = pagination.create(page, pageCount);
 

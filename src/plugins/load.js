@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 
-const semver = require("semver");
-const async = require("async");
-const winston = require("winston");
-const nconf = require("nconf");
-const _ = require("lodash");
+const semver = require('semver');
+const async = require('async');
+const winston = require('winston');
+const nconf = require('nconf');
+const _ = require('lodash');
 
-const meta = require("../meta");
-const { themeNamePattern } = require("../constants");
+const meta = require('../meta');
+const { themeNamePattern } = require('../constants');
 
 module.exports = function (Plugins) {
     async function registerPluginAssets(pluginData, fields) {
@@ -20,19 +20,19 @@ module.exports = function (Plugins) {
                 Plugins.data.getStaticDirectories(pluginData, next);
             },
             cssFiles: function (next) {
-                Plugins.data.getFiles(pluginData, "css", next);
+                Plugins.data.getFiles(pluginData, 'css', next);
             },
             lessFiles: function (next) {
-                Plugins.data.getFiles(pluginData, "less", next);
+                Plugins.data.getFiles(pluginData, 'less', next);
             },
             acpLessFiles: function (next) {
-                Plugins.data.getFiles(pluginData, "acpLess", next);
+                Plugins.data.getFiles(pluginData, 'acpLess', next);
             },
             clientScripts: function (next) {
-                Plugins.data.getScripts(pluginData, "client", next);
+                Plugins.data.getScripts(pluginData, 'client', next);
             },
             acpScripts: function (next) {
-                Plugins.data.getScripts(pluginData, "acp", next);
+                Plugins.data.getScripts(pluginData, 'acp', next);
             },
             modules: function (next) {
                 Plugins.data.getModules(pluginData, next);
@@ -44,7 +44,7 @@ module.exports = function (Plugins) {
 
         let methods = {};
         if (Array.isArray(fields)) {
-            fields.forEach((field) => {
+            fields.forEach(field => {
                 methods[field] = handlers[field];
             });
         } else {
@@ -76,34 +76,32 @@ module.exports = function (Plugins) {
 
     Plugins.prepareForBuild = async function (targets) {
         const map = {
-            "plugin static dirs": ["staticDirs"],
-            "requirejs modules": ["modules"],
-            "client js bundle": ["clientScripts"],
-            "admin js bundle": ["acpScripts"],
-            "client side styles": ["cssFiles", "lessFiles"],
-            "admin control panel styles": [
-                "cssFiles",
-                "lessFiles",
-                "acpLessFiles",
+            'plugin static dirs': ['staticDirs'],
+            'requirejs modules': ['modules'],
+            'client js bundle': ['clientScripts'],
+            'admin js bundle': ['acpScripts'],
+            'client side styles': ['cssFiles', 'lessFiles'],
+            'admin control panel styles': [
+                'cssFiles',
+                'lessFiles',
+                'acpLessFiles',
             ],
-            languages: ["languageData"],
+            languages: ['languageData'],
         };
 
-        const fields = _.uniq(
-            _.flatMap(targets, (target) => map[target] || []),
-        );
+        const fields = _.uniq(_.flatMap(targets, target => map[target] || []));
 
         // clear old data before build
-        fields.forEach((field) => {
+        fields.forEach(field => {
             switch (field) {
-                case "clientScripts":
-                case "acpScripts":
-                case "cssFiles":
-                case "lessFiles":
-                case "acpLessFiles":
+                case 'clientScripts':
+                case 'acpScripts':
+                case 'cssFiles':
+                case 'lessFiles':
+                case 'acpLessFiles':
                     Plugins[field].length = 0;
                     break;
-                case "languageData":
+                case 'languageData':
                     Plugins.languageData.languages = [];
                     Plugins.languageData.namespaces = [];
                     break;
@@ -112,10 +110,10 @@ module.exports = function (Plugins) {
         });
 
         winston.verbose(
-            `[plugins] loading the following fields from plugin data: ${fields.join(", ")}`,
+            `[plugins] loading the following fields from plugin data: ${fields.join(', ')}`,
         );
         const plugins = await Plugins.data.getActive();
-        await Promise.all(plugins.map((p) => registerPluginAssets(p, fields)));
+        await Promise.all(plugins.map(p => registerPluginAssets(p, fields)));
     };
 
     Plugins.loadPlugin = async function (pluginPath) {
@@ -123,7 +121,7 @@ module.exports = function (Plugins) {
         try {
             pluginData = await Plugins.data.loadPluginInfo(pluginPath);
         } catch (err) {
-            if (err.message === "[[error:parse-error]]") {
+            if (err.message === '[[error:parse-error]]') {
                 return;
             }
             if (!themeNamePattern.test(pluginPath)) {
@@ -168,7 +166,7 @@ module.exports = function (Plugins) {
         ) {
             if (
                 !semver.satisfies(
-                    nconf.get("version"),
+                    nconf.get('version'),
                     pluginData.nbbpm.compatibility,
                 )
             ) {
@@ -186,7 +184,7 @@ module.exports = function (Plugins) {
             }
 
             if (Array.isArray(pluginData.hooks)) {
-                pluginData.hooks.forEach((hook) =>
+                pluginData.hooks.forEach(hook =>
                     Plugins.hooks.register(pluginData.id, hook),
                 );
             }

@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
+define('forum/groups/memberlist', ['api', 'bootbox', 'alerts'], function (
     api,
     bootbox,
     alerts,
@@ -10,7 +10,7 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
     let templateName;
 
     MemberList.init = function (_templateName) {
-        templateName = _templateName || "groups/details";
+        templateName = _templateName || 'groups/details';
         groupName = ajaxify.data.group.name;
 
         handleMemberAdd();
@@ -19,48 +19,48 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
     };
 
     function handleMemberAdd() {
-        $('[component="groups/members/add"]').on("click", function () {
+        $('[component="groups/members/add"]').on('click', function () {
             app.parseAndTranslate(
-                "admin/partials/groups/add-members",
+                'admin/partials/groups/add-members',
                 {},
                 function (html) {
                     const foundUsers = [];
                     const modal = bootbox.dialog({
-                        title: "[[groups:details.add-member]]",
+                        title: '[[groups:details.add-member]]',
                         message: html,
                         buttons: {
                             ok: {
                                 callback: function () {
                                     const users = [];
                                     modal
-                                        .find("[data-uid][data-selected]")
+                                        .find('[data-uid][data-selected]')
                                         .each(function (index, el) {
                                             users.push(
                                                 foundUsers[
-                                                    $(el).attr("data-uid")
+                                                    $(el).attr('data-uid')
                                                 ],
                                             );
                                         });
                                     addUserToGroup(users, function () {
-                                        modal.modal("hide");
+                                        modal.modal('hide');
                                     });
                                 },
                             },
                         },
                     });
-                    modal.on("click", "[data-username]", function () {
+                    modal.on('click', '[data-username]', function () {
                         const isSelected =
-                            $(this).attr("data-selected") === "1";
+                            $(this).attr('data-selected') === '1';
                         if (isSelected) {
-                            $(this).removeAttr("data-selected");
+                            $(this).removeAttr('data-selected');
                         } else {
-                            $(this).attr("data-selected", 1);
+                            $(this).attr('data-selected', 1);
                         }
-                        $(this).find("i").toggleClass("invisible");
+                        $(this).find('i').toggleClass('invisible');
                     });
-                    modal.find("input").on("keyup", function () {
+                    modal.find('input').on('keyup', function () {
                         api.get(
-                            "/api/users",
+                            '/api/users',
                             {
                                 query: $(this).val(),
                                 paginate: false,
@@ -73,11 +73,11 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
                                     foundUsers[user.uid] = user;
                                 });
                                 app.parseAndTranslate(
-                                    "admin/partials/groups/add-members",
-                                    "users",
+                                    'admin/partials/groups/add-members',
+                                    'users',
                                     { users: result.users },
                                     function (html) {
-                                        modal.find("#search-result").html(html);
+                                        modal.find('#search-result').html(html);
                                     },
                                 );
                             },
@@ -105,8 +105,8 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
         const uids = users.map(function (user) {
             return user.uid;
         });
-        if (groupName === "administrators") {
-            socket.emit("admin.user.makeAdmins", uids, function (err) {
+        if (groupName === 'administrators') {
+            socket.emit('admin.user.makeAdmins', uids, function (err) {
                 if (err) {
                     return alerts.error(err);
                 }
@@ -114,11 +114,11 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
             });
         } else {
             Promise.all(
-                uids.map((uid) =>
+                uids.map(uid =>
                     api.put(
-                        "/groups/" +
+                        '/groups/' +
                             ajaxify.data.group.slug +
-                            "/membership/" +
+                            '/membership/' +
                             uid,
                     ),
                 ),
@@ -131,11 +131,11 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
     function handleMemberSearch() {
         const searchEl = $('[component="groups/members/search"]');
         searchEl.on(
-            "keyup",
+            'keyup',
             utils.debounce(function () {
                 const query = searchEl.val();
                 socket.emit(
-                    "groups.searchMembers",
+                    'groups.searchMembers',
                     {
                         groupName: groupName,
                         query: query,
@@ -147,7 +147,7 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
                         parseAndTranslate(results.users, function (html) {
                             $('[component="groups/members"] tbody').html(html);
                             $('[component="groups/members"]').attr(
-                                "data-nextstart",
+                                'data-nextstart',
                                 20,
                             );
                         });
@@ -158,7 +158,7 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
     }
 
     function handleMemberInfiniteScroll() {
-        $('[component="groups/members"] tbody').on("scroll", function () {
+        $('[component="groups/members"] tbody').on('scroll', function () {
             const $this = $(this);
             const bottom = ($this[0].scrollHeight - $this.innerHeight()) * 0.9;
 
@@ -173,16 +173,16 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
 
     function loadMoreMembers() {
         const members = $('[component="groups/members"]');
-        if (members.attr("loading")) {
+        if (members.attr('loading')) {
             return;
         }
 
-        members.attr("loading", 1);
+        members.attr('loading', 1);
         socket.emit(
-            "groups.loadMoreMembers",
+            'groups.loadMoreMembers',
             {
                 groupName: groupName,
-                after: members.attr("data-nextstart"),
+                after: members.attr('data-nextstart'),
             },
             function (err, data) {
                 if (err) {
@@ -191,11 +191,11 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
 
                 if (data && data.users.length) {
                     onMembersLoaded(data.users, function () {
-                        members.removeAttr("loading");
-                        members.attr("data-nextstart", data.nextStart);
+                        members.removeAttr('loading');
+                        members.attr('data-nextstart', data.nextStart);
                     });
                 } else {
-                    members.removeAttr("loading");
+                    members.removeAttr('loading');
                 }
             },
         );
@@ -217,7 +217,7 @@ define("forum/groups/memberlist", ["api", "bootbox", "alerts"], function (
     function parseAndTranslate(users, callback) {
         app.parseAndTranslate(
             templateName,
-            "group.members",
+            'group.members',
             {
                 group: {
                     members: users,

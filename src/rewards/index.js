@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const util = require("util");
+const util = require('util');
 
-const db = require("../database");
-const plugins = require("../plugins");
+const db = require('../database');
+const plugins = require('../plugins');
 
 const rewards = module.exports;
 
@@ -21,7 +21,7 @@ rewards.checkConditionAndRewardUser = async function (params) {
         return;
     }
     const eligible = await Promise.all(
-        rewardData.map((reward) => checkCondition(reward, method)),
+        rewardData.map(reward => checkCondition(reward, method)),
     );
     const eligibleRewards = rewardData.filter(
         (reward, index) => eligible[index],
@@ -30,7 +30,7 @@ rewards.checkConditionAndRewardUser = async function (params) {
 };
 
 async function isConditionActive(condition) {
-    return await db.isSetMember("conditions:active", condition);
+    return await db.isSetMember('conditions:active', condition);
 }
 
 async function getIDsByCondition(condition) {
@@ -43,15 +43,15 @@ async function filterCompletedRewards(uid, rewards) {
         0,
         -1,
         1,
-        "+inf",
+        '+inf',
     );
     const userRewards = {};
 
-    data.forEach((obj) => {
+    data.forEach(obj => {
         userRewards[obj.value] = parseInt(obj.score, 10);
     });
 
-    return rewards.filter((reward) => {
+    return rewards.filter(reward => {
         if (!reward) {
             return false;
         }
@@ -66,17 +66,17 @@ async function filterCompletedRewards(uid, rewards) {
 }
 
 async function getRewardDataByIDs(ids) {
-    return await db.getObjects(ids.map((id) => `rewards:id:${id}`));
+    return await db.getObjects(ids.map(id => `rewards:id:${id}`));
 }
 
 async function getRewardsByRewardData(rewards) {
     return await db.getObjects(
-        rewards.map((reward) => `rewards:id:${reward.id}:rewards`),
+        rewards.map(reward => `rewards:id:${reward.id}:rewards`),
     );
 }
 
 async function checkCondition(reward, method) {
-    if (method.constructor && method.constructor.name !== "AsyncFunction") {
+    if (method.constructor && method.constructor.name !== 'AsyncFunction') {
         method = util.promisify(method);
     }
     const value = await method();
@@ -99,4 +99,4 @@ async function giveRewards(uid, rewards) {
     }
 }
 
-require("../promisify")(rewards);
+require('../promisify')(rewards);

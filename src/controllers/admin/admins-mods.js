@@ -1,14 +1,14 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
+const _ = require('lodash');
 
-const db = require("../../database");
-const groups = require("../../groups");
-const categories = require("../../categories");
-const user = require("../../user");
-const meta = require("../../meta");
-const pagination = require("../../pagination");
-const categoriesController = require("./categories");
+const db = require('../../database');
+const groups = require('../../groups');
+const categories = require('../../categories');
+const user = require('../../user');
+const meta = require('../../meta');
+const pagination = require('../../pagination');
+const categoriesController = require('./categories');
 
 const AdminsMods = module.exports;
 
@@ -37,16 +37,16 @@ AdminsMods.get = async function (req, res) {
     const pageCategories = await categories.getCategoriesData(cids);
 
     const [admins, globalMods, moderators, crumbs] = await Promise.all([
-        groups.get("administrators", { uid: req.uid }),
-        groups.get("Global Moderators", { uid: req.uid }),
+        groups.get('administrators', { uid: req.uid }),
+        groups.get('Global Moderators', { uid: req.uid }),
         getModeratorsOfCategories(pageCategories),
         categoriesController.buildBreadCrumbs(
             selectedCategory,
-            "/admin/manage/admins-mods",
+            '/admin/manage/admins-mods',
         ),
     ]);
 
-    res.render("admin/manage/admins-mods", {
+    res.render('admin/manage/admins-mods', {
         admins: admins,
         globalMods: globalMods,
         categoryMods: moderators,
@@ -58,20 +58,20 @@ AdminsMods.get = async function (req, res) {
 
 async function getModeratorsOfCategories(categoryData) {
     const [moderatorUids, childrenCounts] = await Promise.all([
-        categories.getModeratorUids(categoryData.map((c) => c.cid)),
-        db.sortedSetsCard(categoryData.map((c) => `cid:${c.cid}:children`)),
+        categories.getModeratorUids(categoryData.map(c => c.cid)),
+        db.sortedSetsCard(categoryData.map(c => `cid:${c.cid}:children`)),
     ]);
 
     const uids = _.uniq(_.flatten(moderatorUids));
     const moderatorData = await user.getUsersFields(uids, [
-        "uid",
-        "username",
-        "userslug",
-        "picture",
+        'uid',
+        'username',
+        'userslug',
+        'picture',
     ]);
     const moderatorMap = _.zipObject(uids, moderatorData);
     categoryData.forEach((c, index) => {
-        c.moderators = moderatorUids[index].map((uid) => moderatorMap[uid]);
+        c.moderators = moderatorUids[index].map(uid => moderatorMap[uid]);
         c.subCategoryCount = childrenCounts[index];
     });
     return categoryData;

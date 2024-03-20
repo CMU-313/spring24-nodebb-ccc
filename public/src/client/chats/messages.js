@@ -1,14 +1,14 @@
-"use strict";
+'use strict';
 
-define("forum/chats/messages", [
-    "components",
-    "translator",
-    "benchpress",
-    "hooks",
-    "bootbox",
-    "alerts",
-    "messages",
-    "api",
+define('forum/chats/messages', [
+    'components',
+    'translator',
+    'benchpress',
+    'hooks',
+    'bootbox',
+    'alerts',
+    'messages',
+    'api',
 ], function (
     components,
     translator,
@@ -23,44 +23,44 @@ define("forum/chats/messages", [
 
     messages.sendMessage = async function (roomId, inputEl) {
         let message = inputEl.val();
-        let mid = inputEl.attr("data-mid");
+        let mid = inputEl.attr('data-mid');
 
         if (!message.trim().length) {
             return;
         }
 
-        inputEl.val("");
-        inputEl.removeAttr("data-mid");
+        inputEl.val('');
+        inputEl.removeAttr('data-mid');
         messages.updateRemainingLength(inputEl.parent());
         const payload = { roomId, message, mid };
         // TODO: move this to success callback of api.post/put call?
-        hooks.fire("action:chat.sent", payload);
+        hooks.fire('action:chat.sent', payload);
         ({ roomId, message, mid } = await hooks.fire(
-            "filter:chat.send",
+            'filter:chat.send',
             payload,
         ));
 
         if (!mid) {
-            api.post(`/chats/${roomId}`, { message }).catch((err) => {
+            api.post(`/chats/${roomId}`, { message }).catch(err => {
                 inputEl.val(message);
                 messages.updateRemainingLength(inputEl.parent());
-                if (err.message === "[[error:email-not-confirmed-chat]]") {
+                if (err.message === '[[error:email-not-confirmed-chat]]') {
                     return messagesModule.showEmailConfirmWarning(err.message);
                 }
 
                 return alerts.alert({
-                    alert_id: "chat_spam_error",
-                    title: "[[global:alert.error]]",
+                    alert_id: 'chat_spam_error',
+                    title: '[[global:alert.error]]',
                     message: err.message,
-                    type: "danger",
+                    type: 'danger',
                     timeout: 10000,
                 });
             });
         } else {
             api.put(`/chats/${roomId}/messages/${mid}`, { message }).catch(
-                (err) => {
+                err => {
                     inputEl.val(message);
-                    inputEl.attr("data-mid", mid);
+                    inputEl.attr('data-mid', mid);
                     messages.updateRemainingLength(inputEl.parent());
                     return alerts.error(err);
                 },
@@ -76,18 +76,18 @@ define("forum/chats/messages", [
         parent
             .find('[component="chat/message/remaining"]')
             .text(config.maximumChatMessageLength - element.val().length);
-        hooks.fire("action:chat.updateRemainingLength", {
+        hooks.fire('action:chat.updateRemainingLength', {
             parent: parent,
         });
     };
 
     messages.appendChatMessage = function (chatContentEl, data) {
         const lastSpeaker = parseInt(
-            chatContentEl.find(".chat-message").last().attr("data-uid"),
+            chatContentEl.find('.chat-message').last().attr('data-uid'),
             10,
         );
         const lasttimestamp = parseInt(
-            chatContentEl.find(".chat-message").last().attr("data-timestamp"),
+            chatContentEl.find('.chat-message').last().attr('data-timestamp'),
             10,
         );
         if (!Array.isArray(data)) {
@@ -106,13 +106,13 @@ define("forum/chats/messages", [
         const newMessage = $(html);
         const isAtBottom = messages.isAtBottom(chatContentEl);
         newMessage.appendTo(chatContentEl);
-        newMessage.find(".timeago").timeago();
-        newMessage.find("img:not(.not-responsive)").addClass("img-responsive");
+        newMessage.find('.timeago').timeago();
+        newMessage.find('img:not(.not-responsive)').addClass('img-responsive');
         if (isAtBottom) {
             messages.scrollToBottom(chatContentEl);
         }
 
-        hooks.fire("action:chat.received", {
+        hooks.fire('action:chat.received', {
             messageEl: newMessage,
         });
     }
@@ -124,15 +124,15 @@ define("forum/chats/messages", [
 
         if (Array.isArray(data)) {
             Benchpress.render(
-                "partials/chats/message" + (Array.isArray(data) ? "s" : ""),
+                'partials/chats/message' + (Array.isArray(data) ? 's' : ''),
                 {
                     messages: data,
                 },
             ).then(done);
         } else {
             Benchpress.render(
-                "partials/chats/" +
-                    (data.system ? "system-message" : "message"),
+                'partials/chats/' +
+                    (data.system ? 'system-message' : 'message'),
                 {
                     messages: data,
                 },
@@ -157,7 +157,7 @@ define("forum/chats/messages", [
             containerEl
                 .parent()
                 .find('[component="chat/messages/scroll-up-alert"]')
-                .addClass("hidden");
+                .addClass('hidden');
         }
     };
 
@@ -166,12 +166,12 @@ define("forum/chats/messages", [
         containerEl
             .parent()
             .find('[component="chat/messages/scroll-up-alert"]')
-            .toggleClass("hidden", isAtBottom);
+            .toggleClass('hidden', isAtBottom);
     };
 
     messages.prepEdit = function (inputEl, messageId, roomId) {
         socket.emit(
-            "modules.chats.getRaw",
+            'modules.chats.getRaw',
             { mid: messageId, roomId: roomId },
             function (err, raw) {
                 if (err) {
@@ -181,10 +181,10 @@ define("forum/chats/messages", [
                 if (inputEl.val().length === 0) {
                     // By setting the `data-mid` attribute, I tell the chat code that I am editing a
                     // message, instead of posting a new one.
-                    inputEl.attr("data-mid", messageId).addClass("editing");
+                    inputEl.attr('data-mid', messageId).addClass('editing');
                     inputEl.val(raw).focus();
 
-                    hooks.fire("action:chat.prepEdit", {
+                    hooks.fire('action:chat.prepEdit', {
                         inputEl: inputEl,
                         messageId: messageId,
                         roomId: roomId,
@@ -195,14 +195,14 @@ define("forum/chats/messages", [
     };
 
     messages.addSocketListeners = function () {
-        socket.removeListener("event:chats.edit", onChatMessageEdited);
-        socket.on("event:chats.edit", onChatMessageEdited);
+        socket.removeListener('event:chats.edit', onChatMessageEdited);
+        socket.on('event:chats.edit', onChatMessageEdited);
 
-        socket.removeListener("event:chats.delete", onChatMessageDeleted);
-        socket.on("event:chats.delete", onChatMessageDeleted);
+        socket.removeListener('event:chats.delete', onChatMessageDeleted);
+        socket.on('event:chats.delete', onChatMessageDeleted);
 
-        socket.removeListener("event:chats.restore", onChatMessageRestored);
-        socket.on("event:chats.restore", onChatMessageRestored);
+        socket.removeListener('event:chats.restore', onChatMessageRestored);
+        socket.on('event:chats.restore', onChatMessageRestored);
     };
 
     function onChatMessageEdited(data) {
@@ -211,12 +211,12 @@ define("forum/chats/messages", [
                 parseInt(message.fromuid, 10) === parseInt(app.user.uid, 10);
             message.self = self ? 1 : 0;
             messages.parseMessage(message, function (html) {
-                const body = components.get("chat/message", message.messageId);
+                const body = components.get('chat/message', message.messageId);
                 if (body.length) {
                     body.replaceWith(html);
                     components
-                        .get("chat/message", message.messageId)
-                        .find(".timeago")
+                        .get('chat/message', message.messageId)
+                        .find('.timeago')
                         .timeago();
                 }
             });
@@ -225,23 +225,23 @@ define("forum/chats/messages", [
 
     function onChatMessageDeleted(messageId) {
         components
-            .get("chat/message", messageId)
-            .toggleClass("deleted", true)
+            .get('chat/message', messageId)
+            .toggleClass('deleted', true)
             .find('[component="chat/message/body"]')
-            .translateHtml("[[modules:chat.message-deleted]]");
+            .translateHtml('[[modules:chat.message-deleted]]');
     }
 
     function onChatMessageRestored(message) {
         components
-            .get("chat/message", message.messageId)
-            .toggleClass("deleted", false)
+            .get('chat/message', message.messageId)
+            .toggleClass('deleted', false)
             .find('[component="chat/message/body"]')
             .html(message.content);
     }
 
     messages.delete = function (messageId, roomId) {
         translator.translate(
-            "[[modules:chat.delete_message_confirm]]",
+            '[[modules:chat.delete_message_confirm]]',
             function (translated) {
                 bootbox.confirm(translated, function (ok) {
                     if (!ok) {
@@ -251,8 +251,8 @@ define("forum/chats/messages", [
                     api.delete(`/chats/${roomId}/messages/${messageId}`, {})
                         .then(() => {
                             components
-                                .get("chat/message", messageId)
-                                .toggleClass("deleted", true);
+                                .get('chat/message', messageId)
+                                .toggleClass('deleted', true);
                         })
                         .catch(alerts.error);
                 });
@@ -264,8 +264,8 @@ define("forum/chats/messages", [
         api.post(`/chats/${roomId}/messages/${messageId}`, {})
             .then(() => {
                 components
-                    .get("chat/message", messageId)
-                    .toggleClass("deleted", false);
+                    .get('chat/message', messageId)
+                    .toggleClass('deleted', false);
             })
             .catch(alerts.error);
     };

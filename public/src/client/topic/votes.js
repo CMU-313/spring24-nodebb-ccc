@@ -1,20 +1,20 @@
-"use strict";
+'use strict';
 
-define("forum/topic/votes", [
-    "components",
-    "translator",
-    "api",
-    "hooks",
-    "bootbox",
-    "alerts",
+define('forum/topic/votes', [
+    'components',
+    'translator',
+    'api',
+    'hooks',
+    'bootbox',
+    'alerts',
 ], function (components, translator, api, hooks, bootbox, alerts) {
     const Votes = {};
 
     Votes.addVoteHandler = function () {
         components
-            .get("topic")
+            .get('topic')
             .on(
-                "mouseenter",
+                'mouseenter',
                 '[data-pid] [component="post/vote-count"]',
                 loadDataAndCreateTooltip,
             );
@@ -25,10 +25,10 @@ define("forum/topic/votes", [
 
         const $this = $(this);
         const el = $this.parent();
-        el.find(".tooltip").css("display", "none");
-        const pid = el.parents("[data-pid]").attr("data-pid");
+        el.find('.tooltip').css('display', 'none');
+        const pid = el.parents('[data-pid]').attr('data-pid');
 
-        socket.emit("posts.getUpvoters", [pid], function (err, data) {
+        socket.emit('posts.getUpvoters', [pid], function (err, data) {
             if (err) {
                 return alerts.error(err);
             }
@@ -42,40 +42,40 @@ define("forum/topic/votes", [
 
     function createTooltip(el, data) {
         function doCreateTooltip(title) {
-            el.attr("title", title).tooltip("fixTitle").tooltip("show");
-            el.parent().find(".tooltip").css("display", "");
+            el.attr('title', title).tooltip('fixTitle').tooltip('show');
+            el.parent().find('.tooltip').css('display', '');
         }
         let usernames = data.usernames.filter(
-            (name) => name !== "[[global:former_user]]",
+            name => name !== '[[global:former_user]]',
         );
         if (!usernames.length) {
             return;
         }
         if (usernames.length + data.otherCount > 6) {
-            usernames = usernames.join(", ").replace(/,/g, "|");
+            usernames = usernames.join(', ').replace(/,/g, '|');
             translator.translate(
-                "[[topic:users_and_others, " +
+                '[[topic:users_and_others, ' +
                     usernames +
-                    ", " +
+                    ', ' +
                     data.otherCount +
-                    "]]",
+                    ']]',
                 function (translated) {
-                    translated = translated.replace(/\|/g, ",");
+                    translated = translated.replace(/\|/g, ',');
                     doCreateTooltip(translated);
                 },
             );
         } else {
-            usernames = usernames.join(", ");
+            usernames = usernames.join(', ');
             doCreateTooltip(usernames);
         }
     }
 
     Votes.toggleVote = function (button, className, delta) {
-        const post = button.closest("[data-pid]");
+        const post = button.closest('[data-pid]');
         const currentState = post.find(className).length;
 
-        const method = currentState ? "del" : "put";
-        const pid = post.attr("data-pid");
+        const method = currentState ? 'del' : 'put';
+        const pid = post.attr('data-pid');
         api[method](
             `/posts/${pid}/vote`,
             {
@@ -84,15 +84,15 @@ define("forum/topic/votes", [
             function (err) {
                 if (err) {
                     if (!app.user.uid) {
-                        ajaxify.go("login");
+                        ajaxify.go('login');
                         return;
                     }
                     return alerts.error(err);
                 }
-                hooks.fire("action:post.toggleVote", {
+                hooks.fire('action:post.toggleVote', {
                     pid: pid,
                     delta: delta,
-                    unvote: method === "del",
+                    unvote: method === 'del',
                 });
             },
         );
@@ -128,11 +128,11 @@ define("forum/topic/votes", [
 
     Votes.showVotes = function (pid) {
         socket.emit(
-            "posts.getVoters",
+            'posts.getVoters',
             { pid: pid, cid: ajaxify.data.cid },
             function (err, data) {
                 if (err) {
-                    if (err.message === "[[error:no-privileges]]") {
+                    if (err.message === '[[error:no-privileges]]') {
                         return;
                     }
 
@@ -141,18 +141,18 @@ define("forum/topic/votes", [
                 }
 
                 app.parseAndTranslate(
-                    "partials/modals/votes_modal",
+                    'partials/modals/votes_modal',
                     data,
                     function (html) {
                         const dialog = bootbox.dialog({
-                            title: "[[global:voters]]",
+                            title: '[[global:voters]]',
                             message: html,
-                            className: "vote-modal",
+                            className: 'vote-modal',
                             show: true,
                         });
 
-                        dialog.on("click", function () {
-                            dialog.modal("hide");
+                        dialog.on('click', function () {
+                            dialog.modal('hide');
                         });
                     },
                 );

@@ -1,22 +1,22 @@
-"use strict";
+'use strict';
 
-const winston = require("winston");
-const util = require("util");
+const winston = require('winston');
+const util = require('util');
 
-const user = require(".");
-const db = require("../database");
-const meta = require("../meta");
-const privileges = require("../privileges");
-const plugins = require("../plugins");
-const utils = require("../utils");
+const user = require('.');
+const db = require('../database');
+const meta = require('../meta');
+const privileges = require('../privileges');
+const plugins = require('../plugins');
+const utils = require('../utils');
 
 const sleep = util.promisify(setTimeout);
 
 const Interstitials = module.exports;
 
-Interstitials.email = async (data) => {
+Interstitials.email = async data => {
     if (!data.userData) {
-        throw new Error("[[error:invalid-data]]");
+        throw new Error('[[error:invalid-data]]');
     }
     if (!data.userData.updateEmail) {
         return data;
@@ -29,11 +29,11 @@ Interstitials.email = async (data) => {
 
     let email;
     if (data.userData.uid) {
-        email = await user.getUserField(data.userData.uid, "email");
+        email = await user.getUserField(data.userData.uid, 'email');
     }
 
     data.interstitials.push({
-        template: "partials/email_update",
+        template: 'partials/email_update',
         data: {
             email,
             requireEmailAddress: meta.config.requireEmailAddress,
@@ -45,7 +45,7 @@ Interstitials.email = async (data) => {
                 const [
                     isPasswordCorrect,
                     canEdit,
-                    { email: current, "email:confirmed": confirmed },
+                    { email: current, 'email:confirmed': confirmed },
                     { allowed, error },
                 ] = await Promise.all([
                     user.isPasswordCorrect(
@@ -55,15 +55,15 @@ Interstitials.email = async (data) => {
                     ),
                     privileges.users.canEdit(data.req.uid, userData.uid),
                     user.getUserFields(userData.uid, [
-                        "email",
-                        "email:confirmed",
+                        'email',
+                        'email:confirmed',
                     ]),
-                    plugins.hooks.fire("filter:user.saveEmail", {
+                    plugins.hooks.fire('filter:user.saveEmail', {
                         uid: userData.uid,
                         email: formData.email,
                         registration: false,
                         allowed: true, // change this value to disallow
-                        error: "[[error:invalid-email]]",
+                        error: '[[error:invalid-email]]',
                     }),
                 ]);
 
@@ -79,7 +79,7 @@ Interstitials.email = async (data) => {
                     // Handle errors when setting to same email (unconfirmed accts only)
                     if (formData.email === current) {
                         if (confirmed) {
-                            throw new Error("[[error:email-nochange]]");
+                            throw new Error('[[error:email-nochange]]');
                         } else if (
                             await user.email.canSendValidation(
                                 userData.uid,
@@ -96,13 +96,13 @@ Interstitials.email = async (data) => {
                     if (isAdminOrGlobalMod && userData.uid !== data.req.uid) {
                         await user.setUserField(
                             userData.uid,
-                            "email",
+                            'email',
                             formData.email,
                         );
                         await user.email.confirmByUid(userData.uid);
                     } else if (canEdit) {
                         if (hasPassword && !isPasswordCorrect) {
-                            throw new Error("[[error:invalid-password]]");
+                            throw new Error('[[error:invalid-password]]');
                         }
 
                         await user.email
@@ -110,7 +110,7 @@ Interstitials.email = async (data) => {
                                 email: formData.email,
                                 force: true,
                             })
-                            .catch((err) => {
+                            .catch(err => {
                                 winston.error(
                                     `[user.interstitials.email] Validation email failed to send\n[emailer.send] ${err.stack}`,
                                 );
@@ -118,11 +118,11 @@ Interstitials.email = async (data) => {
                         data.req.session.emailChanged = 1;
                     } else {
                         // User attempting to edit another user's email -- not allowed
-                        throw new Error("[[error:no-privileges]]");
+                        throw new Error('[[error:no-privileges]]');
                     }
                 } else {
                     if (meta.config.requireEmailAddress) {
-                        throw new Error("[[error:invalid-email]]");
+                        throw new Error('[[error:invalid-email]]');
                     }
 
                     if (
@@ -140,13 +140,13 @@ Interstitials.email = async (data) => {
                 }
             } else {
                 const { allowed, error } = await plugins.hooks.fire(
-                    "filter:user.saveEmail",
+                    'filter:user.saveEmail',
                     {
                         uid: null,
                         email: formData.email,
                         registration: true,
                         allowed: true, // change this value to disallow
-                        error: "[[error:invalid-email]]",
+                        error: '[[error:invalid-email]]',
                     },
                 );
 
@@ -177,13 +177,13 @@ Interstitials.gdpr = async function (data) {
         return data;
     }
     if (!data.userData) {
-        throw new Error("[[error:invalid-data]]");
+        throw new Error('[[error:invalid-data]]');
     }
 
     if (data.userData.uid) {
         const consented = await db.getObjectField(
             `user:${data.userData.uid}`,
-            "gdpr_consent",
+            'gdpr_consent',
         );
         if (parseInt(consented, 10)) {
             return data;
@@ -191,15 +191,15 @@ Interstitials.gdpr = async function (data) {
     }
 
     data.interstitials.push({
-        template: "partials/gdpr_consent",
+        template: 'partials/gdpr_consent',
         data: {
             digestFrequency: meta.config.dailyDigestFreq,
-            digestEnabled: meta.config.dailyDigestFreq !== "off",
+            digestEnabled: meta.config.dailyDigestFreq !== 'off',
         },
         callback: function (userData, formData, next) {
             if (
-                formData.gdpr_agree_data === "on" &&
-                formData.gdpr_agree_email === "on"
+                formData.gdpr_agree_data === 'on' &&
+                formData.gdpr_agree_email === 'on'
             ) {
                 userData.gdpr_consent = true;
             }
@@ -207,7 +207,7 @@ Interstitials.gdpr = async function (data) {
             next(
                 userData.gdpr_consent
                     ? null
-                    : new Error("[[register:gdpr_consent_denied]]"),
+                    : new Error('[[register:gdpr_consent_denied]]'),
             );
         },
     });
@@ -216,7 +216,7 @@ Interstitials.gdpr = async function (data) {
 
 Interstitials.tou = async function (data) {
     if (!data.userData) {
-        throw new Error("[[error:invalid-data]]");
+        throw new Error('[[error:invalid-data]]');
     }
     if (!meta.config.termsOfUse || data.userData.acceptTos) {
         // no ToS or ToS accepted, nothing to do
@@ -226,33 +226,33 @@ Interstitials.tou = async function (data) {
     if (data.userData.uid) {
         const accepted = await db.getObjectField(
             `user:${data.userData.uid}`,
-            "acceptTos",
+            'acceptTos',
         );
         if (parseInt(accepted, 10)) {
             return data;
         }
     }
 
-    const termsOfUse = await plugins.hooks.fire("filter:parse.post", {
+    const termsOfUse = await plugins.hooks.fire('filter:parse.post', {
         postData: {
-            content: meta.config.termsOfUse || "",
+            content: meta.config.termsOfUse || '',
         },
     });
 
     data.interstitials.push({
-        template: "partials/acceptTos",
+        template: 'partials/acceptTos',
         data: {
             termsOfUse: termsOfUse.postData.content,
         },
         callback: function (userData, formData, next) {
-            if (formData["agree-terms"] === "on") {
+            if (formData['agree-terms'] === 'on') {
                 userData.acceptTos = true;
             }
 
             next(
                 userData.acceptTos
                     ? null
-                    : new Error("[[register:terms_of_use_error]]"),
+                    : new Error('[[register:terms_of_use_error]]'),
             );
         },
     });

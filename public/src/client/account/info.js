@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-define("forum/account/info", [
-    "forum/account/header",
-    "alerts",
-    "forum/account/sessions",
+define('forum/account/info', [
+    'forum/account/header',
+    'alerts',
+    'forum/account/sessions',
 ], function (header, alerts, sessions) {
     const Info = {};
 
@@ -15,18 +15,18 @@ define("forum/account/info", [
 
     function handleModerationNote() {
         $('[component="account/save-moderation-note"]').on(
-            "click",
+            'click',
             function () {
                 const note = $('[component="account/moderation-note"]').val();
                 socket.emit(
-                    "user.setModerationNote",
+                    'user.setModerationNote',
                     { uid: ajaxify.data.uid, note: note },
                     function (err) {
                         if (err) {
                             return alerts.error(err);
                         }
-                        $('[component="account/moderation-note"]').val("");
-                        alerts.success("[[user:info.moderation-note.success]]");
+                        $('[component="account/moderation-note"]').val('');
+                        alerts.success('[[user:info.moderation-note.success]]');
                         const timestamp = Date.now();
                         const data = [
                             {
@@ -37,14 +37,14 @@ define("forum/account/info", [
                             },
                         ];
                         app.parseAndTranslate(
-                            "account/info",
-                            "moderationNotes",
+                            'account/info',
+                            'moderationNotes',
                             { moderationNotes: data },
                             function (html) {
                                 $(
                                     '[component="account/moderation-note/list"]',
                                 ).prepend(html);
-                                html.find(".timeago").timeago();
+                                html.find('.timeago').timeago();
                             },
                         );
                     },

@@ -1,35 +1,35 @@
-"use strict";
+'use strict';
 
-const nconf = require("nconf");
-const fs = require("fs").promises;
-const crypto = require("crypto");
-const path = require("path");
-const winston = require("winston");
-const mime = require("mime");
-const validator = require("validator");
-const cronJob = require("cron").CronJob;
-const chalk = require("chalk");
+const nconf = require('nconf');
+const fs = require('fs').promises;
+const crypto = require('crypto');
+const path = require('path');
+const winston = require('winston');
+const mime = require('mime');
+const validator = require('validator');
+const cronJob = require('cron').CronJob;
+const chalk = require('chalk');
 
-const db = require("../database");
-const image = require("../image");
-const user = require("../user");
-const topics = require("../topics");
-const file = require("../file");
-const meta = require("../meta");
+const db = require('../database');
+const image = require('../image');
+const user = require('../user');
+const topics = require('../topics');
+const file = require('../file');
+const meta = require('../meta');
 
 module.exports = function (Posts) {
     Posts.uploads = {};
 
-    const md5 = (filename) =>
-        crypto.createHash("md5").update(filename).digest("hex");
-    const pathPrefix = path.join(nconf.get("upload_path"));
+    const md5 = filename =>
+        crypto.createHash('md5').update(filename).digest('hex');
+    const pathPrefix = path.join(nconf.get('upload_path'));
     const searchRegex = /\/assets\/uploads\/(files\/[^\s")]+\.?[\w]*)/g;
 
-    const _getFullPath = (relativePath) => path.join(pathPrefix, relativePath);
-    const _filterValidPaths = async (filePaths) =>
+    const _getFullPath = relativePath => path.join(pathPrefix, relativePath);
+    const _filterValidPaths = async filePaths =>
         (
             await Promise.all(
-                filePaths.map(async (filePath) => {
+                filePaths.map(async filePath => {
                     const fullPath = _getFullPath(filePath);
                     return fullPath.startsWith(pathPrefix) &&
                         (await file.exists(fullPath))
@@ -39,18 +39,18 @@ module.exports = function (Posts) {
             )
         ).filter(Boolean);
 
-    const runJobs = nconf.get("runJobs");
+    const runJobs = nconf.get('runJobs');
     if (runJobs) {
         new cronJob(
-            "0 2 * * 0",
+            '0 2 * * 0',
             async () => {
                 const orphans = await Posts.uploads.cleanOrphans();
                 if (orphans.length) {
                     winston.info(
                         `[posts/uploads] Deleting ${orphans.length} orphaned uploads...`,
                     );
-                    orphans.forEach((relPath) => {
-                        process.stdout.write(`${chalk.red("  - ")} ${relPath}`);
+                    orphans.forEach(relPath => {
+                        process.stdout.write(`${chalk.red('  - ')} ${relPath}`);
                     });
                 }
             },
@@ -63,7 +63,7 @@ module.exports = function (Posts) {
         // Scans a post's content and updates sorted set of uploads
 
         const [content, currentUploads, isMainPost] = await Promise.all([
-            Posts.getPostField(pid, "content"),
+            Posts.getPostField(pid, 'content'),
             Posts.uploads.list(pid),
             Posts.isMain(pid),
         ]);
@@ -72,21 +72,21 @@ module.exports = function (Posts) {
         let match = searchRegex.exec(content);
         const uploads = [];
         while (match) {
-            uploads.push(match[1].replace("-resized", ""));
+            uploads.push(match[1].replace('-resized', ''));
             match = searchRegex.exec(content);
         }
 
         // Main posts can contain topic thumbs, which are also tracked by pid
         if (isMainPost) {
-            const tid = await Posts.getPostField(pid, "tid");
+            const tid = await Posts.getPostField(pid, 'tid');
             let thumbs = await topics.thumbs.get(tid);
             const replacePath = path.posix.join(
-                `${nconf.get("relative_path")}${nconf.get("upload_url")}/`,
+                `${nconf.get('relative_path')}${nconf.get('upload_url')}/`,
             );
             thumbs = thumbs
-                .map((thumb) => thumb.url.replace(replacePath, ""))
+                .map(thumb => thumb.url.replace(replacePath, ''))
                 .filter(
-                    (path) =>
+                    path =>
                         !validator.isURL(path, {
                             require_protocol: true,
                         }),
@@ -95,8 +95,8 @@ module.exports = function (Posts) {
         }
 
         // Create add/remove sets
-        const add = uploads.filter((path) => !currentUploads.includes(path));
-        const remove = currentUploads.filter((path) => !uploads.includes(path));
+        const add = uploads.filter(path => !currentUploads.includes(path));
+        const remove = currentUploads.filter(path => !uploads.includes(path));
         await Promise.all([
             Posts.uploads.associate(pid, add),
             Posts.uploads.dissociate(pid, remove),
@@ -110,7 +110,7 @@ module.exports = function (Posts) {
     Posts.uploads.listWithSizes = async function (pid) {
         const paths = await Posts.uploads.list(pid);
         const sizes =
-            (await db.getObjects(paths.map((path) => `upload:${md5(path)}`))) ||
+            (await db.getObjects(paths.map(path => `upload:${md5(path)}`))) ||
             [];
 
         return sizes.map((sizeObj, idx) => ({
@@ -120,15 +120,15 @@ module.exports = function (Posts) {
     };
 
     Posts.uploads.getOrphans = async () => {
-        let files = await fs.readdir(_getFullPath("/files"));
-        files = files.filter((filename) => filename !== ".gitignore");
+        let files = await fs.readdir(_getFullPath('/files'));
+        files = files.filter(filename => filename !== '.gitignore');
 
         // Exclude non-timestamped files (e.g. group covers; see gh#10783/gh#10705)
         const tsPrefix = /^\d{13}-/;
-        files = files.filter((filename) => tsPrefix.test(filename));
+        files = files.filter(filename => tsPrefix.test(filename));
 
         files = await Promise.all(
-            files.map(async (filename) =>
+            files.map(async filename =>
                 (await Posts.uploads.isOrphan(`files/${filename}`))
                     ? `files/${filename}`
                     : null,
@@ -151,7 +151,7 @@ module.exports = function (Posts) {
         let orphans = await Posts.uploads.getOrphans();
 
         orphans = await Promise.all(
-            orphans.map(async (relPath) => {
+            orphans.map(async relPath => {
                 const { mtimeMs } = await fs.stat(_getFullPath(relPath));
                 return mtimeMs < expiration ? relPath : null;
             }),
@@ -159,7 +159,7 @@ module.exports = function (Posts) {
         orphans = orphans.filter(Boolean);
 
         // Note: no await. Deletion not guaranteed by method end.
-        orphans.forEach((relPath) => {
+        orphans.forEach(relPath => {
             file.delete(_getFullPath(relPath));
         });
 
@@ -178,12 +178,10 @@ module.exports = function (Posts) {
         }
 
         const keys = filePaths.map(
-            (fileObj) =>
-                `upload:${md5(fileObj.path.replace("-resized", ""))}:pids`,
+            fileObj =>
+                `upload:${md5(fileObj.path.replace('-resized', ''))}:pids`,
         );
-        return await Promise.all(
-            keys.map((k) => db.getSortedSetRange(k, 0, -1)),
-        );
+        return await Promise.all(keys.map(k => db.getSortedSetRange(k, 0, -1)));
     };
 
     Posts.uploads.associate = async function (pid, filePaths) {
@@ -198,7 +196,7 @@ module.exports = function (Posts) {
 
         const now = Date.now();
         const scores = filePaths.map(() => now);
-        const bulkAdd = filePaths.map((path) => [
+        const bulkAdd = filePaths.map(path => [
             `upload:${md5(path)}:pids`,
             now,
             pid,
@@ -217,7 +215,7 @@ module.exports = function (Posts) {
             return;
         }
 
-        const bulkRemove = filePaths.map((path) => [
+        const bulkRemove = filePaths.map(path => [
             `upload:${md5(path)}:pids`,
             pid,
         ]);
@@ -231,7 +229,7 @@ module.exports = function (Posts) {
         if (!meta.config.preserveOrphanedUploads) {
             const deletePaths = (
                 await Promise.all(
-                    filePaths.map(async (filePath) =>
+                    filePaths.map(async filePath =>
                         (await Posts.uploads.isOrphan(filePath))
                             ? filePath
                             : false,
@@ -241,9 +239,9 @@ module.exports = function (Posts) {
 
             const uploaderUids = (
                 await db.getObjectsFields(
-                    deletePaths.map((path) => `upload:${md5(path)}`, ["uid"]),
+                    deletePaths.map(path => `upload:${md5(path)}`, ['uid']),
                 )
-            ).map((o) => (o ? o.uid || null : null));
+            ).map(o => (o ? o.uid || null : null));
             await Promise.all(
                 uploaderUids
                     .map((uid, idx) =>
@@ -257,13 +255,13 @@ module.exports = function (Posts) {
         }
     };
 
-    Posts.uploads.dissociateAll = async (pid) => {
+    Posts.uploads.dissociateAll = async pid => {
         const current = await Posts.uploads.list(pid);
         await Posts.uploads.dissociate(pid, current);
     };
 
-    Posts.uploads.deleteFromDisk = async (filePaths) => {
-        if (typeof filePaths === "string") {
+    Posts.uploads.deleteFromDisk = async filePaths => {
+        if (typeof filePaths === 'string') {
             filePaths = [filePaths];
         } else if (!Array.isArray(filePaths)) {
             throw new Error(
@@ -275,13 +273,13 @@ module.exports = function (Posts) {
         await Promise.all(filePaths.map(file.delete));
     };
 
-    Posts.uploads.saveSize = async (filePaths) => {
-        filePaths = filePaths.filter((fileName) => {
+    Posts.uploads.saveSize = async filePaths => {
+        filePaths = filePaths.filter(fileName => {
             const type = mime.getType(fileName);
             return type && type.match(/image./);
         });
         await Promise.all(
-            filePaths.map(async (fileName) => {
+            filePaths.map(async fileName => {
                 try {
                     const size = await image.size(_getFullPath(fileName));
                     await db.setObject(`upload:${md5(fileName)}`, {

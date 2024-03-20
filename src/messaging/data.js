@@ -1,19 +1,19 @@
-"use strict";
+'use strict';
 
-const validator = require("validator");
+const validator = require('validator');
 
-const db = require("../database");
-const user = require("../user");
-const utils = require("../utils");
-const plugins = require("../plugins");
+const db = require('../database');
+const user = require('../user');
+const utils = require('../utils');
+const plugins = require('../plugins');
 
 const intFields = [
-    "timestamp",
-    "edited",
-    "fromuid",
-    "roomId",
-    "deleted",
-    "system",
+    'timestamp',
+    'edited',
+    'fromuid',
+    'roomId',
+    'deleted',
+    'system',
 ];
 
 module.exports = function (Messaging) {
@@ -24,7 +24,7 @@ module.exports = function (Messaging) {
             return [];
         }
 
-        const keys = mids.map((mid) => `message:${mid}`);
+        const keys = mids.map(mid => `message:${mid}`);
         const messages = await db.getObjects(keys, fields);
 
         return await Promise.all(
@@ -54,7 +54,7 @@ module.exports = function (Messaging) {
 
     Messaging.getMessagesData = async (mids, uid, roomId, isNew) => {
         let messages = await Messaging.getMessagesFields(mids, []);
-        messages = await user.blocks.filter(uid, "fromuid", messages);
+        messages = await user.blocks.filter(uid, 'fromuid', messages);
         messages = messages
             .map((msg, idx) => {
                 if (msg) {
@@ -66,8 +66,8 @@ module.exports = function (Messaging) {
             .filter(Boolean);
 
         const users = await user.getUsersFields(
-            messages.map((msg) => msg && msg.fromuid),
-            ["uid", "username", "userslug", "picture", "status", "banned"],
+            messages.map(msg => msg && msg.fromuid),
+            ['uid', 'username', 'userslug', 'picture', 'status', 'banned'],
         );
 
         messages.forEach((message, index) => {
@@ -87,7 +87,7 @@ module.exports = function (Messaging) {
         });
 
         messages = await Promise.all(
-            messages.map(async (message) => {
+            messages.map(async message => {
                 if (message.system) {
                     message.content = validator.escape(String(message.content));
                     message.cleanedContent = utils.stripHTMLTags(
@@ -146,8 +146,8 @@ module.exports = function (Messaging) {
                     index - 1,
                 );
                 const fields = await Messaging.getMessageFields(mid, [
-                    "fromuid",
-                    "timestamp",
+                    'fromuid',
+                    'timestamp',
                 ]);
                 if (
                     messages[0].timestamp >
@@ -164,7 +164,7 @@ module.exports = function (Messaging) {
             messages = [];
         }
 
-        const data = await plugins.hooks.fire("filter:messaging.getMessages", {
+        const data = await plugins.hooks.fire('filter:messaging.getMessages', {
             messages: messages,
             uid: uid,
             roomId: roomId,
@@ -179,15 +179,15 @@ module.exports = function (Messaging) {
 async function modifyMessage(message, fields, mid) {
     if (message) {
         db.parseIntFields(message, intFields, fields);
-        if (message.hasOwnProperty("timestamp")) {
+        if (message.hasOwnProperty('timestamp')) {
             message.timestampISO = utils.toISOString(message.timestamp);
         }
-        if (message.hasOwnProperty("edited")) {
+        if (message.hasOwnProperty('edited')) {
             message.editedISO = utils.toISOString(message.edited);
         }
     }
 
-    const payload = await plugins.hooks.fire("filter:messaging.getFields", {
+    const payload = await plugins.hooks.fire('filter:messaging.getFields', {
         mid: mid,
         message: message,
         fields: fields,

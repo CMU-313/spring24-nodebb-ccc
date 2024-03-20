@@ -1,54 +1,54 @@
-"use strict";
+'use strict';
 
-const db = require("../../database");
-const batch = require("../../batch");
-const posts = require("../../posts");
-const user = require("../../user");
+const db = require('../../database');
+const batch = require('../../batch');
+const posts = require('../../posts');
+const user = require('../../user');
 
 module.exports = {
-    name: "Consolidate multiple flags reports, going forward",
+    name: 'Consolidate multiple flags reports, going forward',
     timestamp: Date.UTC(2020, 6, 16),
     method: async function () {
         const { progress } = this;
 
-        let flags = await db.getSortedSetRange("flags:datetime", 0, -1);
-        flags = flags.map((flagId) => `flag:${flagId}`);
+        let flags = await db.getSortedSetRange('flags:datetime', 0, -1);
+        flags = flags.map(flagId => `flag:${flagId}`);
         flags = await db.getObjectsFields(flags, [
-            "flagId",
-            "type",
-            "targetId",
-            "uid",
-            "description",
-            "datetime",
+            'flagId',
+            'type',
+            'targetId',
+            'uid',
+            'description',
+            'datetime',
         ]);
         progress.total = flags.length;
 
         await batch.processArray(
             flags,
-            async (subset) => {
+            async subset => {
                 progress.incr(subset.length);
 
                 await Promise.all(
-                    subset.map(async (flagObj) => {
+                    subset.map(async flagObj => {
                         const methods = [];
                         switch (flagObj.type) {
-                            case "post":
+                            case 'post':
                                 methods.push(
                                     posts.setPostField.bind(
                                         posts,
                                         flagObj.targetId,
-                                        "flagId",
+                                        'flagId',
                                         flagObj.flagId,
                                     ),
                                 );
                                 break;
 
-                            case "user":
+                            case 'user':
                                 methods.push(
                                     user.setUserField.bind(
                                         user,
                                         flagObj.targetId,
-                                        "flagId",
+                                        'flagId',
                                         flagObj.flagId,
                                     ),
                                 );
@@ -71,7 +71,7 @@ module.exports = {
                         );
 
                         await Promise.all(
-                            methods.map(async (method) => method()),
+                            methods.map(async method => method()),
                         );
                     }),
                 );

@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
 const helpers = module.exports;
-const winston = require("winston");
-const middleware = require("../middleware");
-const controllerHelpers = require("../controllers/helpers");
+const winston = require('winston');
+const middleware = require('../middleware');
+const controllerHelpers = require('../controllers/helpers');
 
 // router, name, middleware(deprecated), middlewares(optional), controller
 helpers.setupPageRoute = function (...args) {
@@ -83,7 +83,7 @@ helpers.tryRoute = function (controller, handler) {
     if (
         controller &&
         controller.constructor &&
-        controller.constructor.name === "AsyncFunction"
+        controller.constructor.name === 'AsyncFunction'
     ) {
         return async function (req, res, next) {
             try {

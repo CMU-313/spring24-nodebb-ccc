@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
 module.exports = function (module) {
-    const _ = require("lodash");
-    const helpers = require("./helpers");
+    const _ = require('lodash');
+    const helpers = require('./helpers');
 
     module.setAdd = async function (key, value) {
         if (!Array.isArray(value)) {
@@ -11,9 +11,9 @@ module.exports = function (module) {
         if (!value.length) {
             return;
         }
-        value = value.map((v) => helpers.valueToString(v));
+        value = value.map(v => helpers.valueToString(v));
 
-        await module.client.collection("objects").updateOne(
+        await module.client.collection('objects').updateOne(
             {
                 _key: key,
             },
@@ -39,10 +39,10 @@ module.exports = function (module) {
             value = [value];
         }
 
-        value = value.map((v) => helpers.valueToString(v));
+        value = value.map(v => helpers.valueToString(v));
 
         const bulk = module.client
-            .collection("objects")
+            .collection('objects')
             .initializeUnorderedBulkOp();
 
         for (let i = 0; i < keys.length; i += 1) {
@@ -59,7 +59,7 @@ module.exports = function (module) {
         try {
             await bulk.execute();
         } catch (err) {
-            if (err && err.message.startsWith("E11000 duplicate key error")) {
+            if (err && err.message.startsWith('E11000 duplicate key error')) {
                 return await module.setsAdd(keys, value);
             }
             throw err;
@@ -71,9 +71,9 @@ module.exports = function (module) {
             value = [value];
         }
 
-        value = value.map((v) => helpers.valueToString(v));
+        value = value.map(v => helpers.valueToString(v));
 
-        await module.client.collection("objects").updateMany(
+        await module.client.collection('objects').updateMany(
             {
                 _key: Array.isArray(key) ? { $in: key } : key,
             },
@@ -89,7 +89,7 @@ module.exports = function (module) {
         }
         value = helpers.valueToString(value);
 
-        await module.client.collection("objects").updateMany(
+        await module.client.collection('objects').updateMany(
             {
                 _key: { $in: keys },
             },
@@ -105,7 +105,7 @@ module.exports = function (module) {
         }
         value = helpers.valueToString(value);
 
-        const item = await module.client.collection("objects").findOne(
+        const item = await module.client.collection('objects').findOne(
             {
                 _key: key,
                 members: value,
@@ -121,9 +121,9 @@ module.exports = function (module) {
         if (!key || !Array.isArray(values) || !values.length) {
             return [];
         }
-        values = values.map((v) => helpers.valueToString(v));
+        values = values.map(v => helpers.valueToString(v));
 
-        const result = await module.client.collection("objects").findOne(
+        const result = await module.client.collection('objects').findOne(
             {
                 _key: key,
             },
@@ -134,7 +134,7 @@ module.exports = function (module) {
         const membersSet = new Set(
             result && Array.isArray(result.members) ? result.members : [],
         );
-        return values.map((v) => membersSet.has(v));
+        return values.map(v => membersSet.has(v));
     };
 
     module.isMemberOfSets = async function (sets, value) {
@@ -144,7 +144,7 @@ module.exports = function (module) {
         value = helpers.valueToString(value);
 
         const result = await module.client
-            .collection("objects")
+            .collection('objects')
             .find(
                 {
                     _key: { $in: sets },
@@ -157,11 +157,11 @@ module.exports = function (module) {
             .toArray();
 
         const map = {};
-        result.forEach((item) => {
+        result.forEach(item => {
             map[item._key] = true;
         });
 
-        return sets.map((set) => !!map[set]);
+        return sets.map(set => !!map[set]);
     };
 
     module.getSetMembers = async function (key) {
@@ -169,7 +169,7 @@ module.exports = function (module) {
             return [];
         }
 
-        const data = await module.client.collection("objects").findOne(
+        const data = await module.client.collection('objects').findOne(
             {
                 _key: key,
             },
@@ -185,7 +185,7 @@ module.exports = function (module) {
             return [];
         }
         const data = await module.client
-            .collection("objects")
+            .collection('objects')
             .find(
                 {
                     _key: { $in: keys },
@@ -197,11 +197,11 @@ module.exports = function (module) {
             .toArray();
 
         const sets = {};
-        data.forEach((set) => {
+        data.forEach(set => {
             sets[set._key] = set.members || [];
         });
 
-        return keys.map((k) => sets[k] || []);
+        return keys.map(k => sets[k] || []);
     };
 
     module.setCount = async function (key) {
@@ -209,10 +209,10 @@ module.exports = function (module) {
             return 0;
         }
         const data = await module.client
-            .collection("objects")
+            .collection('objects')
             .aggregate([
                 { $match: { _key: key } },
-                { $project: { _id: 0, count: { $size: "$members" } } },
+                { $project: { _id: 0, count: { $size: '$members' } } },
             ])
             .toArray();
         return Array.isArray(data) && data.length ? data[0].count : 0;
@@ -220,21 +220,19 @@ module.exports = function (module) {
 
     module.setsCount = async function (keys) {
         const data = await module.client
-            .collection("objects")
+            .collection('objects')
             .aggregate([
                 { $match: { _key: { $in: keys } } },
-                { $project: { _id: 0, _key: 1, count: { $size: "$members" } } },
+                { $project: { _id: 0, _key: 1, count: { $size: '$members' } } },
             ])
             .toArray();
-        const map = _.keyBy(data, "_key");
-        return keys.map((key) =>
-            map.hasOwnProperty(key) ? map[key].count : 0,
-        );
+        const map = _.keyBy(data, '_key');
+        return keys.map(key => (map.hasOwnProperty(key) ? map[key].count : 0));
     };
 
     module.setRemoveRandom = async function (key) {
         const data = await module.client
-            .collection("objects")
+            .collection('objects')
             .findOne({ _key: key });
         if (!data) {
             return;

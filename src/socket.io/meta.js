@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const user = require("../user");
-const topics = require("../topics");
+const user = require('../user');
+const topics = require('../topics');
 
 const SocketMeta = {
     rooms: {},
@@ -24,7 +24,7 @@ SocketMeta.rooms.enter = function (socket, data, callback) {
     }
 
     if (!data) {
-        return callback(new Error("[[error:invalid-data]]"));
+        return callback(new Error('[[error:invalid-data]]'));
     }
 
     if (data.enter) {
@@ -33,10 +33,10 @@ SocketMeta.rooms.enter = function (socket, data, callback) {
 
     if (
         data.enter &&
-        data.enter.startsWith("uid_") &&
+        data.enter.startsWith('uid_') &&
         data.enter !== `uid_${socket.uid}`
     ) {
-        return callback(new Error("[[error:not-allowed]]"));
+        return callback(new Error('[[error:not-allowed]]'));
     }
 
     leaveCurrentRoom(socket);
@@ -59,7 +59,7 @@ SocketMeta.rooms.leaveCurrent = function (socket, data, callback) {
 function leaveCurrentRoom(socket) {
     if (socket.currentRoom) {
         socket.leave(socket.currentRoom);
-        socket.currentRoom = "";
+        socket.currentRoom = '';
     }
 }
 

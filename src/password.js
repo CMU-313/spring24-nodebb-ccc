@@ -1,20 +1,20 @@
-"use strict";
+'use strict';
 
-const path = require("path");
-const crypto = require("crypto");
-const util = require("util");
+const path = require('path');
+const crypto = require('crypto');
+const util = require('util');
 
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 
-const fork = require("./meta/debugFork");
+const fork = require('./meta/debugFork');
 
 function forkChild(message, callback) {
-    const child = fork(path.join(__dirname, "password"));
+    const child = fork(path.join(__dirname, 'password'));
 
-    child.on("message", (msg) => {
+    child.on('message', msg => {
         callback(msg.err ? new Error(msg.err) : null, msg.result);
     });
-    child.on("error", (err) => {
+    child.on('error', err => {
         console.error(err.stack);
         callback(err);
     });
@@ -25,9 +25,9 @@ function forkChild(message, callback) {
 const forkChildAsync = util.promisify(forkChild);
 
 exports.hash = async function (rounds, password) {
-    password = crypto.createHash("sha512").update(password).digest("hex");
+    password = crypto.createHash('sha512').update(password).digest('hex');
     return await forkChildAsync({
-        type: "hash",
+        type: 'hash',
         rounds: rounds,
         password: password,
     });
@@ -37,11 +37,11 @@ exports.compare = async function (password, hash, shaWrapped) {
     const fakeHash = await getFakeHash();
 
     if (shaWrapped) {
-        password = crypto.createHash("sha512").update(password).digest("hex");
+        password = crypto.createHash('sha512').update(password).digest('hex');
     }
 
     return await forkChildAsync({
-        type: "compare",
+        type: 'compare',
         password: password,
         hash: hash || fakeHash,
     });
@@ -57,10 +57,10 @@ async function getFakeHash() {
 }
 
 // child process
-process.on("message", (msg) => {
-    if (msg.type === "hash") {
+process.on('message', msg => {
+    if (msg.type === 'hash') {
         tryMethod(hashPassword, msg);
-    } else if (msg.type === "compare") {
+    } else if (msg.type === 'compare') {
         tryMethod(compare, msg);
     }
 });
@@ -84,9 +84,9 @@ async function hashPassword(msg) {
 
 async function compare(msg) {
     return await bcrypt.compare(
-        String(msg.password || ""),
-        String(msg.hash || ""),
+        String(msg.password || ''),
+        String(msg.hash || ''),
     );
 }
 
-require("./promisify")(exports);
+require('./promisify')(exports);

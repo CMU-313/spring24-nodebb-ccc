@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
+define('accounts/picture', ['pictureCropper', 'api', 'bootbox', 'alerts'], (
     pictureCropper,
     api,
     bootbox,
@@ -10,7 +10,7 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
 
     Picture.openChangeModal = () => {
         socket.emit(
-            "user.getProfilePictures",
+            'user.getProfilePictures',
             {
                 uid: ajaxify.data.uid,
             },
@@ -21,17 +21,17 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
 
                 // boolean to signify whether an uploaded picture is present in the pictures list
                 const uploaded = pictures.reduce(function (memo, cur) {
-                    return memo || cur.type === "uploaded";
+                    return memo || cur.type === 'uploaded';
                 }, false);
 
                 app.parseAndTranslate(
-                    "partials/modals/change_picture_modal",
+                    'partials/modals/change_picture_modal',
                     {
                         pictures: pictures,
                         uploaded: uploaded,
                         icon: {
-                            text: ajaxify.data["icon:text"],
-                            bgColor: ajaxify.data["icon:bgColor"],
+                            text: ajaxify.data['icon:text'],
+                            bgColor: ajaxify.data['icon:bgColor'],
                         },
                         defaultAvatar: ajaxify.data.defaultAvatar,
                         allowProfileImageUploads:
@@ -41,48 +41,48 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
                             uid: ajaxify.data.uid,
                             username: ajaxify.data.username,
                             picture: ajaxify.data.picture,
-                            "icon:text": ajaxify.data["icon:text"],
-                            "icon:bgColor": ajaxify.data["icon:bgColor"],
+                            'icon:text': ajaxify.data['icon:text'],
+                            'icon:bgColor': ajaxify.data['icon:bgColor'],
                         },
                     },
                     function (html) {
                         const modal = bootbox.dialog({
-                            className: "picture-switcher",
-                            title: "[[user:change_picture]]",
+                            className: 'picture-switcher',
+                            title: '[[user:change_picture]]',
                             message: html,
                             show: true,
                             buttons: {
                                 close: {
-                                    label: "[[global:close]]",
+                                    label: '[[global:close]]',
                                     callback: onCloseModal,
-                                    className: "btn-link",
+                                    className: 'btn-link',
                                 },
                                 update: {
-                                    label: "[[global:save_changes]]",
+                                    label: '[[global:save_changes]]',
                                     callback: saveSelection,
                                 },
                             },
                         });
 
-                        modal.on("shown.bs.modal", updateImages);
+                        modal.on('shown.bs.modal', updateImages);
                         modal.on(
-                            "click",
-                            ".list-group-item",
+                            'click',
+                            '.list-group-item',
                             function selectImageType() {
                                 modal
-                                    .find(".list-group-item")
-                                    .removeClass("active");
-                                $(this).addClass("active");
+                                    .find('.list-group-item')
+                                    .removeClass('active');
+                                $(this).addClass('active');
                             },
                         );
                         modal.on(
-                            "change",
+                            'change',
                             'input[type="radio"][name="icon:bgColor"]',
-                            (e) => {
+                            e => {
                                 const value = e.target.value;
                                 modal
-                                    .find(".user-icon")
-                                    .css("background-color", value);
+                                    .find('.user-icon')
+                                    .css('background-color', value);
                             },
                         );
 
@@ -92,27 +92,27 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
                             // Check to see which one is the active picture
                             if (!ajaxify.data.picture) {
                                 modal
-                                    .find(".list-group-item .user-icon")
-                                    .parents(".list-group-item")
-                                    .addClass("active");
+                                    .find('.list-group-item .user-icon')
+                                    .parents('.list-group-item')
+                                    .addClass('active');
                             } else {
                                 modal
-                                    .find(".list-group-item img")
+                                    .find('.list-group-item img')
                                     .each(function () {
                                         if (
-                                            this.getAttribute("src") ===
+                                            this.getAttribute('src') ===
                                             ajaxify.data.picture
                                         ) {
                                             $(this)
-                                                .parents(".list-group-item")
-                                                .addClass("active");
+                                                .parents('.list-group-item')
+                                                .addClass('active');
                                         }
                                     });
                             }
 
                             // Update avatar background colour
                             const radioEl = document.querySelector(
-                                `.modal input[type="radio"][value="${ajaxify.data["icon:bgColor"]}"]`,
+                                `.modal input[type="radio"][value="${ajaxify.data['icon:bgColor']}"]`,
                             );
                             if (radioEl) {
                                 radioEl.checked = true;
@@ -126,23 +126,23 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
 
                         function saveSelection() {
                             const type = modal
-                                .find(".list-group-item.active")
-                                .attr("data-type");
+                                .find('.list-group-item.active')
+                                .attr('data-type');
                             const iconBgColor =
                                 document.querySelector(
                                     '.modal.picture-switcher input[type="radio"]:checked',
-                                ).value || "transparent";
+                                ).value || 'transparent';
 
                             changeUserPicture(type, iconBgColor)
                                 .then(() => {
                                     Picture.updateHeader(
-                                        type === "default"
-                                            ? ""
+                                        type === 'default'
+                                            ? ''
                                             : modal
                                                   .find(
-                                                      ".list-group-item.active img",
+                                                      '.list-group-item.active img',
                                                   )
-                                                  .attr("src"),
+                                                  .attr('src'),
                                         iconBgColor,
                                     );
                                     ajaxify.refresh();
@@ -151,7 +151,7 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
                         }
 
                         function onCloseModal() {
-                            modal.modal("hide");
+                            modal.modal('hide');
                         }
                     },
                 );
@@ -169,10 +169,10 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
         if (!picture && ajaxify.data.defaultAvatar) {
             picture = ajaxify.data.defaultAvatar;
         }
-        $('#header [component="avatar/picture"]')[picture ? "show" : "hide"]();
-        $('#header [component="avatar/icon"]')[!picture ? "show" : "hide"]();
+        $('#header [component="avatar/picture"]')[picture ? 'show' : 'hide']();
+        $('#header [component="avatar/icon"]')[!picture ? 'show' : 'hide']();
         if (picture) {
-            $('#header [component="avatar/picture"]').attr("src", picture);
+            $('#header [component="avatar/picture"]').attr('src', picture);
         }
 
         if (iconBgColor) {
@@ -180,8 +180,8 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
                 .querySelectorAll(
                     '[component="navbar"] [component="avatar/icon"]',
                 )
-                .forEach((el) => {
-                    el.style["background-color"] = iconBgColor;
+                .forEach(el => {
+                    el.style['background-color'] = iconBgColor;
                 });
         }
     };
@@ -189,20 +189,20 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
     function handleImageUpload(modal) {
         function onUploadComplete(urlOnServer) {
             urlOnServer =
-                (!urlOnServer.startsWith("http") ? config.relative_path : "") +
+                (!urlOnServer.startsWith('http') ? config.relative_path : '') +
                 urlOnServer +
-                "?" +
+                '?' +
                 Date.now();
 
             Picture.updateHeader(urlOnServer);
 
             if (ajaxify.data.picture && ajaxify.data.picture.length) {
-                $("#user-current-picture, img.avatar").attr("src", urlOnServer);
+                $('#user-current-picture, img.avatar').attr('src', urlOnServer);
                 ajaxify.data.uploadedpicture = urlOnServer;
             } else {
                 ajaxify.refresh(function () {
-                    $("#user-current-picture, img.avatar").attr(
-                        "src",
+                    $('#user-current-picture, img.avatar').attr(
+                        'src',
                         urlOnServer,
                     );
                 });
@@ -216,24 +216,24 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
             }
         }
 
-        modal.find('[data-action="upload"]').on("click", function () {
-            modal.modal("hide");
+        modal.find('[data-action="upload"]').on('click', function () {
+            modal.modal('hide');
 
             pictureCropper.show(
                 {
-                    socketMethod: "user.uploadCroppedPicture",
+                    socketMethod: 'user.uploadCroppedPicture',
                     route:
                         config.relative_path +
-                        "/api/user/" +
+                        '/api/user/' +
                         ajaxify.data.userslug +
-                        "/uploadpicture",
+                        '/uploadpicture',
                     aspectRatio: 1 / 1,
-                    paramName: "uid",
+                    paramName: 'uid',
                     paramValue: ajaxify.data.theirid,
                     fileSize: ajaxify.data.maximumProfileImageSize,
                     allowSkippingCrop: false,
-                    title: "[[user:upload_picture]]",
-                    description: "[[user:upload_a_picture]]",
+                    title: '[[user:upload_picture]]',
+                    description: '[[user:upload_a_picture]]',
                     accept: ajaxify.data.allowedProfileImageExtensions,
                 },
                 function (url) {
@@ -244,29 +244,29 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
             return false;
         });
 
-        modal.find('[data-action="upload-url"]').on("click", function () {
-            modal.modal("hide");
+        modal.find('[data-action="upload-url"]').on('click', function () {
+            modal.modal('hide');
             app.parseAndTranslate(
-                "partials/modals/upload_picture_from_url_modal",
+                'partials/modals/upload_picture_from_url_modal',
                 {},
                 function (uploadModal) {
-                    uploadModal.modal("show");
+                    uploadModal.modal('show');
 
-                    uploadModal.find(".upload-btn").on("click", function () {
-                        const url = uploadModal.find("#uploadFromUrl").val();
+                    uploadModal.find('.upload-btn').on('click', function () {
+                        const url = uploadModal.find('#uploadFromUrl').val();
                         if (!url) {
                             return false;
                         }
 
-                        uploadModal.modal("hide");
+                        uploadModal.modal('hide');
 
                         pictureCropper.handleImageCrop(
                             {
                                 url: url,
-                                socketMethod: "user.uploadCroppedPicture",
+                                socketMethod: 'user.uploadCroppedPicture',
                                 aspectRatio: 1,
                                 allowSkippingCrop: false,
-                                paramName: "uid",
+                                paramName: 'uid',
                                 paramValue: ajaxify.data.theirid,
                             },
                             onUploadComplete,
@@ -280,14 +280,14 @@ define("accounts/picture", ["pictureCropper", "api", "bootbox", "alerts"], (
             return false;
         });
 
-        modal.find('[data-action="remove-uploaded"]').on("click", function () {
+        modal.find('[data-action="remove-uploaded"]').on('click', function () {
             socket.emit(
-                "user.removeUploadedPicture",
+                'user.removeUploadedPicture',
                 {
                     uid: ajaxify.data.theirid,
                 },
                 function (err) {
-                    modal.modal("hide");
+                    modal.modal('hide');
                     if (err) {
                         return alerts.error(err);
                     }

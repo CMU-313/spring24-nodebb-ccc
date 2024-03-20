@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-const querystring = require("querystring");
+const querystring = require('querystring');
 
-const posts = require("../posts");
-const privileges = require("../privileges");
-const helpers = require("./helpers");
+const posts = require('../posts');
+const privileges = require('../privileges');
+const helpers = require('./helpers');
 
 const postsController = module.exports;
 
@@ -15,7 +15,7 @@ postsController.redirectToPost = async function (req, res, next) {
     }
 
     const [canRead, path] = await Promise.all([
-        privileges.posts.can("topics:read", pid, req.uid),
+        privileges.posts.can('topics:read', pid, req.uid),
         posts.generatePostPath(pid, req.uid),
     ]);
     if (!path) {

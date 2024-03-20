@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-define("forum/unread", [
-    "forum/header/unread",
-    "topicSelect",
-    "components",
-    "topicList",
-    "categorySelector",
-    "alerts",
+define('forum/unread', [
+    'forum/header/unread',
+    'topicSelect',
+    'components',
+    'topicList',
+    'categorySelector',
+    'alerts',
 ], function (
     headerUnread,
     topicSelect,
@@ -18,31 +18,31 @@ define("forum/unread", [
     const Unread = {};
 
     Unread.init = function () {
-        app.enterRoom("unread_topics");
+        app.enterRoom('unread_topics');
 
         handleMarkRead();
 
-        topicList.init("unread");
+        topicList.init('unread');
 
         headerUnread.updateUnreadTopicCount(
-            "/" + ajaxify.data.selectedFilter.url,
+            '/' + ajaxify.data.selectedFilter.url,
             ajaxify.data.topicCount,
         );
     };
 
     function handleMarkRead() {
         function markAllRead() {
-            socket.emit("topics.markAllRead", function (err) {
+            socket.emit('topics.markAllRead', function (err) {
                 if (err) {
                     return alerts.error(err);
                 }
 
-                alerts.success("[[unread:topics_marked_as_read.success]]");
+                alerts.success('[[unread:topics_marked_as_read.success]]');
 
                 $('[component="category"]').empty();
-                $('[component="pagination"]').addClass("hidden");
-                $("#category-no-topics").removeClass("hidden");
-                $(".markread").addClass("hidden");
+                $('[component="pagination"]').addClass('hidden');
+                $('#category-no-topics').removeClass('hidden');
+                $('.markread').addClass('hidden');
             });
         }
 
@@ -51,7 +51,7 @@ define("forum/unread", [
             if (!tids.length) {
                 return;
             }
-            socket.emit("topics.markAsRead", tids, function (err) {
+            socket.emit('topics.markAsRead', tids, function (err) {
                 if (err) {
                     return alerts.error(err);
                 }
@@ -63,14 +63,14 @@ define("forum/unread", [
         function markCategoryRead(cid) {
             function getCategoryTids(cid) {
                 const tids = [];
-                components.get("category/topic", "cid", cid).each(function () {
-                    tids.push($(this).attr("data-tid"));
+                components.get('category/topic', 'cid', cid).each(function () {
+                    tids.push($(this).attr('data-tid'));
                 });
                 return tids;
             }
             const tids = getCategoryTids(cid);
 
-            socket.emit("topics.markCategoryTopicsRead", cid, function (err) {
+            socket.emit('topics.markCategoryTopicsRead', cid, function (err) {
                 if (err) {
                     return alerts.error(err);
                 }
@@ -83,9 +83,9 @@ define("forum/unread", [
             {
                 onSelect: function (category) {
                     selector.selectCategory(0);
-                    if (category.cid === "all") {
+                    if (category.cid === 'all') {
                         markAllRead();
-                    } else if (category.cid === "selected") {
+                    } else if (category.cid === 'selected') {
                         markSelectedRead();
                     } else if (parseInt(category.cid, 10) > 0) {
                         markCategoryRead(category.cid);
@@ -93,17 +93,17 @@ define("forum/unread", [
                 },
                 selectCategoryLabel:
                     ajaxify.data.selectCategoryLabel ||
-                    "[[unread:mark_as_read]]",
+                    '[[unread:mark_as_read]]',
                 localCategories: [
                     {
-                        cid: "selected",
-                        name: "[[unread:selected]]",
-                        icon: "",
+                        cid: 'selected',
+                        name: '[[unread:selected]]',
+                        icon: '',
                     },
                     {
-                        cid: "all",
-                        name: "[[unread:all]]",
-                        icon: "",
+                        cid: 'all',
+                        name: '[[unread:all]]',
+                        icon: '',
                     },
                 ],
             },
@@ -113,17 +113,17 @@ define("forum/unread", [
     function doneRemovingTids(tids) {
         removeTids(tids);
 
-        alerts.success("[[unread:topics_marked_as_read.success]]");
+        alerts.success('[[unread:topics_marked_as_read.success]]');
 
         if (!$('[component="category"]').children().length) {
-            $("#category-no-topics").removeClass("hidden");
-            $(".markread").addClass("hidden");
+            $('#category-no-topics').removeClass('hidden');
+            $('.markread').addClass('hidden');
         }
     }
 
     function removeTids(tids) {
         for (let i = 0; i < tids.length; i += 1) {
-            components.get("category/topic", "tid", tids[i]).remove();
+            components.get('category/topic', 'tid', tids[i]).remove();
         }
     }
 

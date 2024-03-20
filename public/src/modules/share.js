@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-define("share", ["hooks"], function (hooks) {
+define('share', ['hooks'], function (hooks) {
     const module = {};
 
     module.addShareHandlers = function (name) {
-        const baseUrl = window.location.protocol + "//" + window.location.host;
+        const baseUrl = window.location.protocol + '//' + window.location.host;
 
         function openShare(url, urlToPost, width, height) {
             window.open(
@@ -12,24 +12,24 @@ define("share", ["hooks"], function (hooks) {
                     encodeURIComponent(
                         baseUrl + config.relative_path + urlToPost,
                     ),
-                "_blank",
-                "width=" +
+                '_blank',
+                'width=' +
                     width +
-                    ",height=" +
+                    ',height=' +
                     height +
-                    ",scrollbars=no,status=no",
+                    ',scrollbars=no,status=no',
             );
-            hooks.fire("action:share.open", {
+            hooks.fire('action:share.open', {
                 url: url,
                 urlToPost: urlToPost,
             });
             return false;
         }
 
-        $("#content")
-            .off("shown.bs.dropdown", ".share-dropdown")
-            .on("shown.bs.dropdown", ".share-dropdown", function () {
-                const postLink = $(this).find(".post-link");
+        $('#content')
+            .off('shown.bs.dropdown', '.share-dropdown')
+            .on('shown.bs.dropdown', '.share-dropdown', function () {
+                const postLink = $(this).find('.post-link');
                 postLink.val(baseUrl + getPostUrl($(this)));
 
                 // without the setTimeout can't select the text in the input
@@ -38,16 +38,16 @@ define("share", ["hooks"], function (hooks) {
                 }, 50);
             });
 
-        addHandler(".post-link", function (e) {
+        addHandler('.post-link', function (e) {
             e.preventDefault();
             return false;
         });
 
         addHandler('[component="share/twitter"]', function () {
             return openShare(
-                "https://twitter.com/intent/tweet?text=" +
+                'https://twitter.com/intent/tweet?text=' +
                     encodeURIComponent(name) +
-                    "&url=",
+                    '&url=',
                 getPostUrl($(this)),
                 550,
                 420,
@@ -56,26 +56,26 @@ define("share", ["hooks"], function (hooks) {
 
         addHandler('[component="share/facebook"]', function () {
             return openShare(
-                "https://www.facebook.com/sharer/sharer.php?u=",
+                'https://www.facebook.com/sharer/sharer.php?u=',
                 getPostUrl($(this)),
                 626,
                 436,
             );
         });
 
-        hooks.fire("action:share.addHandlers", { openShare: openShare });
+        hooks.fire('action:share.addHandlers', { openShare: openShare });
     };
 
     function addHandler(selector, callback) {
-        $("#content").off("click", selector).on("click", selector, callback);
+        $('#content').off('click', selector).on('click', selector, callback);
     }
 
     function getPostUrl(clickedElement) {
         const pid = parseInt(
-            clickedElement.parents("[data-pid]").attr("data-pid"),
+            clickedElement.parents('[data-pid]').attr('data-pid'),
             10,
         );
-        return "/post" + (pid ? "/" + pid : "");
+        return '/post' + (pid ? '/' + pid : '');
     }
 
     return module;

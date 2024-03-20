@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
-const validator = require("validator");
+const validator = require('validator');
 
-const meta = require("../meta");
-const db = require("../database");
-const plugins = require("../plugins");
-const notifications = require("../notifications");
-const languages = require("../languages");
+const meta = require('../meta');
+const db = require('../database');
+const plugins = require('../plugins');
+const notifications = require('../notifications');
+const languages = require('../languages');
 
 module.exports = function (User) {
     User.getSettings = async function (uid) {
@@ -24,20 +24,18 @@ module.exports = function (User) {
             return [];
         }
 
-        const keys = uids.map((uid) => `user:${uid}:settings`);
+        const keys = uids.map(uid => `user:${uid}:settings`);
         let settings = await db.getObjects(keys);
         settings = settings.map((userSettings, index) => {
             userSettings = userSettings || {};
             userSettings.uid = uids[index];
             return userSettings;
         });
-        return await Promise.all(
-            settings.map((s) => onSettingsLoaded(s.uid, s)),
-        );
+        return await Promise.all(settings.map(s => onSettingsLoaded(s.uid, s)));
     };
 
     async function onSettingsLoaded(uid, settings) {
-        const data = await plugins.hooks.fire("filter:user.getSettings", {
+        const data = await plugins.hooks.fire('filter:user.getSettings', {
             uid: uid,
             settings: settings,
         });
@@ -47,21 +45,21 @@ module.exports = function (User) {
         const defaultPostsPerPage = meta.config.postsPerPage;
 
         settings.showemail =
-            parseInt(getSetting(settings, "showemail", 0), 10) === 1;
+            parseInt(getSetting(settings, 'showemail', 0), 10) === 1;
         settings.showfullname =
-            parseInt(getSetting(settings, "showfullname", 0), 10) === 1;
+            parseInt(getSetting(settings, 'showfullname', 0), 10) === 1;
         settings.openOutgoingLinksInNewTab =
             parseInt(
-                getSetting(settings, "openOutgoingLinksInNewTab", 0),
+                getSetting(settings, 'openOutgoingLinksInNewTab', 0),
                 10,
             ) === 1;
         settings.dailyDigestFreq = getSetting(
             settings,
-            "dailyDigestFreq",
-            "off",
+            'dailyDigestFreq',
+            'off',
         );
         settings.usePagination =
-            parseInt(getSetting(settings, "usePagination", 0), 10) === 1;
+            parseInt(getSetting(settings, 'usePagination', 0), 10) === 1;
         settings.topicsPerPage = Math.min(
             meta.config.maxTopicsPerPage,
             settings.topicsPerPage
@@ -77,54 +75,54 @@ module.exports = function (User) {
             defaultPostsPerPage,
         );
         settings.userLang =
-            settings.userLang || meta.config.defaultLang || "en-GB";
+            settings.userLang || meta.config.defaultLang || 'en-GB';
         settings.acpLang = settings.acpLang || settings.userLang;
         settings.topicPostSort = getSetting(
             settings,
-            "topicPostSort",
-            "oldest_to_newest",
+            'topicPostSort',
+            'oldest_to_newest',
         );
         settings.categoryTopicSort = getSetting(
             settings,
-            "categoryTopicSort",
-            "newest_to_oldest",
+            'categoryTopicSort',
+            'newest_to_oldest',
         );
         settings.followTopicsOnCreate =
-            parseInt(getSetting(settings, "followTopicsOnCreate", 1), 10) === 1;
+            parseInt(getSetting(settings, 'followTopicsOnCreate', 1), 10) === 1;
         settings.followTopicsOnReply =
-            parseInt(getSetting(settings, "followTopicsOnReply", 0), 10) === 1;
+            parseInt(getSetting(settings, 'followTopicsOnReply', 0), 10) === 1;
         settings.upvoteNotifFreq = getSetting(
             settings,
-            "upvoteNotifFreq",
-            "all",
+            'upvoteNotifFreq',
+            'all',
         );
         settings.restrictChat =
-            parseInt(getSetting(settings, "restrictChat", 0), 10) === 1;
+            parseInt(getSetting(settings, 'restrictChat', 0), 10) === 1;
         settings.topicSearchEnabled =
-            parseInt(getSetting(settings, "topicSearchEnabled", 0), 10) === 1;
+            parseInt(getSetting(settings, 'topicSearchEnabled', 0), 10) === 1;
         settings.updateUrlWithPostIndex =
-            parseInt(getSetting(settings, "updateUrlWithPostIndex", 1), 10) ===
+            parseInt(getSetting(settings, 'updateUrlWithPostIndex', 1), 10) ===
             1;
         settings.bootswatchSkin = validator.escape(
-            String(settings.bootswatchSkin || ""),
+            String(settings.bootswatchSkin || ''),
         );
         settings.homePageRoute = validator
-            .escape(String(settings.homePageRoute || ""))
-            .replace(/&#x2F;/g, "/");
+            .escape(String(settings.homePageRoute || ''))
+            .replace(/&#x2F;/g, '/');
         settings.scrollToMyPost =
-            parseInt(getSetting(settings, "scrollToMyPost", 1), 10) === 1;
+            parseInt(getSetting(settings, 'scrollToMyPost', 1), 10) === 1;
         settings.categoryWatchState = getSetting(
             settings,
-            "categoryWatchState",
-            "notwatching",
+            'categoryWatchState',
+            'notwatching',
         );
 
         const notificationTypes = await notifications.getAllNotificationTypes();
-        notificationTypes.forEach((notificationType) => {
+        notificationTypes.forEach(notificationType => {
             settings[notificationType] = getSetting(
                 settings,
                 notificationType,
-                "notification",
+                'notification',
             );
         });
 
@@ -165,14 +163,14 @@ module.exports = function (User) {
 
         const languageCodes = await languages.listCodes();
         if (data.userLang && !languageCodes.includes(data.userLang)) {
-            throw new Error("[[error:invalid-language]]");
+            throw new Error('[[error:invalid-language]]');
         }
         if (data.acpLang && !languageCodes.includes(data.acpLang)) {
-            throw new Error("[[error:invalid-language]]");
+            throw new Error('[[error:invalid-language]]');
         }
         data.userLang = data.userLang || meta.config.defaultLang;
 
-        plugins.hooks.fire("action:user.saveSettings", {
+        plugins.hooks.fire('action:user.saveSettings', {
             uid: uid,
             settings: data,
         });
@@ -181,7 +179,7 @@ module.exports = function (User) {
             showemail: data.showemail,
             showfullname: data.showfullname,
             openOutgoingLinksInNewTab: data.openOutgoingLinksInNewTab,
-            dailyDigestFreq: data.dailyDigestFreq || "off",
+            dailyDigestFreq: data.dailyDigestFreq || 'off',
             usePagination: data.usePagination,
             topicsPerPage: Math.min(
                 data.topicsPerPage,
@@ -199,10 +197,10 @@ module.exports = function (User) {
             topicSearchEnabled: data.topicSearchEnabled,
             updateUrlWithPostIndex: data.updateUrlWithPostIndex,
             homePageRoute: (
-                (data.homePageRoute === "custom"
+                (data.homePageRoute === 'custom'
                     ? data.homePageCustom
-                    : data.homePageRoute) || ""
-            ).replace(/^\//, ""),
+                    : data.homePageRoute) || ''
+            ).replace(/^\//, ''),
             scrollToMyPost: data.scrollToMyPost,
             upvoteNotifFreq: data.upvoteNotifFreq,
             bootswatchSkin: data.bootswatchSkin,
@@ -211,12 +209,12 @@ module.exports = function (User) {
             topicPostSort: data.topicPostSort,
         };
         const notificationTypes = await notifications.getAllNotificationTypes();
-        notificationTypes.forEach((notificationType) => {
+        notificationTypes.forEach(notificationType => {
             if (data[notificationType]) {
                 settings[notificationType] = data[notificationType];
             }
         });
-        const result = await plugins.hooks.fire("filter:user.saveSettings", {
+        const result = await plugins.hooks.fire('filter:user.saveSettings', {
             uid: uid,
             settings: settings,
             data: data,
@@ -228,10 +226,10 @@ module.exports = function (User) {
 
     User.updateDigestSetting = async function (uid, dailyDigestFreq) {
         await db.sortedSetsRemove(
-            ["digest:day:uids", "digest:week:uids", "digest:month:uids"],
+            ['digest:day:uids', 'digest:week:uids', 'digest:month:uids'],
             uid,
         );
-        if (["day", "week", "biweek", "month"].includes(dailyDigestFreq)) {
+        if (['day', 'week', 'biweek', 'month'].includes(dailyDigestFreq)) {
             await db.sortedSetAdd(
                 `digest:${dailyDigestFreq}:uids`,
                 Date.now(),

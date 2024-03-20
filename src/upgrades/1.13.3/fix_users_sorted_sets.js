@@ -1,14 +1,14 @@
-"use strict";
+'use strict';
 
-const db = require("../../database");
-const batch = require("../../batch");
+const db = require('../../database');
+const batch = require('../../batch');
 
 module.exports = {
-    name: "Fix user sorted sets",
+    name: 'Fix user sorted sets',
     timestamp: Date.UTC(2020, 4, 2),
     method: async function () {
         const { progress } = this;
-        const nextUid = await db.getObjectField("global", "nextUid");
+        const nextUid = await db.getObjectField('global', 'nextUid');
         const allUids = [];
         for (let i = 1; i <= nextUid; i++) {
             allUids.push(i);
@@ -17,23 +17,23 @@ module.exports = {
         progress.total = nextUid;
         let totalUserCount = 0;
 
-        await db.delete("user:null");
+        await db.delete('user:null');
         await db.sortedSetsRemove(
             [
-                "users:joindate",
-                "users:reputation",
-                "users:postcount",
-                "users:flags",
+                'users:joindate',
+                'users:reputation',
+                'users:postcount',
+                'users:flags',
             ],
-            "null",
+            'null',
         );
 
         await batch.processArray(
             allUids,
-            async (uids) => {
+            async uids => {
                 progress.incr(uids.length);
                 const userData = await db.getObjects(
-                    uids.map((id) => `user:${id}`),
+                    uids.map(id => `user:${id}`),
                 );
 
                 await Promise.all(
@@ -41,10 +41,10 @@ module.exports = {
                         if (!userData || !userData.uid) {
                             await db.sortedSetsRemove(
                                 [
-                                    "users:joindate",
-                                    "users:reputation",
-                                    "users:postcount",
-                                    "users:flags",
+                                    'users:joindate',
+                                    'users:reputation',
+                                    'users:postcount',
+                                    'users:flags',
                                 ],
                                 uids[index],
                             );
@@ -56,27 +56,27 @@ module.exports = {
                         totalUserCount += 1;
                         await db.sortedSetAddBulk([
                             [
-                                "users:joindate",
+                                'users:joindate',
                                 userData.joindate || Date.now(),
                                 uids[index],
                             ],
                             [
-                                "users:reputation",
+                                'users:reputation',
                                 userData.reputation || 0,
                                 uids[index],
                             ],
                             [
-                                "users:postcount",
+                                'users:postcount',
                                 userData.postcount || 0,
                                 uids[index],
                             ],
                         ]);
                         if (
-                            userData.hasOwnProperty("flags") &&
+                            userData.hasOwnProperty('flags') &&
                             parseInt(userData.flags, 10) > 0
                         ) {
                             await db.sortedSetAdd(
-                                "users:flags",
+                                'users:flags',
                                 userData.flags,
                                 uids[index],
                             );
@@ -90,6 +90,6 @@ module.exports = {
             },
         );
 
-        await db.setObjectField("global", "userCount", totalUserCount);
+        await db.setObjectField('global', 'userCount', totalUserCount);
     },
 };

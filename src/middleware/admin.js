@@ -1,29 +1,29 @@
-"use strict";
+'use strict';
 
-const winston = require("winston");
-const jsesc = require("jsesc");
-const nconf = require("nconf");
-const semver = require("semver");
+const winston = require('winston');
+const jsesc = require('jsesc');
+const nconf = require('nconf');
+const semver = require('semver');
 
-const user = require("../user");
-const meta = require("../meta");
-const plugins = require("../plugins");
-const privileges = require("../privileges");
-const utils = require("../utils");
-const versions = require("../admin/versions");
-const helpers = require("./helpers");
+const user = require('../user');
+const meta = require('../meta');
+const plugins = require('../plugins');
+const privileges = require('../privileges');
+const utils = require('../utils');
+const versions = require('../admin/versions');
+const helpers = require('./helpers');
 
 const controllers = {
-    api: require("../controllers/api"),
-    helpers: require("../controllers/helpers"),
+    api: require('../controllers/api'),
+    helpers: require('../controllers/helpers'),
 };
 
 const middleware = module.exports;
 
 middleware.buildHeader = helpers.try(async (req, res, next) => {
     res.locals.renderAdminHeader = true;
-    if (req.method === "GET") {
-        await require("./index").applyCSRFasync(req, res);
+    if (req.method === 'GET') {
+        await require('./index').applyCSRFasync(req, res);
     }
 
     res.locals.config = await controllers.api.loadConfig(req);
@@ -39,15 +39,15 @@ middleware.renderHeader = async (req, res, data) => {
 
     const results = await utils.promiseParallel({
         userData: user.getUserFields(req.uid, [
-            "username",
-            "userslug",
-            "email",
-            "picture",
-            "email:confirmed",
+            'username',
+            'userslug',
+            'email',
+            'picture',
+            'email:confirmed',
         ]),
         scripts: getAdminScripts(),
         custom_header: plugins.hooks.fire(
-            "filter:admin.header.build",
+            'filter:admin.header.build',
             custom_header,
         ),
         configs: meta.configs.list(),
@@ -58,16 +58,16 @@ middleware.renderHeader = async (req, res, data) => {
 
     const { userData } = results;
     userData.uid = req.uid;
-    userData["email:confirmed"] = userData["email:confirmed"] === 1;
+    userData['email:confirmed'] = userData['email:confirmed'] === 1;
     userData.privileges = results.privileges;
 
-    let acpPath = req.path.slice(1).split("/");
+    let acpPath = req.path.slice(1).split('/');
     acpPath.forEach((path, i) => {
         acpPath[i] = path.charAt(0).toUpperCase() + path.slice(1);
     });
-    acpPath = acpPath.join(" > ");
+    acpPath = acpPath.join(' > ');
 
-    const version = nconf.get("version");
+    const version = nconf.get('version');
 
     res.locals.config.userLang =
         res.locals.config.acpLang || res.locals.config.userLang;
@@ -85,9 +85,9 @@ middleware.renderHeader = async (req, res, data) => {
         plugins: results.custom_header.plugins,
         authentication: results.custom_header.authentication,
         scripts: results.scripts,
-        "cache-buster": meta.config["cache-buster"] || "",
+        'cache-buster': meta.config['cache-buster'] || '',
         env: !!process.env.NODE_ENV,
-        title: `${acpPath || "Dashboard"} | NodeBB Admin Control Panel`,
+        title: `${acpPath || 'Dashboard'} | NodeBB Admin Control Panel`,
         bodyClass: data.bodyClass,
         version: version,
         latestVersion: results.latestVersion,
@@ -96,20 +96,20 @@ middleware.renderHeader = async (req, res, data) => {
         showManageMenu:
             results.privileges.superadmin ||
             [
-                "categories",
-                "privileges",
-                "users",
-                "admins-mods",
-                "groups",
-                "tags",
-                "settings",
-            ].some((priv) => results.privileges[`admin:${priv}`]),
+                'categories',
+                'privileges',
+                'users',
+                'admins-mods',
+                'groups',
+                'tags',
+                'settings',
+            ].some(priv => results.privileges[`admin:${priv}`]),
     };
 
     templateValues.template = { name: res.locals.template };
     templateValues.template[res.locals.template] = true;
     ({ templateData: templateValues } = await plugins.hooks.fire(
-        "filter:middleware.renderAdminHeader",
+        'filter:middleware.renderAdminHeader',
         {
             req,
             res,
@@ -118,12 +118,12 @@ middleware.renderHeader = async (req, res, data) => {
         },
     ));
 
-    return await req.app.renderAsync("admin/header", templateValues);
+    return await req.app.renderAsync('admin/header', templateValues);
 };
 
 async function getAdminScripts() {
-    const scripts = await plugins.hooks.fire("filter:admin.scripts.get", []);
-    return scripts.map((script) => ({ src: script }));
+    const scripts = await plugins.hooks.fire('filter:admin.scripts.get', []);
+    return scripts.map(script => ({ src: script }));
 }
 
 async function getLatestVersion() {
@@ -137,7 +137,7 @@ async function getLatestVersion() {
 }
 
 middleware.renderFooter = async function (req, res, data) {
-    return await req.app.renderAsync("admin/footer", data);
+    return await req.app.renderAsync('admin/footer', data);
 };
 
 middleware.checkPrivileges = helpers.try(async (req, res, next) => {
@@ -147,7 +147,7 @@ middleware.checkPrivileges = helpers.try(async (req, res, next) => {
     }
 
     // Otherwise, check for privilege based on page (if not in mapping, deny access)
-    const path = req.path.replace(/^(\/api)?(\/v3)?\/admin\/?/g, "");
+    const path = req.path.replace(/^(\/api)?(\/v3)?\/admin\/?/g, '');
     if (path) {
         const privilege = privileges.admin.resolve(path);
         if (!(await privileges.admin.can(privilege, req.uid))) {
@@ -189,18 +189,18 @@ middleware.checkPrivileges = helpers.try(async (req, res, next) => {
     }
 
     let returnTo = req.path;
-    if (nconf.get("relative_path")) {
+    if (nconf.get('relative_path')) {
         returnTo = req.path.replace(
-            new RegExp(`^${nconf.get("relative_path")}`),
-            "",
+            new RegExp(`^${nconf.get('relative_path')}`),
+            '',
         );
     }
-    returnTo = returnTo.replace(/^\/api/, "");
+    returnTo = returnTo.replace(/^\/api/, '');
 
     req.session.returnTo = returnTo;
     req.session.forceLogin = 1;
 
-    await plugins.hooks.fire("response:auth.relogin", { req, res });
+    await plugins.hooks.fire('response:auth.relogin', { req, res });
     if (res.headersSent) {
         return;
     }
@@ -208,6 +208,6 @@ middleware.checkPrivileges = helpers.try(async (req, res, next) => {
     if (res.locals.isAPI) {
         res.status(401).json({});
     } else {
-        res.redirect(`${nconf.get("relative_path")}/login?local=1`);
+        res.redirect(`${nconf.get('relative_path')}/login?local=1`);
     }
 });

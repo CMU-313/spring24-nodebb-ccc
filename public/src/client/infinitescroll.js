@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-define("forum/infinitescroll", ["hooks", "alerts"], function (hooks, alerts) {
+define('forum/infinitescroll', ['hooks', 'alerts'], function (hooks, alerts) {
     const scroll = {};
     let callback;
     let previousScrollTop = 0;
@@ -9,8 +9,8 @@ define("forum/infinitescroll", ["hooks", "alerts"], function (hooks, alerts) {
     let scrollTimeout = 0;
 
     scroll.init = function (el, cb) {
-        const $body = $("body");
-        if (typeof el === "function") {
+        const $body = $('body');
+        if (typeof el === 'function') {
             callback = el;
             container = $body;
         } else {
@@ -19,8 +19,8 @@ define("forum/infinitescroll", ["hooks", "alerts"], function (hooks, alerts) {
         }
         previousScrollTop = $(window).scrollTop();
         $(window)
-            .off("scroll", startScrollTimeout)
-            .on("scroll", startScrollTimeout);
+            .off('scroll', startScrollTimeout)
+            .on('scroll', startScrollTimeout);
 
         if ($body.height() <= $(window).height()) {
             callback(1);
@@ -40,8 +40,8 @@ define("forum/infinitescroll", ["hooks", "alerts"], function (hooks, alerts) {
     function onScroll() {
         const bsEnv = utils.findBootstrapEnvironment();
         const mobileComposerOpen =
-            (bsEnv === "xs" || bsEnv === "sm") &&
-            $("html").hasClass("composing");
+            (bsEnv === 'xs' || bsEnv === 'sm') &&
+            $('html').hasClass('composing');
         if (loadingMore || mobileComposerOpen) {
             return;
         }
@@ -78,7 +78,7 @@ define("forum/infinitescroll", ["hooks", "alerts"], function (hooks, alerts) {
         loadingMore = true;
 
         const hookData = { method: method, data: data };
-        hooks.fire("action:infinitescroll.loadmore", hookData);
+        hooks.fire('action:infinitescroll.loadmore', hookData);
 
         socket.emit(hookData.method, hookData.data, function (err, data) {
             if (err) {
@@ -98,13 +98,13 @@ define("forum/infinitescroll", ["hooks", "alerts"], function (hooks, alerts) {
         loadingMore = true;
         const url =
             config.relative_path +
-            "/api" +
+            '/api' +
             location.pathname.replace(
-                new RegExp("^" + config.relative_path),
-                "",
+                new RegExp('^' + config.relative_path),
+                '',
             );
         const hookData = { url: url, data: data };
-        hooks.fire("action:infinitescroll.loadmore.xhr", hookData);
+        hooks.fire('action:infinitescroll.loadmore.xhr', hookData);
 
         $.get(url, data, function (data) {
             callback(data, function () {

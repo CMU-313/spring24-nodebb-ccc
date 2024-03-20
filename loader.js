@@ -1,30 +1,30 @@
-"use strict";
+'use strict';
 
-const nconf = require("nconf");
-const fs = require("fs");
-const url = require("url");
-const path = require("path");
-const { fork } = require("child_process");
-const logrotate = require("logrotate-stream");
-const mkdirp = require("mkdirp");
+const nconf = require('nconf');
+const fs = require('fs');
+const url = require('url');
+const path = require('path');
+const { fork } = require('child_process');
+const logrotate = require('logrotate-stream');
+const mkdirp = require('mkdirp');
 
-const file = require("./src/file");
-const pkg = require("./package.json");
+const file = require('./src/file');
+const pkg = require('./package.json');
 
 const pathToConfig = path.resolve(
     __dirname,
-    process.env.CONFIG || "config.json",
+    process.env.CONFIG || 'config.json',
 );
 
 nconf.argv().env().file({
     file: pathToConfig,
 });
 
-const pidFilePath = path.join(__dirname, "pidfile");
+const pidFilePath = path.join(__dirname, 'pidfile');
 
 const outputLogFilePath = path.join(
     __dirname,
-    nconf.get("logFile") || "logs/output.log",
+    nconf.get('logFile') || 'logs/output.log',
 );
 
 const logDir = path.dirname(outputLogFilePath);
@@ -34,47 +34,47 @@ if (!fs.existsSync(logDir)) {
 
 const output = logrotate({
     file: outputLogFilePath,
-    size: "1m",
+    size: '1m',
     keep: 3,
     compress: true,
 });
 const silent =
-    nconf.get("silent") === "false" ? false : nconf.get("silent") !== false;
+    nconf.get('silent') === 'false' ? false : nconf.get('silent') !== false;
 let numProcs;
 const workers = [];
 const Loader = {
     timesStarted: 0,
 };
-const appPath = path.join(__dirname, "app.js");
+const appPath = path.join(__dirname, 'app.js');
 
 Loader.init = function () {
     if (silent) {
         console.log = (...args) => {
-            output.write(`${args.join(" ")}\n`);
+            output.write(`${args.join(' ')}\n`);
         };
     }
 
-    process.on("SIGHUP", Loader.restart);
-    process.on("SIGTERM", Loader.stop);
+    process.on('SIGHUP', Loader.restart);
+    process.on('SIGTERM', Loader.stop);
 };
 
 Loader.displayStartupMessages = function () {
-    console.log("");
+    console.log('');
     console.log(
         `NodeBB v${pkg.version} Copyright (C) 2013-${new Date().getFullYear()} NodeBB Inc.`,
     );
-    console.log("This program comes with ABSOLUTELY NO WARRANTY.");
+    console.log('This program comes with ABSOLUTELY NO WARRANTY.');
     console.log(
-        "This is free software, and you are welcome to redistribute it under certain conditions.",
+        'This is free software, and you are welcome to redistribute it under certain conditions.',
     );
     console.log(
-        "For the full license, please visit: http://www.gnu.org/copyleft/gpl.html",
+        'For the full license, please visit: http://www.gnu.org/copyleft/gpl.html',
     );
-    console.log("");
+    console.log('');
 };
 
 Loader.addWorkerEvents = function (worker) {
-    worker.on("exit", (code, signal) => {
+    worker.on('exit', (code, signal) => {
         if (code !== 0) {
             if (Loader.timesStarted < numProcs * 3) {
                 Loader.timesStarted += 1;
@@ -96,26 +96,26 @@ Loader.addWorkerEvents = function (worker) {
             `[cluster] Child Process (${worker.pid}) has exited (code: ${code}, signal: ${signal})`,
         );
         if (!(worker.suicide || code === 0)) {
-            console.log("[cluster] Spinning up another process...");
+            console.log('[cluster] Spinning up another process...');
 
             forkWorker(worker.index, worker.isPrimary);
         }
     });
 
-    worker.on("message", (message) => {
-        if (message && typeof message === "object" && message.action) {
+    worker.on('message', message => {
+        if (message && typeof message === 'object' && message.action) {
             switch (message.action) {
-                case "restart":
-                    console.log("[cluster] Restarting...");
+                case 'restart':
+                    console.log('[cluster] Restarting...');
                     Loader.restart();
                     break;
-                case "pubsub":
-                    workers.forEach((w) => {
+                case 'pubsub':
+                    workers.forEach(w => {
                         w.send(message);
                     });
                     break;
-                case "socket.io":
-                    workers.forEach((w) => {
+                case 'socket.io':
+                    workers.forEach(w => {
                         if (w !== worker) {
                             w.send(message);
                         }
@@ -146,7 +146,7 @@ function forkWorker(index, isPrimary) {
     }
 
     process.env.isPrimary = isPrimary;
-    process.env.isCluster = nconf.get("isCluster") || ports.length > 1;
+    process.env.isCluster = nconf.get('isCluster') || ports.length > 1;
     process.env.port = ports[index];
 
     const worker = fork(appPath, args, {
@@ -164,7 +164,7 @@ function forkWorker(index, isPrimary) {
     if (silent) {
         const output = logrotate({
             file: outputLogFilePath,
-            size: "1m",
+            size: '1m',
             keep: 3,
             compress: true,
         });
@@ -174,15 +174,15 @@ function forkWorker(index, isPrimary) {
 }
 
 function getPorts() {
-    const _url = nconf.get("url");
+    const _url = nconf.get('url');
     if (!_url) {
         console.log(
-            "[cluster] url is undefined, please check your config.json",
+            '[cluster] url is undefined, please check your config.json',
         );
         process.exit();
     }
     const urlObject = url.parse(_url);
-    let port = nconf.get("PORT") || nconf.get("port") || urlObject.port || 4567;
+    let port = nconf.get('PORT') || nconf.get('port') || urlObject.port || 4567;
     if (!Array.isArray(port)) {
         port = [port];
     }
@@ -192,19 +192,19 @@ function getPorts() {
 Loader.restart = function () {
     killWorkers();
 
-    nconf.remove("file");
-    nconf.use("file", { file: pathToConfig });
+    nconf.remove('file');
+    nconf.use('file', { file: pathToConfig });
 
-    fs.readFile(pathToConfig, { encoding: "utf-8" }, (err, configFile) => {
+    fs.readFile(pathToConfig, { encoding: 'utf-8' }, (err, configFile) => {
         if (err) {
-            console.error("Error reading config");
+            console.error('Error reading config');
             throw err;
         }
 
         const conf = JSON.parse(configFile);
 
         nconf.stores.env.readOnly = false;
-        nconf.set("url", conf.url);
+        nconf.set('url', conf.url);
         nconf.stores.env.readOnly = true;
 
         if (process.env.url !== conf.url) {
@@ -218,30 +218,30 @@ Loader.stop = function () {
     killWorkers();
 
     // Clean up the pidfile
-    if (nconf.get("daemon") !== "false" && nconf.get("daemon") !== false) {
+    if (nconf.get('daemon') !== 'false' && nconf.get('daemon') !== false) {
         fs.unlinkSync(pidFilePath);
     }
 };
 
 function killWorkers() {
-    workers.forEach((worker) => {
+    workers.forEach(worker => {
         worker.suicide = true;
         worker.kill();
     });
 }
 
-fs.open(pathToConfig, "r", (err) => {
+fs.open(pathToConfig, 'r', err => {
     if (err) {
         // No config detected, kickstart web installer
-        fork("app");
+        fork('app');
         return;
     }
 
-    if (nconf.get("daemon") !== "false" && nconf.get("daemon") !== false) {
+    if (nconf.get('daemon') !== 'false' && nconf.get('daemon') !== false) {
         if (file.existsSync(pidFilePath)) {
             let pid = 0;
             try {
-                pid = fs.readFileSync(pidFilePath, { encoding: "utf-8" });
+                pid = fs.readFileSync(pidFilePath, { encoding: 'utf-8' });
                 if (pid) {
                     process.kill(pid, 0);
                     console.info(
@@ -255,7 +255,7 @@ fs.open(pathToConfig, "r", (err) => {
                     fs.unlinkSync(pidFilePath);
                 }
             } catch (err) {
-                if (err.code === "ESRCH") {
+                if (err.code === 'ESRCH') {
                     console.info(
                         `Process "${pid}" from pidfile not found, deleting pidfile`,
                     );
@@ -267,7 +267,7 @@ fs.open(pathToConfig, "r", (err) => {
             }
         }
 
-        require("daemon")({
+        require('daemon')({
             stdout: process.stdout,
             stderr: process.stderr,
             cwd: process.cwd(),
@@ -280,7 +280,7 @@ fs.open(pathToConfig, "r", (err) => {
         Loader.displayStartupMessages();
         Loader.start();
     } catch (err) {
-        console.error("[loader] Error during startup");
+        console.error('[loader] Error during startup');
         throw err;
     }
 });
