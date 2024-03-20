@@ -51,32 +51,6 @@ jobs:
         uses: bahmutov/npm-install@v1
         with:
           useLockFile: false
-
-      - name: Setup on MongoDB
-        env:
-          SETUP: >-
-            {
-              "url": "http://127.0.0.1:4567",
-              "secret": "abcdef",
-              "admin:username": "admin",
-              "admin:email": "test@example.org",
-              "admin:password": "hAN3Eg8W",
-              "admin:password:confirm": "hAN3Eg8W",
-              "database": "mongo",
-              "mongo:host": "127.0.0.1",
-              "mongo:port": 27017,
-              "mongo:username": "",
-              "mongo:password": "",
-              "mongo:database": "nodebb"
-            }
-          CI: >-
-            {
-              "host": "127.0.0.1",
-              "port": 27017,
-              "database": "ci_test"
-            }
-        run: |
-          node app --setup="${SETUP}" --ci="${CI}"
           
       - name: Setup on Redis
         if: startsWith(matrix.database, 'redis')
@@ -121,15 +95,3 @@ jobs:
       #- name: Run k6 extension test
       #  run: ./k6 run k6-testing.js
       # set up k6
-         
-  finish:
-    permissions:
-      checks: write # for coverallsapp/github-action to create new checks
-    needs: k6_local_test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@1.1.3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
