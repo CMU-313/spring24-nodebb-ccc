@@ -24,6 +24,16 @@ import { sleep } from "k6";
 //     ],
 // };
 
+// export const options = {
+//     //spike testing
+//     stages : [
+//         { duration: '1m', target: 10000 }, //ramp up
+//         { duration: '30s', target: 0 }, //ramp-down to 0
+//         { duration: '1m', target: 10000 }, //ramp up
+//         { duration: '30s', target: 0 } //ramp-down to 0
+//     ],
+// };
+
 export const options = {
     //spike testing
     stages: [
