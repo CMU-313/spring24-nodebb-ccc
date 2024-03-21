@@ -2,7 +2,7 @@
 
 **In this file, provide a detailed outline of how to use and user test your new feature(s)**
 
-We have implemented 2 features: one frontend change (NodeBB Dark Mode) and one backend change (ability to react using emojis). Currently the emoji reactions are in the proof-of-concept stage (only one happy-face reaction is currently available), we assert without loss of generality that our changes could be used to introduce an *arbitrary* number of emoji reactions.
+We have implemented 2 features: one frontend change (NodeBB Dark Mode) and one backend change (ability to react using emojis). Currently the emoji reactions are in the proof-of-concept stage (only one happy-face reaction is currently available), we assert without loss of generality that our changes could be used to introduce an _arbitrary_ number of emoji reactions.
 
 To test darkmode as a user, build and start NodeBB on your local machine. On the top-center of the page, there is a button with text "Darkmode". Clicking this button results in the background turning darker and the text turning lighter -- verify that this is the case. Furthermore, try navigating to different pages via the icons on the top navigation bar. You should observe that the darkmode setting persists, until you either log in/out or refresh the page.
 
