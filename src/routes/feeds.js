@@ -1,64 +1,64 @@
-"use strict";
+'use strict';
 
-const rss = require("rss");
-const nconf = require("nconf");
-const validator = require("validator");
+const rss = require('rss');
+const nconf = require('nconf');
+const validator = require('validator');
 
-const posts = require("../posts");
-const topics = require("../topics");
-const user = require("../user");
-const categories = require("../categories");
-const meta = require("../meta");
-const helpers = require("../controllers/helpers");
-const privileges = require("../privileges");
-const db = require("../database");
-const utils = require("../utils");
-const controllers404 = require("../controllers/404");
+const posts = require('../posts');
+const topics = require('../topics');
+const user = require('../user');
+const categories = require('../categories');
+const meta = require('../meta');
+const helpers = require('../controllers/helpers');
+const privileges = require('../privileges');
+const db = require('../database');
+const utils = require('../utils');
+const controllers404 = require('../controllers/404');
 
 const terms = {
-    daily: "day",
-    weekly: "week",
-    monthly: "month",
-    alltime: "alltime",
+    daily: 'day',
+    weekly: 'week',
+    monthly: 'month',
+    alltime: 'alltime',
 };
 
 module.exports = function (app, middleware) {
     app.get(
-        "/topic/:topic_id.rss",
+        '/topic/:topic_id.rss',
         middleware.maintenanceMode,
-        generateForTopic,
+        generateForTopic
     );
     app.get(
-        "/category/:category_id.rss",
+        '/category/:category_id.rss',
         middleware.maintenanceMode,
-        generateForCategory,
+        generateForCategory
     );
-    app.get("/topics.rss", middleware.maintenanceMode, generateForTopics);
-    app.get("/recent.rss", middleware.maintenanceMode, generateForRecent);
-    app.get("/top.rss", middleware.maintenanceMode, generateForTop);
-    app.get("/top/:term.rss", middleware.maintenanceMode, generateForTop);
-    app.get("/popular.rss", middleware.maintenanceMode, generateForPopular);
+    app.get('/topics.rss', middleware.maintenanceMode, generateForTopics);
+    app.get('/recent.rss', middleware.maintenanceMode, generateForRecent);
+    app.get('/top.rss', middleware.maintenanceMode, generateForTop);
+    app.get('/top/:term.rss', middleware.maintenanceMode, generateForTop);
+    app.get('/popular.rss', middleware.maintenanceMode, generateForPopular);
     app.get(
-        "/popular/:term.rss",
+        '/popular/:term.rss',
         middleware.maintenanceMode,
-        generateForPopular,
-    );
-    app.get(
-        "/recentposts.rss",
-        middleware.maintenanceMode,
-        generateForRecentPosts,
+        generateForPopular
     );
     app.get(
-        "/category/:category_id/recentposts.rss",
+        '/recentposts.rss',
         middleware.maintenanceMode,
-        generateForCategoryRecentPosts,
+        generateForRecentPosts
     );
     app.get(
-        "/user/:userslug/topics.rss",
+        '/category/:category_id/recentposts.rss',
         middleware.maintenanceMode,
-        generateForUserTopics,
+        generateForCategoryRecentPosts
     );
-    app.get("/tags/:tag.rss", middleware.maintenanceMode, generateForTag);
+    app.get(
+        '/user/:userslug/topics.rss',
+        middleware.maintenanceMode,
+        generateForUserTopics
+    );
+    app.get('/tags/:tag.rss', middleware.maintenanceMode, generateForTag);
 };
 
 async function validateTokenIfRequiresLogin(requiresLogin, cid, req, res) {
@@ -72,7 +72,7 @@ async function validateTokenIfRequiresLogin(requiresLogin, cid, req, res) {
     if (uid <= 0 || !token) {
         return helpers.notAllowed(req, res);
     }
-    const userToken = await db.getObjectField(`user:${uid}`, "rss_token");
+    const userToken = await db.getObjectField(`user:${uid}`, 'rss_token');
     if (userToken !== token) {
         await user.auth.logAttempt(uid, req.ip);
         return helpers.notAllowed(req, res);
@@ -85,7 +85,7 @@ async function validateTokenIfRequiresLogin(requiresLogin, cid, req, res) {
 }
 
 async function generateForTopic(req, res, next) {
-    if (meta.config["feeds:disableRSS"]) {
+    if (meta.config['feeds:disableRSS']) {
         return next();
     }
 
@@ -102,10 +102,10 @@ async function generateForTopic(req, res, next) {
 
     if (
         await validateTokenIfRequiresLogin(
-            !userPrivileges["topics:read"],
+            !userPrivileges['topics:read'],
             topic.cid,
             req,
-            res,
+            res
         )
     ) {
         const topicData = await topics.getTopicWithPosts(
@@ -114,7 +114,7 @@ async function generateForTopic(req, res, next) {
             req.uid || req.query.uid || 0,
             0,
             24,
-            true,
+            true
         );
 
         topics.modifyPostsByPrivilege(topicData, userPrivileges);
@@ -123,36 +123,36 @@ async function generateForTopic(req, res, next) {
             title: utils.stripHTMLTags(topicData.title, utils.tags),
             description: topicData.posts.length
                 ? topicData.posts[0].content
-                : "",
-            feed_url: `${nconf.get("url")}/topic/${tid}.rss`,
-            site_url: `${nconf.get("url")}/topic/${topicData.slug}`,
-            image_url: topicData.posts.length ? topicData.posts[0].picture : "",
-            author: topicData.posts.length ? topicData.posts[0].username : "",
+                : '',
+            feed_url: `${nconf.get('url')}/topic/${tid}.rss`,
+            site_url: `${nconf.get('url')}/topic/${topicData.slug}`,
+            image_url: topicData.posts.length ? topicData.posts[0].picture : '',
+            author: topicData.posts.length ? topicData.posts[0].username : '',
             ttl: 60,
         });
 
         if (topicData.posts.length > 0) {
             feed.pubDate = new Date(
-                parseInt(topicData.posts[0].timestamp, 10),
+                parseInt(topicData.posts[0].timestamp, 10)
             ).toUTCString();
         }
         const replies = topicData.posts.slice(1);
-        replies.forEach((postData) => {
+        replies.forEach(postData => {
             if (!postData.deleted) {
                 const dateStamp = new Date(
                     parseInt(
                         parseInt(postData.edited, 10) === 0
                             ? postData.timestamp
                             : postData.edited,
-                        10,
-                    ),
+                        10
+                    )
                 ).toUTCString();
 
                 feed.item({
                     title: `Reply to ${utils.stripHTMLTags(topicData.title, utils.tags)} on ${dateStamp}`,
                     description: postData.content,
-                    url: `${nconf.get("url")}/post/${postData.pid}`,
-                    author: postData.user ? postData.user.username : "",
+                    url: `${nconf.get('url')}/post/${postData.pid}`,
+                    author: postData.user ? postData.user.username : '',
                     date: dateStamp,
                 });
             }
@@ -164,7 +164,7 @@ async function generateForTopic(req, res, next) {
 
 async function generateForCategory(req, res, next) {
     const cid = req.params.category_id;
-    if (meta.config["feeds:disableRSS"] || !parseInt(cid, 10)) {
+    if (meta.config['feeds:disableRSS'] || !parseInt(cid, 10)) {
         return next();
     }
     const uid = req.uid || req.query.uid || 0;
@@ -172,7 +172,7 @@ async function generateForCategory(req, res, next) {
         privileges.categories.get(cid, req.uid),
         categories.getCategoryData(cid),
         db.getSortedSetRevIntersect({
-            sets: ["topics:tid", `cid:${cid}:tids:lastposttime`],
+            sets: ['topics:tid', `cid:${cid}:tids:lastposttime`],
             start: 0,
             stop: 25,
             weights: [1, 0],
@@ -197,7 +197,7 @@ async function generateForCategory(req, res, next) {
                 site_url: `/category/${category.cid}`,
             },
             topicsData,
-            "timestamp",
+            'timestamp'
         );
 
         sendFeed(feed, res);
@@ -205,81 +205,81 @@ async function generateForCategory(req, res, next) {
 }
 
 async function generateForTopics(req, res, next) {
-    if (meta.config["feeds:disableRSS"]) {
+    if (meta.config['feeds:disableRSS']) {
         return next();
     }
     let token = null;
     if (req.query.token && req.query.uid) {
-        token = await db.getObjectField(`user:${req.query.uid}`, "rss_token");
+        token = await db.getObjectField(`user:${req.query.uid}`, 'rss_token');
     }
 
     await sendTopicsFeed(
         {
             uid: token && token === req.query.token ? req.query.uid : req.uid,
-            title: "Most recently created topics",
-            description: "A list of topics that have been created recently",
-            feed_url: "/topics.rss",
+            title: 'Most recently created topics',
+            description: 'A list of topics that have been created recently',
+            feed_url: '/topics.rss',
             useMainPost: true,
         },
-        "topics:tid",
-        res,
+        'topics:tid',
+        res
     );
 }
 
 async function generateForRecent(req, res, next) {
     await generateSorted(
         {
-            title: "Recently Active Topics",
+            title: 'Recently Active Topics',
             description:
-                "A list of topics that have been active within the past 24 hours",
-            feed_url: "/recent.rss",
-            site_url: "/recent",
-            sort: "recent",
-            timestampField: "lastposttime",
-            term: "alltime",
+                'A list of topics that have been active within the past 24 hours',
+            feed_url: '/recent.rss',
+            site_url: '/recent',
+            sort: 'recent',
+            timestampField: 'lastposttime',
+            term: 'alltime',
         },
         req,
         res,
-        next,
+        next
     );
 }
 
 async function generateForTop(req, res, next) {
     await generateSorted(
         {
-            title: "Top Voted Topics",
-            description: "A list of topics that have received the most votes",
-            feed_url: `/top/${req.params.term || "daily"}.rss`,
-            site_url: `/top/${req.params.term || "daily"}`,
-            sort: "votes",
-            timestampField: "timestamp",
-            term: "day",
+            title: 'Top Voted Topics',
+            description: 'A list of topics that have received the most votes',
+            feed_url: `/top/${req.params.term || 'daily'}.rss`,
+            site_url: `/top/${req.params.term || 'daily'}`,
+            sort: 'votes',
+            timestampField: 'timestamp',
+            term: 'day',
         },
         req,
         res,
-        next,
+        next
     );
 }
 
 async function generateForPopular(req, res, next) {
     await generateSorted(
         {
-            title: "Popular Topics",
-            description: "A list of topics that are sorted by post count",
-            feed_url: `/popular/${req.params.term || "daily"}.rss`,
-            site_url: `/popular/${req.params.term || "daily"}`,
-            sort: "posts",
-            timestampField: "timestamp",
-            term: "day",
+            title: 'Popular Topics',
+            description: 'A list of topics that are sorted by post count',
+            feed_url: `/popular/${req.params.term || 'daily'}.rss`,
+            site_url: `/popular/${req.params.term || 'daily'}`,
+            sort: 'posts',
+            timestampField: 'timestamp',
+            term: 'day',
         },
         req,
         res,
-        next,
+        next
     );
 }
 
 async function generateSorted(options, req, res, next) {
-    if (meta.config["feeds:disableRSS"]) {
+    if (meta.config['feeds:disableRSS']) {
         return next();
     }
 
@@ -287,7 +287,7 @@ async function generateSorted(options, req, res, next) {
 
     let token = null;
     if (req.query.token && req.query.uid) {
-        token = await db.getObjectField(`user:${req.query.uid}`, "rss_token");
+        token = await db.getObjectField(`user:${req.query.uid}`, 'rss_token');
     }
 
     const uid = token && token === req.query.token ? req.query.uid : req.uid;
@@ -302,7 +302,7 @@ async function generateSorted(options, req, res, next) {
 
     const { cid } = req.query;
     if (cid) {
-        if (!(await privileges.categories.can("topics:read", cid, uid))) {
+        if (!(await privileges.categories.can('topics:read', cid, uid))) {
             return helpers.notAllowed(req, res);
         }
         params.cids = [cid];
@@ -318,33 +318,33 @@ async function generateSorted(options, req, res, next) {
             site_url: options.site_url,
         },
         result.topics,
-        options.timestampField,
+        options.timestampField
     );
 
     sendFeed(feed, res);
 }
 
 async function sendTopicsFeed(options, set, res, timestampField) {
-    const start = options.hasOwnProperty("start") ? options.start : 0;
-    const stop = options.hasOwnProperty("stop") ? options.stop : 19;
+    const start = options.hasOwnProperty('start') ? options.start : 0;
+    const stop = options.hasOwnProperty('stop') ? options.stop : 19;
     const topicData = await topics.getTopicsFromSet(
         set,
         options.uid,
         start,
-        stop,
+        stop
     );
     const feed = await generateTopicsFeed(
         options,
         topicData.topics,
-        timestampField,
+        timestampField
     );
     sendFeed(feed, res);
 }
 
 async function generateTopicsFeed(feedOptions, feedTopics, timestampField) {
     feedOptions.ttl = 60;
-    feedOptions.feed_url = nconf.get("url") + feedOptions.feed_url;
-    feedOptions.site_url = nconf.get("url") + feedOptions.site_url;
+    feedOptions.feed_url = nconf.get('url') + feedOptions.feed_url;
+    feedOptions.site_url = nconf.get('url') + feedOptions.site_url;
 
     feedTopics = feedTopics.filter(Boolean);
 
@@ -357,7 +357,7 @@ async function generateTopicsFeed(feedOptions, feedTopics, timestampField) {
     async function addFeedItem(topicData) {
         const feedItem = {
             title: utils.stripHTMLTags(topicData.title, utils.tags),
-            url: `${nconf.get("url")}/topic/${topicData.slug}`,
+            url: `${nconf.get('url')}/topic/${topicData.slug}`,
             date: new Date(topicData[timestampField]).toUTCString(),
         };
 
@@ -378,7 +378,7 @@ async function generateTopicsFeed(feedOptions, feedTopics, timestampField) {
 
         const mainPost = await topics.getMainPost(
             topicData.tid,
-            feedOptions.uid,
+            feedOptions.uid
         );
         if (!mainPost) {
             feed.item(feedItem);
@@ -397,29 +397,29 @@ async function generateTopicsFeed(feedOptions, feedTopics, timestampField) {
 }
 
 async function generateForRecentPosts(req, res, next) {
-    if (meta.config["feeds:disableRSS"]) {
+    if (meta.config['feeds:disableRSS']) {
         return next();
     }
     const page = parseInt(req.query.page, 10) || 1;
     const postsPerPage = 20;
     const start = Math.max(0, (page - 1) * postsPerPage);
     const stop = start + postsPerPage - 1;
-    const postData = await posts.getRecentPosts(req.uid, start, stop, "month");
+    const postData = await posts.getRecentPosts(req.uid, start, stop, 'month');
     const feed = generateForPostsFeed(
         {
-            title: "Recent Posts",
-            description: "A list of recent posts",
-            feed_url: "/recentposts.rss",
-            site_url: "/recentposts",
+            title: 'Recent Posts',
+            description: 'A list of recent posts',
+            feed_url: '/recentposts.rss',
+            site_url: '/recentposts',
         },
-        postData,
+        postData
     );
 
     sendFeed(feed, res);
 }
 
 async function generateForCategoryRecentPosts(req, res) {
-    if (meta.config["feeds:disableRSS"]) {
+    if (meta.config['feeds:disableRSS']) {
         return controllers404.handle404(req, res);
     }
     const cid = req.params.category_id;
@@ -434,7 +434,7 @@ async function generateForCategoryRecentPosts(req, res) {
             cid,
             req.uid || req.query.uid || 0,
             start,
-            stop,
+            stop
         ),
     ]);
 
@@ -452,7 +452,7 @@ async function generateForCategoryRecentPosts(req, res) {
                 feed_url: `/category/${cid}/recentposts.rss`,
                 site_url: `/category/${cid}/recentposts`,
             },
-            postData,
+            postData
         );
 
         sendFeed(feed, res);
@@ -461,8 +461,8 @@ async function generateForCategoryRecentPosts(req, res) {
 
 function generateForPostsFeed(feedOptions, posts) {
     feedOptions.ttl = 60;
-    feedOptions.feed_url = nconf.get("url") + feedOptions.feed_url;
-    feedOptions.site_url = nconf.get("url") + feedOptions.site_url;
+    feedOptions.feed_url = nconf.get('url') + feedOptions.feed_url;
+    feedOptions.site_url = nconf.get('url') + feedOptions.site_url;
 
     const feed = new rss(feedOptions);
 
@@ -470,12 +470,12 @@ function generateForPostsFeed(feedOptions, posts) {
         feed.pubDate = new Date(parseInt(posts[0].timestamp, 10)).toUTCString();
     }
 
-    posts.forEach((postData) => {
+    posts.forEach(postData => {
         feed.item({
-            title: postData.topic ? postData.topic.title : "",
+            title: postData.topic ? postData.topic.title : '',
             description: postData.content,
-            url: `${nconf.get("url")}/post/${postData.pid}`,
-            author: postData.user ? postData.user.username : "",
+            url: `${nconf.get('url')}/post/${postData.pid}`,
+            author: postData.user ? postData.user.username : '',
             date: new Date(parseInt(postData.timestamp, 10)).toUTCString(),
         });
     });
@@ -484,7 +484,7 @@ function generateForPostsFeed(feedOptions, posts) {
 }
 
 async function generateForUserTopics(req, res, next) {
-    if (meta.config["feeds:disableRSS"]) {
+    if (meta.config['feeds:disableRSS']) {
         return next();
     }
 
@@ -493,7 +493,7 @@ async function generateForUserTopics(req, res, next) {
     if (!uid) {
         return next();
     }
-    const userData = await user.getUserFields(uid, ["uid", "username"]);
+    const userData = await user.getUserFields(uid, ['uid', 'username']);
     await sendTopicsFeed(
         {
             uid: req.uid,
@@ -503,12 +503,12 @@ async function generateForUserTopics(req, res, next) {
             site_url: `/user/${userslug}/topics`,
         },
         `uid:${userData.uid}:topics`,
-        res,
+        res
     );
 }
 
 async function generateForTag(req, res) {
-    if (meta.config["feeds:disableRSS"]) {
+    if (meta.config['feeds:disableRSS']) {
         return controllers404.handle404(req, res);
     }
     const tag = validator.escape(String(req.params.tag));
@@ -527,11 +527,11 @@ async function generateForTag(req, res) {
             stop: stop,
         },
         `tag:${tag}:topics`,
-        res,
+        res
     );
 }
 
 function sendFeed(feed, res) {
     const xml = feed.xml();
-    res.type("xml").set("Content-Length", Buffer.byteLength(xml)).send(xml);
+    res.type('xml').set('Content-Length', Buffer.byteLength(xml)).send(xml);
 }

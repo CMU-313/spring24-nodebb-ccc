@@ -1,16 +1,16 @@
-"use strict";
+'use strict';
 
-const nconf = require("nconf");
-const validator = require("validator");
+const nconf = require('nconf');
+const validator = require('validator');
 
-const plugins = require("../plugins");
-const meta = require("../meta");
-const translator = require("../translator");
-const widgets = require("../widgets");
-const utils = require("../utils");
-const helpers = require("./helpers");
+const plugins = require('../plugins');
+const meta = require('../meta');
+const translator = require('../translator');
+const widgets = require('../widgets');
+const utils = require('../utils');
+const helpers = require('./helpers');
 
-const relative_path = nconf.get("relative_path");
+const relative_path = nconf.get('relative_path');
 
 module.exports = function (middleware) {
     middleware.processRender = function processRender(req, res, next) {
@@ -22,7 +22,7 @@ module.exports = function (middleware) {
             const { req } = this;
             async function renderMethod(template, options, fn) {
                 options = options || {};
-                if (typeof options === "function") {
+                if (typeof options === 'function') {
                     fn = options;
                     options = {};
                 }
@@ -30,16 +30,16 @@ module.exports = function (middleware) {
                 options.loggedIn = req.uid > 0;
                 options.relative_path = relative_path;
                 options.template = { name: template, [template]: true };
-                options.url = req.baseUrl + req.path.replace(/^\/api/, "");
+                options.url = req.baseUrl + req.path.replace(/^\/api/, '');
                 options.bodyClass = helpers.buildBodyClass(req, res, options);
 
                 if (req.loggedIn) {
-                    res.set("cache-control", "private");
+                    res.set('cache-control', 'private');
                 }
 
                 const buildResult = await plugins.hooks.fire(
                     `filter:${template}.build`,
-                    { req: req, res: res, templateData: options },
+                    { req: req, res: res, templateData: options }
                 );
                 if (res.headersSent) {
                     return;
@@ -48,12 +48,12 @@ module.exports = function (middleware) {
                     buildResult.templateData.templateToRender || template;
 
                 const renderResult = await plugins.hooks.fire(
-                    "filter:middleware.render",
+                    'filter:middleware.render',
                     {
                         req: req,
                         res: res,
                         templateData: buildResult.templateData,
-                    },
+                    }
                 );
                 if (res.headersSent) {
                     return;
@@ -64,7 +64,7 @@ module.exports = function (middleware) {
                         req,
                         renderResult,
                         res.locals.metaTags,
-                        res.locals.linkTags,
+                        res.locals.linkTags
                     ),
                 };
                 options.widgets = await widgets.render(req.uid, {
@@ -78,52 +78,44 @@ module.exports = function (middleware) {
                 options._locals = undefined;
 
                 if (res.locals.isAPI) {
-                    if (req.route && req.route.path === "/api/") {
-                        options.title = "[[pages:home]]";
+                    if (req.route && req.route.path === '/api/') {
+                        options.title = '[[pages:home]]';
                     }
                     req.app.set(
-                        "json spaces",
-                        global.env === "development" || req.query.pretty
-                            ? 4
-                            : 0,
+                        'json spaces',
+                        global.env === 'development' || req.query.pretty ? 4 : 0
                     );
                     return res.json(options);
                 }
                 const optionsString = JSON.stringify(options).replace(
                     /<\//g,
-                    "<\\/",
+                    '<\\/'
                 );
                 const results = await utils.promiseParallel({
                     header: renderHeaderFooter(
-                        "renderHeader",
+                        'renderHeader',
                         req,
                         res,
-                        options,
+                        options
                     ),
                     content: renderContent(
                         render,
                         templateToRender,
                         req,
                         res,
-                        options,
+                        options
                     ),
                     footer: renderHeaderFooter(
-                        "renderFooter",
+                        'renderFooter',
                         req,
                         res,
-                        options,
+                        options
                     ),
                 });
 
-                const str = `${
-                    results.header +
-                    (res.locals.postHeader || "") +
-                    results.content
-                }<script id="ajaxify-data" type="application/json">${optionsString}</script>${
-                    res.locals.preFooter || ""
-                }${results.footer}`;
+                const str = `${results.header + (res.locals.postHeader || '') + results.content}<script id="ajaxify-data" type="application/json">${optionsString}</script>${res.locals.preFooter || ''}${results.footer}`;
 
-                if (typeof fn !== "function") {
+                if (typeof fn !== 'function') {
                     self.send(str);
                 } else {
                     fn(null, str);
@@ -150,23 +142,23 @@ module.exports = function (middleware) {
     }
 
     async function renderHeaderFooter(method, req, res, options) {
-        let str = "";
+        let str = '';
         if (res.locals.renderHeader) {
             str = await middleware[method](req, res, options);
         } else if (res.locals.renderAdminHeader) {
             str = await middleware.admin[method](req, res, options);
         } else {
-            str = "";
+            str = '';
         }
         return await translate(str, getLang(req, res));
     }
 
     function getLang(req, res) {
         let language =
-            (res.locals.config && res.locals.config.userLang) || "en-GB";
+            (res.locals.config && res.locals.config.userLang) || 'en-GB';
         if (res.locals.renderAdminHeader) {
             language =
-                (res.locals.config && res.locals.config.acpLang) || "en-GB";
+                (res.locals.config && res.locals.config.acpLang) || 'en-GB';
         }
         return req.query.lang
             ? validator.escape(String(req.query.lang))

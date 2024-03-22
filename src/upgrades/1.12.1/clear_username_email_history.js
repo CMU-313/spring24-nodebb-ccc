@@ -1,25 +1,25 @@
-"use strict";
+'use strict';
 
-const async = require("async");
-const db = require("../../database");
-const user = require("../../user");
+const async = require('async');
+const db = require('../../database');
+const user = require('../../user');
 
 module.exports = {
-    name: "Delete username email history for deleted users",
+    name: 'Delete username email history for deleted users',
     timestamp: Date.UTC(2019, 2, 25),
     method: function (callback) {
         const { progress } = this;
         let currentUid = 1;
-        db.getObjectField("global", "nextUid", (err, nextUid) => {
+        db.getObjectField('global', 'nextUid', (err, nextUid) => {
             if (err) {
                 return callback(err);
             }
             progress.total = nextUid;
             async.whilst(
-                (next) => {
+                next => {
                     next(null, currentUid < nextUid);
                 },
-                (next) => {
+                next => {
                     progress.incr();
                     user.exists(currentUid, (err, exists) => {
                         if (err) {
@@ -34,19 +34,19 @@ module.exports = {
                                 `user:${currentUid}:usernames`,
                                 `user:${currentUid}:emails`,
                             ],
-                            (err) => {
+                            err => {
                                 if (err) {
                                     return next(err);
                                 }
                                 currentUid += 1;
                                 next();
-                            },
+                            }
                         );
                     });
                 },
-                (err) => {
+                err => {
                     callback(err);
-                },
+                }
             );
         });
     },

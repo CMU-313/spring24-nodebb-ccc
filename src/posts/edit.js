@@ -1,22 +1,22 @@
-"use strict";
+'use strict';
 
-const validator = require("validator");
-const _ = require("lodash");
+const validator = require('validator');
+const _ = require('lodash');
 
-const db = require("../database");
-const meta = require("../meta");
-const topics = require("../topics");
-const user = require("../user");
-const privileges = require("../privileges");
-const plugins = require("../plugins");
-const pubsub = require("../pubsub");
-const utils = require("../utils");
-const slugify = require("../slugify");
-const translator = require("../translator");
+const db = require('../database');
+const meta = require('../meta');
+const topics = require('../topics');
+const user = require('../user');
+const privileges = require('../privileges');
+const plugins = require('../plugins');
+const pubsub = require('../pubsub');
+const utils = require('../utils');
+const slugify = require('../slugify');
+const translator = require('../translator');
 
 module.exports = function (Posts) {
-    pubsub.on("post:edit", (pid) => {
-        require("./cache").del(pid);
+    pubsub.on('post:edit', pid => {
+        require('./cache').del(pid);
     });
 
     Posts.edit = async function (data) {
@@ -26,17 +26,17 @@ module.exports = function (Posts) {
         }
         const postData = await Posts.getPostData(data.pid);
         if (!postData) {
-            throw new Error("[[error:no-post]]");
+            throw new Error('[[error:no-post]]');
         }
 
         const topicData = await topics.getTopicFields(postData.tid, [
-            "cid",
-            "mainPid",
-            "title",
-            "timestamp",
-            "scheduled",
-            "slug",
-            "tags",
+            'cid',
+            'mainPid',
+            'title',
+            'timestamp',
+            'scheduled',
+            'slug',
+            'tags',
         ]);
 
         await scheduledTopicCheck(data, topicData);
@@ -48,7 +48,7 @@ module.exports = function (Posts) {
             editPostData.handle = data.handle;
         }
 
-        const result = await plugins.hooks.fire("filter:post.edit", {
+        const result = await plugins.hooks.fire('filter:post.edit', {
             req: data.req,
             post: editPostData,
             data: data,
@@ -56,7 +56,7 @@ module.exports = function (Posts) {
         });
 
         const [editor, topic] = await Promise.all([
-            user.getUserFields(data.uid, ["username", "userslug"]),
+            user.getUserFields(data.uid, ['username', 'userslug']),
             editMainPost(data, postData, topicData),
         ]);
 
@@ -88,24 +88,24 @@ module.exports = function (Posts) {
         returnPostData.newContent = data.content;
 
         await topics.notifyFollowers(returnPostData, data.uid, {
-            type: "post-edit",
+            type: 'post-edit',
             bodyShort: translator.compile(
-                "notifications:user_edited_post",
+                'notifications:user_edited_post',
                 editor.username,
-                topic.title,
+                topic.title
             ),
             nid: `edit_post:${data.pid}:uid:${data.uid}`,
         });
         await topics.syncBacklinks(returnPostData);
 
-        plugins.hooks.fire("action:post.edit", {
+        plugins.hooks.fire('action:post.edit', {
             post: _.clone(returnPostData),
             data: data,
             uid: data.uid,
         });
 
-        require("./cache").del(String(postData.pid));
-        pubsub.publish("post:edit", String(postData.pid));
+        require('./cache').del(String(postData.pid));
+        pubsub.publish('post:edit', String(postData.pid));
 
         await Posts.parsePost(returnPostData);
 
@@ -118,7 +118,7 @@ module.exports = function (Posts) {
 
     async function editMainPost(data, postData, topicData) {
         const { tid } = postData;
-        const title = data.title ? data.title.trim() : "";
+        const title = data.title ? data.title.trim() : '';
 
         const isMain =
             parseInt(data.pid, 10) === parseInt(topicData.mainPid, 10);
@@ -144,29 +144,29 @@ module.exports = function (Posts) {
         };
         if (title) {
             newTopicData.title = title;
-            newTopicData.slug = `${tid}/${slugify(title) || "topic"}`;
+            newTopicData.slug = `${tid}/${slugify(title) || 'topic'}`;
         }
 
         const tagsupdated =
             Array.isArray(data.tags) &&
             !_.isEqual(
                 data.tags,
-                topicData.tags.map((tag) => tag.value),
+                topicData.tags.map(tag => tag.value)
             );
 
         if (tagsupdated) {
             const canTag = await privileges.categories.can(
-                "topics:tag",
+                'topics:tag',
                 topicData.cid,
-                data.uid,
+                data.uid
             );
             if (!canTag) {
-                throw new Error("[[error:no-privileges]]");
+                throw new Error('[[error:no-privileges]]');
             }
             await topics.validateTags(data.tags, topicData.cid, data.uid, tid);
         }
 
-        const results = await plugins.hooks.fire("filter:topic.edit", {
+        const results = await plugins.hooks.fire('filter:topic.edit', {
             req: data.req,
             topic: newTopicData,
             data: data,
@@ -187,7 +187,7 @@ module.exports = function (Posts) {
             title &&
             translator.escape(validator.escape(String(title))) !==
                 topicData.title;
-        plugins.hooks.fire("action:topic.edit", {
+        plugins.hooks.fire('action:topic.edit', {
             topic: newTopicData,
             uid: data.uid,
         });
@@ -212,17 +212,17 @@ module.exports = function (Posts) {
             return;
         }
         const canSchedule = await privileges.categories.can(
-            "topics:schedule",
+            'topics:schedule',
             topicData.cid,
-            data.uid,
+            data.uid
         );
         if (!canSchedule) {
-            throw new Error("[[error:no-privileges]]");
+            throw new Error('[[error:no-privileges]]');
         }
         const isMain =
             parseInt(data.pid, 10) === parseInt(topicData.mainPid, 10);
         if (isMain && (isNaN(data.timestamp) || data.timestamp < Date.now())) {
-            throw new Error("[[error:invalid-data]]");
+            throw new Error('[[error:invalid-data]]');
         }
     }
 

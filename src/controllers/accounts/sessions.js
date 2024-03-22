@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-const user = require("../../user");
-const helpers = require("../helpers");
-const accountHelpers = require("./helpers");
+const user = require('../../user');
+const helpers = require('../helpers');
+const accountHelpers = require('./helpers');
 
 const sessionController = module.exports;
 
@@ -10,7 +10,7 @@ sessionController.get = async function (req, res, next) {
     const userData = await accountHelpers.getUserDataByUserSlug(
         req.params.userslug,
         req.uid,
-        req.query,
+        req.query
     );
     if (!userData) {
         return next();
@@ -18,13 +18,13 @@ sessionController.get = async function (req, res, next) {
 
     userData.sessions = await user.auth.getSessions(
         userData.uid,
-        req.sessionID,
+        req.sessionID
     );
-    userData.title = "[[pages:account/sessions]]";
+    userData.title = '[[pages:account/sessions]]';
     userData.breadcrumbs = helpers.buildBreadcrumbs([
         { text: userData.username, url: `/user/${userData.userslug}` },
-        { text: "[[pages:account/sessions]]" },
+        { text: '[[pages:account/sessions]]' },
     ]);
 
-    res.render("account/sessions", userData);
+    res.render('account/sessions', userData);
 };

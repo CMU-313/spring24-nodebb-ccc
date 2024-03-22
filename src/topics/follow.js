@@ -1,16 +1,16 @@
-"use strict";
+'use strict';
 
-const db = require("../database");
-const notifications = require("../notifications");
-const privileges = require("../privileges");
-const plugins = require("../plugins");
-const utils = require("../utils");
+const db = require('../database');
+const notifications = require('../notifications');
+const privileges = require('../privileges');
+const plugins = require('../plugins');
+const utils = require('../utils');
 
 module.exports = function (Topics) {
     Topics.toggleFollow = async function (tid, uid) {
         const exists = await Topics.exists(tid);
         if (!exists) {
-            throw new Error("[[error:no-topic]]");
+            throw new Error('[[error:no-topic]]');
         }
         const isFollowing = await Topics.isFollowing([tid], uid);
         if (isFollowing[0]) {
@@ -22,30 +22,30 @@ module.exports = function (Topics) {
     };
 
     Topics.follow = async function (tid, uid) {
-        await setWatching(follow, unignore, "action:topic.follow", tid, uid);
+        await setWatching(follow, unignore, 'action:topic.follow', tid, uid);
     };
 
     Topics.unfollow = async function (tid, uid) {
         await setWatching(
             unfollow,
             unignore,
-            "action:topic.unfollow",
+            'action:topic.unfollow',
             tid,
-            uid,
+            uid
         );
     };
 
     Topics.ignore = async function (tid, uid) {
-        await setWatching(ignore, unfollow, "action:topic.ignore", tid, uid);
+        await setWatching(ignore, unfollow, 'action:topic.ignore', tid, uid);
     };
 
     async function setWatching(method1, method2, hook, tid, uid) {
         if (!(parseInt(uid, 10) > 0)) {
-            throw new Error("[[error:not-logged-in]]");
+            throw new Error('[[error:not-logged-in]]');
         }
         const exists = await Topics.exists(tid);
         if (!exists) {
-            throw new Error("[[error:no-topic]]");
+            throw new Error('[[error:no-topic]]');
         }
         await method1(tid, uid);
         await method2(tid, uid);
@@ -57,7 +57,7 @@ module.exports = function (Topics) {
             `tid:${tid}:followers`,
             `uid:${uid}:followed_tids`,
             tid,
-            uid,
+            uid
         );
     }
 
@@ -66,7 +66,7 @@ module.exports = function (Topics) {
             `tid:${tid}:followers`,
             `uid:${uid}:followed_tids`,
             tid,
-            uid,
+            uid
         );
     }
 
@@ -75,7 +75,7 @@ module.exports = function (Topics) {
             `tid:${tid}:ignorers`,
             `uid:${uid}:ignored_tids`,
             tid,
-            uid,
+            uid
         );
     }
 
@@ -84,7 +84,7 @@ module.exports = function (Topics) {
             `tid:${tid}:ignorers`,
             `uid:${uid}:ignored_tids`,
             tid,
-            uid,
+            uid
         );
     }
 
@@ -99,11 +99,11 @@ module.exports = function (Topics) {
     }
 
     Topics.isFollowing = async function (tids, uid) {
-        return await isIgnoringOrFollowing("followers", tids, uid);
+        return await isIgnoringOrFollowing('followers', tids, uid);
     };
 
     Topics.isIgnoring = async function (tids, uid) {
-        return await isIgnoringOrFollowing("ignorers", tids, uid);
+        return await isIgnoringOrFollowing('ignorers', tids, uid);
     };
 
     Topics.getFollowData = async function (tids, uid) {
@@ -114,8 +114,8 @@ module.exports = function (Topics) {
             return tids.map(() => ({ following: false, ignoring: false }));
         }
         const keys = [];
-        tids.forEach((tid) =>
-            keys.push(`tid:${tid}:followers`, `tid:${tid}:ignorers`),
+        tids.forEach(tid =>
+            keys.push(`tid:${tid}:followers`, `tid:${tid}:ignorers`)
         );
 
         const data = await db.isMemberOfSets(keys, uid);
@@ -137,7 +137,7 @@ module.exports = function (Topics) {
         if (parseInt(uid, 10) <= 0) {
             return tids.map(() => false);
         }
-        const keys = tids.map((tid) => `tid:${tid}:${set}`);
+        const keys = tids.map(tid => `tid:${tid}:${set}`);
         return await db.isMemberOfSets(keys, uid);
     }
 
@@ -152,7 +152,7 @@ module.exports = function (Topics) {
     Topics.filterIgnoringUids = async function (tid, uids) {
         const isIgnoring = await db.isSetMembers(`tid:${tid}:ignorers`, uids);
         const readingUids = uids.filter(
-            (uid, index) => uid && !isIgnoring[index],
+            (uid, index) => uid && !isIgnoring[index]
         );
         return readingUids;
     };
@@ -163,7 +163,7 @@ module.exports = function (Topics) {
         }
         const scores = await db.sortedSetScores(
             `uid:${uid}:followed_tids`,
-            tids,
+            tids
         );
         return tids.filter((tid, index) => tid && !!scores[index]);
     };
@@ -174,7 +174,7 @@ module.exports = function (Topics) {
         }
         const scores = await db.sortedSetScores(
             `uid:${uid}:ignored_tids`,
-            tids,
+            tids
         );
         return tids.filter((tid, index) => tid && !scores[index]);
     };
@@ -188,9 +188,9 @@ module.exports = function (Topics) {
         }
 
         followers = await privileges.topics.filterUids(
-            "topics:read",
+            'topics:read',
             postData.topic.tid,
-            followers,
+            followers
         );
         if (!followers.length) {
             return;

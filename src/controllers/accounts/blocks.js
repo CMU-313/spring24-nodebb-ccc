@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-const helpers = require("../helpers");
-const accountHelpers = require("./helpers");
-const pagination = require("../../pagination");
-const user = require("../../user");
-const plugins = require("../../plugins");
+const helpers = require('../helpers');
+const accountHelpers = require('./helpers');
+const pagination = require('../../pagination');
+const user = require('../../user');
+const plugins = require('../../plugins');
 
 const blocksController = module.exports;
 
@@ -17,13 +17,13 @@ blocksController.getBlocks = async function (req, res, next) {
     const userData = await accountHelpers.getUserDataByUserSlug(
         req.params.userslug,
         req.uid,
-        req.query,
+        req.query
     );
     if (!userData) {
         return next();
     }
     const uids = await user.blocks.list(userData.uid);
-    const data = await plugins.hooks.fire("filter:user.getBlocks", {
+    const data = await plugins.hooks.fire('filter:user.getBlocks', {
         uids: uids,
         uid: userData.uid,
         start: start,
@@ -39,8 +39,8 @@ blocksController.getBlocks = async function (req, res, next) {
 
     userData.breadcrumbs = helpers.buildBreadcrumbs([
         { text: userData.username, url: `/user/${userData.userslug}` },
-        { text: "[[user:blocks]]" },
+        { text: '[[user:blocks]]' },
     ]);
 
-    res.render("account/blocks", userData);
+    res.render('account/blocks', userData);
 };

@@ -1,21 +1,21 @@
-"use strict";
+'use strict';
 
-define("categorySearch", ["alerts"], function (alerts) {
+define('categorySearch', ['alerts'], function (alerts) {
     const categorySearch = {};
 
     categorySearch.init = function (el, options) {
         let categoriesList = null;
         options = options || {};
-        options.privilege = options.privilege || "topics:read";
+        options.privilege = options.privilege || 'topics:read';
         options.states = options.states || [
-            "watching",
-            "notwatching",
-            "ignoring",
+            'watching',
+            'notwatching',
+            'ignoring',
         ];
 
         let localCategories = [];
         if (Array.isArray(options.localCategories)) {
-            localCategories = options.localCategories.map((c) => ({ ...c }));
+            localCategories = options.localCategories.map(c => ({ ...c }));
         }
         options.selectedCids =
             options.selectedCids || ajaxify.data.selectedCids || [];
@@ -29,14 +29,14 @@ define("categorySearch", ["alerts"], function (alerts) {
             searchEl.parent('[component="category/dropdown"]').length > 0 ||
             searchEl.parent('[component="category-selector"]').length > 0;
 
-        el.on("show.bs.dropdown", function () {
+        el.on('show.bs.dropdown', function () {
             if (toggleVisibility) {
-                el.find(".dropdown-toggle").addClass("hidden");
-                searchEl.removeClass("hidden");
+                el.find('.dropdown-toggle').addClass('hidden');
+                searchEl.removeClass('hidden');
             }
 
             function doSearch() {
-                const val = searchEl.find("input").val();
+                const val = searchEl.find('input').val();
                 if (val.length > 1 || (!val && !categoriesList)) {
                     loadList(val, function (categories) {
                         categoriesList = categoriesList || categories;
@@ -50,34 +50,34 @@ define("categorySearch", ["alerts"], function (alerts) {
                 }
             }
 
-            searchEl.on("click", function (ev) {
+            searchEl.on('click', function (ev) {
                 ev.preventDefault();
                 ev.stopPropagation();
             });
             searchEl
-                .find("input")
-                .val("")
-                .on("keyup", utils.debounce(doSearch, 300));
+                .find('input')
+                .val('')
+                .on('keyup', utils.debounce(doSearch, 300));
             doSearch();
         });
 
-        el.on("shown.bs.dropdown", function () {
-            searchEl.find("input").focus();
+        el.on('shown.bs.dropdown', function () {
+            searchEl.find('input').focus();
         });
 
-        el.on("hide.bs.dropdown", function () {
+        el.on('hide.bs.dropdown', function () {
             if (toggleVisibility) {
-                el.find(".dropdown-toggle").removeClass("hidden");
-                searchEl.addClass("hidden");
+                el.find('.dropdown-toggle').removeClass('hidden');
+                searchEl.addClass('hidden');
             }
 
-            searchEl.off("click");
-            searchEl.find("input").off("keyup");
+            searchEl.off('click');
+            searchEl.find('input').off('keyup');
         });
 
         function loadList(search, callback) {
             socket.emit(
-                "categories.categorySearch",
+                'categories.categorySearch',
                 {
                     search: search,
                     query: utils.params(),
@@ -92,7 +92,7 @@ define("categorySearch", ["alerts"], function (alerts) {
                         return alerts.error(err);
                     }
                     callback(localCategories.concat(categories));
-                },
+                }
             );
         }
 
@@ -106,12 +106,12 @@ define("categorySearch", ["alerts"], function (alerts) {
                 },
                 function (html) {
                     el.find('[component="category/list"]').replaceWith(
-                        html.find('[component="category/list"]'),
+                        html.find('[component="category/list"]')
                     );
                     el.find(
-                        '[component="category/list"] [component="category/no-matches"]',
-                    ).toggleClass("hidden", !!categories.length);
-                },
+                        '[component="category/list"] [component="category/no-matches"]'
+                    ).toggleClass('hidden', !!categories.length);
+                }
             );
         }
     };

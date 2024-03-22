@@ -1,19 +1,19 @@
-"use strict";
+'use strict';
 
 module.exports = function (module) {
-    const helpers = require("./helpers");
+    const helpers = require('./helpers');
 
     module.listPrepend = async function (key, value) {
         if (!key) {
             return;
         }
 
-        await module.transaction(async (client) => {
-            await helpers.ensureLegacyObjectType(client, key, "list");
+        await module.transaction(async client => {
+            await helpers.ensureLegacyObjectType(client, key, 'list');
             value = Array.isArray(value) ? value : [value];
             value.reverse();
             await client.query({
-                name: "listPrependValues",
+                name: 'listPrependValues',
                 text: `
 INSERT INTO "legacy_list" ("_key", "array")
 VALUES ($1::TEXT, $2::TEXT[])
@@ -28,12 +28,12 @@ DO UPDATE SET "array" = EXCLUDED.array || "legacy_list"."array"`,
         if (!key) {
             return;
         }
-        await module.transaction(async (client) => {
+        await module.transaction(async client => {
             value = Array.isArray(value) ? value : [value];
 
-            await helpers.ensureLegacyObjectType(client, key, "list");
+            await helpers.ensureLegacyObjectType(client, key, 'list');
             await client.query({
-                name: "listAppend",
+                name: 'listAppend',
                 text: `
 INSERT INTO "legacy_list" ("_key", "array")
 VALUES ($1::TEXT, $2::TEXT[])
@@ -50,7 +50,7 @@ DO UPDATE SET "array" = "legacy_list"."array" || EXCLUDED.array`,
         }
 
         const res = await module.pool.query({
-            name: "listRemoveLast",
+            name: 'listRemoveLast',
             text: `
 WITH A AS (
     SELECT l.*
@@ -77,11 +77,11 @@ RETURNING A."array"[array_length(A."array", 1)] v`,
         }
         // TODO: remove all values with one query
         if (Array.isArray(value)) {
-            await Promise.all(value.map((v) => module.listRemoveAll(key, v)));
+            await Promise.all(value.map(v => module.listRemoveAll(key, v)));
             return;
         }
         await module.pool.query({
-            name: "listRemoveAll",
+            name: 'listRemoveAll',
             text: `
 UPDATE "legacy_list" l
    SET "array" = array_remove(l."array", $2::TEXT)
@@ -103,7 +103,7 @@ UPDATE "legacy_list" l
         await module.pool.query(
             stop > 0
                 ? {
-                      name: "listTrim",
+                      name: 'listTrim',
                       text: `
 UPDATE "legacy_list" l
    SET "array" = ARRAY(SELECT m.m
@@ -118,7 +118,7 @@ UPDATE "legacy_list" l
                       values: [key, start, stop],
                   }
                 : {
-                      name: "listTrimBack",
+                      name: 'listTrimBack',
                       text: `
 UPDATE "legacy_list" l
    SET "array" = ARRAY(SELECT m.m
@@ -131,7 +131,7 @@ UPDATE "legacy_list" l
    AND o."type" = l."type"
    AND o."_key" = $1::TEXT`,
                       values: [key, start, stop],
-                  },
+                  }
         );
     };
 
@@ -145,7 +145,7 @@ UPDATE "legacy_list" l
         const res = await module.pool.query(
             stop > 0
                 ? {
-                      name: "getListRange",
+                      name: 'getListRange',
                       text: `
 SELECT ARRAY(SELECT m.m
                FROM UNNEST(l."array") WITH ORDINALITY m(m, i)
@@ -160,7 +160,7 @@ SELECT ARRAY(SELECT m.m
                       values: [key, start, stop],
                   }
                 : {
-                      name: "getListRangeBack",
+                      name: 'getListRangeBack',
                       text: `
 SELECT ARRAY(SELECT m.m
                FROM UNNEST(l."array") WITH ORDINALITY m(m, i)
@@ -173,7 +173,7 @@ SELECT ARRAY(SELECT m.m
         AND o."type" = l."type"
  WHERE o."_key" = $1::TEXT`,
                       values: [key, start, stop],
-                  },
+                  }
         );
 
         return res.rows.length ? res.rows[0].l : [];
@@ -181,7 +181,7 @@ SELECT ARRAY(SELECT m.m
 
     module.listLength = async function (key) {
         const res = await module.pool.query({
-            name: "listLength",
+            name: 'listLength',
             text: `
 SELECT array_length(l."array", 1) l
   FROM "legacy_object_live" o

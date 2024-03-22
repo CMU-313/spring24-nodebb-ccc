@@ -1,25 +1,25 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
+const _ = require('lodash');
 
-const db = require("../database");
-const utils = require("../utils");
-const slugify = require("../slugify");
-const plugins = require("../plugins");
-const analytics = require("../analytics");
-const user = require("../user");
-const meta = require("../meta");
-const posts = require("../posts");
-const privileges = require("../privileges");
-const categories = require("../categories");
-const translator = require("../translator");
+const db = require('../database');
+const utils = require('../utils');
+const slugify = require('../slugify');
+const plugins = require('../plugins');
+const analytics = require('../analytics');
+const user = require('../user');
+const meta = require('../meta');
+const posts = require('../posts');
+const privileges = require('../privileges');
+const categories = require('../categories');
+const translator = require('../translator');
 
 module.exports = function (Topics) {
     Topics.create = async function (data) {
         // This is an internal method, consider using Topics.post instead
         const timestamp = data.timestamp || Date.now();
 
-        const tid = await db.incrObjectField("global", "nextTid");
+        const tid = await db.incrObjectField('global', 'nextTid');
 
         let topicData = {
             tid: tid,
@@ -27,7 +27,7 @@ module.exports = function (Topics) {
             cid: data.cid,
             mainPid: 0,
             title: data.title,
-            slug: `${tid}/${slugify(data.title) || "topic"}`,
+            slug: `${tid}/${slugify(data.title) || 'topic'}`,
             timestamp: timestamp,
             lastposttime: 0,
             postcount: 0,
@@ -35,10 +35,10 @@ module.exports = function (Topics) {
         };
 
         if (Array.isArray(data.tags) && data.tags.length) {
-            topicData.tags = data.tags.join(",");
+            topicData.tags = data.tags.join(',');
         }
 
-        const result = await plugins.hooks.fire("filter:topic.create", {
+        const result = await plugins.hooks.fire('filter:topic.create', {
             topic: topicData,
             data: data,
         });
@@ -46,37 +46,37 @@ module.exports = function (Topics) {
         await db.setObject(`topic:${topicData.tid}`, topicData);
 
         const timestampedSortedSetKeys = [
-            "topics:tid",
+            'topics:tid',
             `cid:${topicData.cid}:tids`,
             `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
         ];
 
         const scheduled = timestamp > Date.now();
         if (scheduled) {
-            timestampedSortedSetKeys.push("topics:scheduled");
+            timestampedSortedSetKeys.push('topics:scheduled');
         }
 
         await Promise.all([
             db.sortedSetsAdd(
                 timestampedSortedSetKeys,
                 timestamp,
-                topicData.tid,
+                topicData.tid
             ),
             db.sortedSetsAdd(
                 [
-                    "topics:views",
-                    "topics:posts",
-                    "topics:votes",
+                    'topics:views',
+                    'topics:posts',
+                    'topics:votes',
                     `cid:${topicData.cid}:tids:votes`,
                     `cid:${topicData.cid}:tids:posts`,
                     `cid:${topicData.cid}:tids:views`,
                 ],
                 0,
-                topicData.tid,
+                topicData.tid
             ),
             user.addTopicIdToUser(topicData.uid, topicData.tid, timestamp),
-            db.incrObjectField(`category:${topicData.cid}`, "topic_count"),
-            db.incrObjectField("global", "topicCount"),
+            db.incrObjectField(`category:${topicData.cid}`, 'topic_count'),
+            db.incrObjectField('global', 'topicCount'),
             Topics.createTags(data.tags, topicData.tid, timestamp),
             scheduled
                 ? Promise.resolve()
@@ -86,7 +86,7 @@ module.exports = function (Topics) {
             await Topics.scheduled.pin(tid, topicData);
         }
 
-        plugins.hooks.fire("action:topic.save", {
+        plugins.hooks.fire('action:topic.save', {
             topic: _.clone(topicData),
             data: data,
         });
@@ -94,7 +94,7 @@ module.exports = function (Topics) {
     };
 
     Topics.post = async function (data) {
-        data = await plugins.hooks.fire("filter:topic.post", data);
+        data = await plugins.hooks.fire('filter:topic.post', data);
         const { uid } = data;
 
         data.title = String(data.title).trim();
@@ -111,16 +111,16 @@ module.exports = function (Topics) {
 
         const [categoryExists, canCreate, canTag] = await Promise.all([
             categories.exists(data.cid),
-            privileges.categories.can("topics:create", data.cid, uid),
-            privileges.categories.can("topics:tag", data.cid, uid),
+            privileges.categories.can('topics:create', data.cid, uid),
+            privileges.categories.can('topics:tag', data.cid, uid),
         ]);
 
         if (!categoryExists) {
-            throw new Error("[[error:no-category]]");
+            throw new Error('[[error:no-category]]');
         }
 
         if (!canCreate || (!canTag && data.tags.length)) {
-            throw new Error("[[error:no-privileges]]");
+            throw new Error('[[error:no-privileges]]');
         }
 
         await guestHandleValid(data);
@@ -143,7 +143,7 @@ module.exports = function (Topics) {
         ]);
 
         if (!Array.isArray(topics) || !topics.length) {
-            throw new Error("[[error:no-topic]]");
+            throw new Error('[[error:no-topic]]');
         }
 
         if (uid > 0 && settings.followTopicsOnCreate) {
@@ -159,8 +159,8 @@ module.exports = function (Topics) {
             await Topics.delete(tid);
         }
 
-        analytics.increment(["topics", `topics:byCid:${topicData.cid}`]);
-        plugins.hooks.fire("action:topic.post", {
+        analytics.increment(['topics', `topics:byCid:${topicData.cid}`]);
+        plugins.hooks.fire('action:topic.post', {
             topic: topicData,
             post: postData,
             data: data,
@@ -170,7 +170,7 @@ module.exports = function (Topics) {
             user.notifications.sendTopicNotificationToFollowers(
                 uid,
                 topicData,
-                postData,
+                postData
             );
         }
 
@@ -181,7 +181,7 @@ module.exports = function (Topics) {
     };
 
     Topics.reply = async function (data) {
-        data = await plugins.hooks.fire("filter:topic.reply", data);
+        data = await plugins.hooks.fire('filter:topic.reply', data);
         const { tid } = data;
         const { uid } = data;
 
@@ -215,26 +215,26 @@ module.exports = function (Topics) {
         }
 
         if (parseInt(uid, 10)) {
-            user.setUserField(uid, "lastonline", Date.now());
+            user.setUserField(uid, 'lastonline', Date.now());
         }
 
         if (parseInt(uid, 10) || meta.config.allowGuestReplyNotifications) {
             const { displayname } = postData.user;
 
             Topics.notifyFollowers(postData, uid, {
-                type: "new-reply",
+                type: 'new-reply',
                 bodyShort: translator.compile(
-                    "notifications:user_posted_to",
+                    'notifications:user_posted_to',
                     displayname,
-                    postData.topic.title,
+                    postData.topic.title
                 ),
                 nid: `new_post:tid:${postData.topic.tid}:pid:${postData.pid}:uid:${uid}`,
                 mergeId: `notifications:user_posted_to|${postData.topic.tid}`,
             });
         }
 
-        analytics.increment(["posts", `posts:byCid:${data.cid}`]);
-        plugins.hooks.fire("action:topic.reply", {
+        analytics.increment(['posts', `posts:byCid:${data.cid}`]);
+        plugins.hooks.fire('action:topic.reply', {
             post: _.clone(postData),
             data: data,
         });
@@ -250,14 +250,14 @@ module.exports = function (Topics) {
         const [userInfo, topicInfo] = await Promise.all([
             posts.getUserInfoForPosts([postData.uid], uid),
             Topics.getTopicFields(tid, [
-                "tid",
-                "uid",
-                "title",
-                "slug",
-                "cid",
-                "postcount",
-                "mainPid",
-                "scheduled",
+                'tid',
+                'uid',
+                'title',
+                'slug',
+                'cid',
+                'postcount',
+                'mainPid',
+                'scheduled',
             ]),
             Topics.addParentPosts([postData]),
             Topics.syncBacklinks(postData),
@@ -288,8 +288,8 @@ module.exports = function (Topics) {
             title,
             meta.config.minimumTitleLength,
             meta.config.maximumTitleLength,
-            "title-too-short",
-            "title-too-long",
+            'title-too-short',
+            'title-too-long'
         );
     };
 
@@ -298,14 +298,14 @@ module.exports = function (Topics) {
             content,
             meta.config.minimumPostLength,
             meta.config.maximumPostLength,
-            "content-too-short",
-            "content-too-long",
+            'content-too-short',
+            'content-too-long'
         );
     };
 
     function check(item, min, max, minError, maxError) {
         // Trim and remove HTML (latter for composers that send in HTML, like redactor)
-        if (typeof item === "string") {
+        if (typeof item === 'string') {
             item = utils.stripHTMLTags(item).trim();
         }
 
@@ -327,42 +327,42 @@ module.exports = function (Topics) {
             data.handle
         ) {
             if (data.handle.length > meta.config.maximumUsernameLength) {
-                throw new Error("[[error:guest-handle-invalid]]");
+                throw new Error('[[error:guest-handle-invalid]]');
             }
             const exists = await user.existsBySlug(slugify(data.handle));
             if (exists) {
-                throw new Error("[[error:username-taken]]");
+                throw new Error('[[error:username-taken]]');
             }
         }
     }
 
     async function canReply(data, topicData) {
         if (!topicData) {
-            throw new Error("[[error:no-topic]]");
+            throw new Error('[[error:no-topic]]');
         }
         const { tid, uid } = data;
         const { cid, deleted, locked, scheduled } = topicData;
 
         const [canReply, canSchedule, isAdminOrMod] = await Promise.all([
-            privileges.topics.can("topics:reply", tid, uid),
-            privileges.topics.can("topics:schedule", tid, uid),
+            privileges.topics.can('topics:reply', tid, uid),
+            privileges.topics.can('topics:schedule', tid, uid),
             privileges.categories.isAdminOrMod(cid, uid),
         ]);
 
         if (locked && !isAdminOrMod) {
-            throw new Error("[[error:topic-locked]]");
+            throw new Error('[[error:topic-locked]]');
         }
 
         if (!scheduled && deleted && !isAdminOrMod) {
-            throw new Error("[[error:topic-deleted]]");
+            throw new Error('[[error:topic-deleted]]');
         }
 
         if (scheduled && !canSchedule) {
-            throw new Error("[[error:no-privileges]]");
+            throw new Error('[[error:no-privileges]]');
         }
 
         if (!canReply) {
-            throw new Error("[[error:no-privileges]]");
+            throw new Error('[[error:no-privileges]]');
         }
     }
 };

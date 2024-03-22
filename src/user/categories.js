@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
+const _ = require('lodash');
 
-const db = require("../database");
-const categories = require("../categories");
-const plugins = require("../plugins");
+const db = require('../database');
+const categories = require('../categories');
+const plugins = require('../plugins');
 
 module.exports = function (User) {
     User.setCategoryWatchState = async function (uid, cids, state) {
@@ -12,20 +12,20 @@ module.exports = function (User) {
             return;
         }
         const isStateValid = Object.values(categories.watchStates).includes(
-            parseInt(state, 10),
+            parseInt(state, 10)
         );
         if (!isStateValid) {
-            throw new Error("[[error:invalid-watch-state]]");
+            throw new Error('[[error:invalid-watch-state]]');
         }
         cids = Array.isArray(cids) ? cids : [cids];
         const exists = await categories.exists(cids);
         if (exists.includes(false)) {
-            throw new Error("[[error:no-category]]");
+            throw new Error('[[error:no-category]]');
         }
         await db.sortedSetsAdd(
-            cids.map((cid) => `cid:${cid}:uid:watch:state`),
+            cids.map(cid => `cid:${cid}:uid:watch:state`),
             state,
-            uid,
+            uid
         );
     };
 
@@ -34,7 +34,7 @@ module.exports = function (User) {
             return {};
         }
 
-        const cids = await categories.getAllCidsFromSet("categories:cid");
+        const cids = await categories.getAllCidsFromSet('categories:cid');
         const states = await categories.getWatchState(cids, uid);
         return _.zipObject(cids, states);
     };
@@ -47,11 +47,11 @@ module.exports = function (User) {
             categories.watchStates.ignoring,
         ]);
         const result = await plugins.hooks.fire(
-            "filter:user.getIgnoredCategories",
+            'filter:user.getIgnoredCategories',
             {
                 uid: uid,
                 cids: cids,
-            },
+            }
         );
         return result.cids;
     };
@@ -64,20 +64,20 @@ module.exports = function (User) {
             categories.watchStates.watching,
         ]);
         const result = await plugins.hooks.fire(
-            "filter:user.getWatchedCategories",
+            'filter:user.getWatchedCategories',
             {
                 uid: uid,
                 cids: cids,
-            },
+            }
         );
         return result.cids;
     };
 
     User.getCategoriesByStates = async function (uid, states) {
         if (!(parseInt(uid, 10) > 0)) {
-            return await categories.getAllCidsFromSet("categories:cid");
+            return await categories.getAllCidsFromSet('categories:cid');
         }
-        const cids = await categories.getAllCidsFromSet("categories:cid");
+        const cids = await categories.getAllCidsFromSet('categories:cid');
         const userState = await categories.getWatchState(cids, uid);
         return cids.filter((cid, index) => states.includes(userState[index]));
     };
@@ -86,7 +86,7 @@ module.exports = function (User) {
         await User.setCategoryWatchState(
             uid,
             cid,
-            categories.watchStates.ignoring,
+            categories.watchStates.ignoring
         );
     };
 
@@ -94,7 +94,7 @@ module.exports = function (User) {
         await User.setCategoryWatchState(
             uid,
             cid,
-            categories.watchStates.watching,
+            categories.watchStates.watching
         );
     };
 };

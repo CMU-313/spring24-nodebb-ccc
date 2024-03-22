@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-define("forum/account/posts", [
-    "forum/account/header",
-    "forum/infinitescroll",
-    "hooks",
+define('forum/account/posts', [
+    'forum/account/header',
+    'forum/infinitescroll',
+    'hooks',
 ], function (header, infinitescroll, hooks) {
     const AccountPosts = {};
 
@@ -14,10 +14,10 @@ define("forum/account/posts", [
         header.init();
 
         $('[component="post/content"] img:not(.not-responsive)').addClass(
-            "img-responsive",
+            'img-responsive'
         );
 
-        AccountPosts.handleInfiniteScroll("account/posts");
+        AccountPosts.handleInfiniteScroll('account/posts');
     };
 
     AccountPosts.handleInfiniteScroll = function (_template) {
@@ -48,21 +48,21 @@ define("forum/account/posts", [
     function onPostsLoaded(posts, callback) {
         app.parseAndTranslate(
             template,
-            "posts",
+            'posts',
             { posts: posts },
             function (html) {
                 $('[component="posts"]').append(html);
-                html.find("img:not(.not-responsive)").addClass(
-                    "img-responsive",
+                html.find('img:not(.not-responsive)').addClass(
+                    'img-responsive'
                 );
-                html.find(".timeago").timeago();
+                html.find('.timeago').timeago();
                 app.createUserTooltips(html);
                 utils.makeNumbersHumanReadable(
-                    html.find(".human-readable-number"),
+                    html.find('.human-readable-number')
                 );
-                hooks.fire("action:posts.loaded", { posts: posts });
+                hooks.fire('action:posts.loaded', { posts: posts });
                 callback();
-            },
+            }
         );
     }
 

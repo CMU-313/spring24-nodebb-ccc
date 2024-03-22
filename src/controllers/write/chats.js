@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-const api = require("../../api");
-const messaging = require("../../messaging");
+const api = require('../../api');
+const messaging = require('../../messaging');
 
-const helpers = require("../helpers");
+const helpers = require('../helpers');
 
 const Chats = module.exports;
 
@@ -18,7 +18,7 @@ Chats.list = async (req, res) => {
         req.uid,
         req.uid,
         start,
-        stop,
+        stop
     );
 
     helpers.formatApiResponse(200, res, { rooms });
@@ -113,7 +113,7 @@ Chats.messages.get = async (req, res) => {
         [req.params.mid],
         req.uid,
         req.params.roomId,
-        false,
+        false
     );
     helpers.formatApiResponse(200, res, messages.pop());
 };
@@ -124,14 +124,14 @@ Chats.messages.edit = async (req, res) => {
         req.uid,
         req.params.mid,
         req.params.roomId,
-        req.body.message,
+        req.body.message
     );
 
     const messages = await messaging.getMessagesData(
         [req.params.mid],
         req.uid,
         req.params.roomId,
-        false,
+        false
     );
     helpers.formatApiResponse(200, res, messages.pop());
 };

@@ -12,7 +12,7 @@ get:
 
     Subcategories are also returned, nested under a category's `children` property.
   responses:
-    "200":
+    '200':
       description: A list of category objects currently available to the accessing user
       content:
         application/json:
@@ -112,7 +112,7 @@ get:
                                                     value is used in conjunction
                                                     with `icon:text` for the user's
                                                     auto-generated icon
-                                                  example: "#f44336"
+                                                  example: '#f44336'
                                             index:
                                               type: number
                                             cid:
@@ -176,7 +176,7 @@ get:
                                           value is used in conjunction with
                                           `icon:text` for the user's
                                           auto-generated icon
-                                        example: "#f44336"
+                                        example: '#f44336'
                                   index:
                                     type: number
                                   cid:

@@ -1,20 +1,20 @@
-"use strict";
+'use strict';
 
-define("admin/manage/digest", ["bootbox", "alerts"], function (
+define('admin/manage/digest', ['bootbox', 'alerts'], function (
     bootbox,
-    alerts,
+    alerts
 ) {
     const Digest = {};
 
     Digest.init = function () {
-        $("table").on("click", "[data-action]", function () {
-            const action = this.getAttribute("data-action");
-            const uid = this.getAttribute("data-uid");
+        $('table').on('click', '[data-action]', function () {
+            const action = this.getAttribute('data-action');
+            const uid = this.getAttribute('data-uid');
 
-            if (action.startsWith("resend-")) {
+            if (action.startsWith('resend-')) {
                 const interval = action.slice(7);
                 bootbox.confirm(
-                    "[[admin/manage/digest:resend-all-confirm]]",
+                    '[[admin/manage/digest:resend-all-confirm]]',
                     function (ok) {
                         if (ok) {
                             Digest.send(action, undefined, function (err) {
@@ -23,13 +23,13 @@ define("admin/manage/digest", ["bootbox", "alerts"], function (
                                 }
 
                                 alerts.success(
-                                    "[[admin/manage/digest:resent-" +
+                                    '[[admin/manage/digest:resent-' +
                                         interval +
-                                        "]]",
+                                        ']]'
                                 );
                             });
                         }
-                    },
+                    }
                 );
             } else {
                 Digest.send(action, uid, function (err) {
@@ -37,7 +37,7 @@ define("admin/manage/digest", ["bootbox", "alerts"], function (
                         return alerts.error(err);
                     }
 
-                    alerts.success("[[admin/manage/digest:resent-single]]");
+                    alerts.success('[[admin/manage/digest:resent-single]]');
                 });
             }
         });
@@ -45,12 +45,12 @@ define("admin/manage/digest", ["bootbox", "alerts"], function (
 
     Digest.send = function (action, uid, callback) {
         socket.emit(
-            "admin.digest.resend",
+            'admin.digest.resend',
             {
                 action: action,
                 uid: uid,
             },
-            callback,
+            callback
         );
     };
 

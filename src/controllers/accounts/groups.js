@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-const groups = require("../../groups");
-const helpers = require("../helpers");
-const accountHelpers = require("./helpers");
+const groups = require('../../groups');
+const helpers = require('../helpers');
+const accountHelpers = require('./helpers');
 
 const groupsController = module.exports;
 
@@ -10,14 +10,14 @@ groupsController.get = async function (req, res, next) {
     const userData = await accountHelpers.getUserDataByUserSlug(
         req.params.userslug,
         req.uid,
-        req.query,
+        req.query
     );
     if (!userData) {
         return next();
     }
     let groupsData = await groups.getUserGroups([userData.uid]);
     groupsData = groupsData[0];
-    const groupNames = groupsData.filter(Boolean).map((group) => group.name);
+    const groupNames = groupsData.filter(Boolean).map(group => group.name);
     const members = await groups.getMemberUsers(groupNames, 0, 3);
     groupsData.forEach((group, index) => {
         group.members = members[index];
@@ -26,7 +26,7 @@ groupsController.get = async function (req, res, next) {
     userData.title = `[[pages:account/groups, ${userData.username}]]`;
     userData.breadcrumbs = helpers.buildBreadcrumbs([
         { text: userData.username, url: `/user/${userData.userslug}` },
-        { text: "[[global:header.groups]]" },
+        { text: '[[global:header.groups]]' },
     ]);
-    res.render("account/groups", userData);
+    res.render('account/groups', userData);
 };

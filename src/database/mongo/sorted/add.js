@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
 module.exports = function (module) {
-    const helpers = require("../helpers");
-    const utils = require("../../../utils");
+    const helpers = require('../helpers');
+    const utils = require('../../../utils');
 
     module.sortedSetAdd = async function (key, score, value) {
         if (!key) {
@@ -18,14 +18,14 @@ module.exports = function (module) {
 
         try {
             await module.client
-                .collection("objects")
+                .collection('objects')
                 .updateOne(
                     { _key: key, value: value },
                     { $set: { score: parseFloat(score) } },
-                    { upsert: true },
+                    { upsert: true }
                 );
         } catch (err) {
-            if (err && err.message.startsWith("E11000 duplicate key error")) {
+            if (err && err.message.startsWith('E11000 duplicate key error')) {
                 return await module.sortedSetAdd(key, score, value);
             }
             throw err;
@@ -37,7 +37,7 @@ module.exports = function (module) {
             return;
         }
         if (scores.length !== values.length) {
-            throw new Error("[[error:invalid-data]]");
+            throw new Error('[[error:invalid-data]]');
         }
         for (let i = 0; i < scores.length; i += 1) {
             if (!utils.isNumber(scores[i])) {
@@ -47,7 +47,7 @@ module.exports = function (module) {
         values = values.map(helpers.valueToString);
 
         const bulk = module.client
-            .collection("objects")
+            .collection('objects')
             .initializeUnorderedBulkOp();
         for (let i = 0; i < scores.length; i += 1) {
             bulk.find({ _key: key, value: values[i] })
@@ -65,19 +65,19 @@ module.exports = function (module) {
         if (
             (!isArrayOfScores && !utils.isNumber(scores)) ||
             (isArrayOfScores &&
-                scores.map((s) => utils.isNumber(s)).includes(false))
+                scores.map(s => utils.isNumber(s)).includes(false))
         ) {
             throw new Error(`[[error:invalid-score, ${scores}]]`);
         }
 
         if (isArrayOfScores && scores.length !== keys.length) {
-            throw new Error("[[error:invalid-data]]");
+            throw new Error('[[error:invalid-data]]');
         }
 
         value = helpers.valueToString(value);
 
         const bulk = module.client
-            .collection("objects")
+            .collection('objects')
             .initializeUnorderedBulkOp();
         for (let i = 0; i < keys.length; i += 1) {
             bulk.find({ _key: keys[i], value: value })
@@ -96,9 +96,9 @@ module.exports = function (module) {
             return;
         }
         const bulk = module.client
-            .collection("objects")
+            .collection('objects')
             .initializeUnorderedBulkOp();
-        data.forEach((item) => {
+        data.forEach(item => {
             if (!utils.isNumber(item[1])) {
                 throw new Error(`[[error:invalid-score, ${item[1]}]]`);
             }

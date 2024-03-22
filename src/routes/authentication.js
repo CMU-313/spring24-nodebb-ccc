@@ -1,15 +1,15 @@
-"use strict";
+'use strict';
 
-const async = require("async");
-const passport = require("passport");
-const passportLocal = require("passport-local").Strategy;
-const BearerStrategy = require("passport-http-bearer").Strategy;
-const winston = require("winston");
+const async = require('async');
+const passport = require('passport');
+const passportLocal = require('passport-local').Strategy;
+const BearerStrategy = require('passport-http-bearer').Strategy;
+const winston = require('winston');
 
-const meta = require("../meta");
-const controllers = require("../controllers");
-const helpers = require("../controllers/helpers");
-const plugins = require("../plugins");
+const meta = require('../meta');
+const controllers = require('../controllers');
+const helpers = require('../controllers/helpers');
+const plugins = require('../plugins');
 
 let loginStrategies = [];
 
@@ -29,11 +29,11 @@ Auth.initialize = function (app, middleware) {
     // Apply wrapper around passport.authenticate to pass in keepSessionInfo option
     const _authenticate = passport.authenticate;
     passport.authenticate = (strategy, options, callback) => {
-        if (!callback && typeof options === "function") {
+        if (!callback && typeof options === 'function') {
             return _authenticate.call(passport, strategy, options);
         }
 
-        if (!options.hasOwnProperty("keepSessionInfo")) {
+        if (!options.hasOwnProperty('keepSessionInfo')) {
             options.keepSessionInfo = true;
         }
 
@@ -58,8 +58,8 @@ Auth.getLoginStrategies = function () {
 };
 
 Auth.verifyToken = async function (token, done) {
-    const { tokens = [] } = await meta.settings.get("core.api");
-    const tokenObj = tokens.find((t) => t.token === token);
+    const { tokens = [] } = await meta.settings.get('core.api');
+    const tokenObj = tokens.find(t => t.token === token);
     const uid = tokenObj ? tokenObj.uid : undefined;
 
     if (uid !== undefined) {
@@ -82,36 +82,36 @@ Auth.reloadRoutes = async function (params) {
     const { router } = params;
 
     // Local Logins
-    if (plugins.hooks.hasListeners("action:auth.overrideLogin")) {
+    if (plugins.hooks.hasListeners('action:auth.overrideLogin')) {
         winston.warn(
-            "[authentication] Login override detected, skipping local login strategy.",
+            '[authentication] Login override detected, skipping local login strategy.'
         );
-        plugins.hooks.fire("action:auth.overrideLogin");
+        plugins.hooks.fire('action:auth.overrideLogin');
     } else {
         passport.use(
             new passportLocal(
                 { passReqToCallback: true },
-                controllers.authentication.localLogin,
-            ),
+                controllers.authentication.localLogin
+            )
         );
     }
 
     // HTTP bearer authentication
-    passport.use("core.api", new BearerStrategy({}, Auth.verifyToken));
+    passport.use('core.api', new BearerStrategy({}, Auth.verifyToken));
 
     // Additional logins via SSO plugins
     try {
         loginStrategies = await plugins.hooks.fire(
-            "filter:auth.init",
-            loginStrategies,
+            'filter:auth.init',
+            loginStrategies
         );
     } catch (err) {
         winston.error(`[authentication] ${err.stack}`);
     }
     loginStrategies = loginStrategies || [];
-    loginStrategies.forEach((strategy) => {
+    loginStrategies.forEach(strategy => {
         if (strategy.url) {
-            router[strategy.urlMethod || "get"](
+            router[strategy.urlMethod || 'get'](
                 strategy.url,
                 Auth.middleware.applyCSRF,
                 async (req, res, next) => {
@@ -127,15 +127,15 @@ Auth.reloadRoutes = async function (params) {
 
                     // Allow SSO plugins to override/append options (for use in passport prototype authorizationParams)
                     ({ opts } = await plugins.hooks.fire(
-                        "filter:auth.options",
-                        { req, res, opts },
+                        'filter:auth.options',
+                        { req, res, opts }
                     ));
                     passport.authenticate(strategy.name, opts)(req, res, next);
-                },
+                }
             );
         }
 
-        router[strategy.callbackMethod || "get"](
+        router[strategy.callbackMethod || 'get'](
             strategy.callbackURL,
             (req, res, next) => {
                 // Ensure the passed-back state value is identical to the saved ssoState (unless explicitly skipped)
@@ -145,8 +145,8 @@ Auth.reloadRoutes = async function (params) {
 
                 next(
                     req.query.state !== req.session.ssoState
-                        ? new Error("[[error:csrf-invalid]]")
-                        : null,
+                        ? new Error('[[error:csrf-invalid]]')
+                        : null
                 );
             },
             (req, res, next) => {
@@ -172,7 +172,7 @@ Auth.reloadRoutes = async function (params) {
                             res,
                             strategy.failureUrl !== undefined
                                 ? strategy.failureUrl
-                                : "/login",
+                                : '/login'
                         );
                     }
 
@@ -191,10 +191,10 @@ Auth.reloadRoutes = async function (params) {
                         async.apply(
                             controllers.authentication.onSuccessfulLogin,
                             req,
-                            req.uid,
+                            req.uid
                         ),
                     ],
-                    (err) => {
+                    err => {
                         if (err) {
                             return next(err);
                         }
@@ -203,15 +203,15 @@ Auth.reloadRoutes = async function (params) {
                             res,
                             strategy.successUrl !== undefined
                                 ? strategy.successUrl
-                                : "/",
+                                : '/'
                         );
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
-    const multipart = require("connect-multiparty");
+    const multipart = require('connect-multiparty');
     const multipartMiddleware = multipart();
     const middlewares = [
         multipartMiddleware,
@@ -219,27 +219,27 @@ Auth.reloadRoutes = async function (params) {
         Auth.middleware.applyBlacklist,
     ];
 
-    router.post("/register", middlewares, controllers.authentication.register);
+    router.post('/register', middlewares, controllers.authentication.register);
     router.post(
-        "/register/complete",
+        '/register/complete',
         middlewares,
-        controllers.authentication.registerComplete,
+        controllers.authentication.registerComplete
     );
     router.post(
-        "/register/abort",
+        '/register/abort',
         Auth.middleware.applyCSRF,
-        controllers.authentication.registerAbort,
+        controllers.authentication.registerAbort
     );
     router.post(
-        "/login",
+        '/login',
         Auth.middleware.applyCSRF,
         Auth.middleware.applyBlacklist,
-        controllers.authentication.login,
+        controllers.authentication.login
     );
     router.post(
-        "/logout",
+        '/logout',
         Auth.middleware.applyCSRF,
-        controllers.authentication.logout,
+        controllers.authentication.logout
     );
 };
 

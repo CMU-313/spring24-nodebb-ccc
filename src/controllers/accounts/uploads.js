@@ -1,14 +1,14 @@
-"use strict";
+'use strict';
 
-const path = require("path");
+const path = require('path');
 
-const nconf = require("nconf");
+const nconf = require('nconf');
 
-const db = require("../../database");
-const helpers = require("../helpers");
-const meta = require("../../meta");
-const pagination = require("../../pagination");
-const accountHelpers = require("./helpers");
+const db = require('../../database');
+const helpers = require('../helpers');
+const meta = require('../../meta');
+const pagination = require('../../pagination');
+const accountHelpers = require('./helpers');
 
 const uploadsController = module.exports;
 
@@ -16,7 +16,7 @@ uploadsController.get = async function (req, res, next) {
     const userData = await accountHelpers.getUserDataByUserSlug(
         req.params.userslug,
         req.uid,
-        req.query,
+        req.query
     );
     if (!userData) {
         return next();
@@ -31,9 +31,9 @@ uploadsController.get = async function (req, res, next) {
         db.getSortedSetRevRange(`uid:${userData.uid}:uploads`, start, stop),
     ]);
 
-    userData.uploads = uploadNames.map((uploadName) => ({
+    userData.uploads = uploadNames.map(uploadName => ({
         name: uploadName,
-        url: path.resolve(nconf.get("upload_url"), uploadName),
+        url: path.resolve(nconf.get('upload_url'), uploadName),
     }));
     const pageCount = Math.ceil(itemCount / itemsPerPage);
     userData.pagination = pagination.create(page, pageCount, req.query);
@@ -41,7 +41,7 @@ uploadsController.get = async function (req, res, next) {
     userData.title = `[[pages:account/uploads, ${userData.username}]]`;
     userData.breadcrumbs = helpers.buildBreadcrumbs([
         { text: userData.username, url: `/user/${userData.userslug}` },
-        { text: "[[global:uploads]]" },
+        { text: '[[global:uploads]]' },
     ]);
-    res.render("account/uploads", userData);
+    res.render('account/uploads', userData);
 };

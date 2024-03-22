@@ -1,29 +1,29 @@
-"use strict";
+'use strict';
 
-const async = require("async");
-const assert = require("assert");
+const async = require('async');
+const assert = require('assert');
 
-const db = require("./mocks/databasemock");
+const db = require('./mocks/databasemock');
 
-const batch = require("../src/batch");
+const batch = require('../src/batch');
 
-describe("batch", () => {
+describe('batch', () => {
     const scores = [];
     const values = [];
-    before((done) => {
+    before(done => {
         for (let i = 0; i < 100; i++) {
             scores.push(i);
             values.push(`val${i}`);
         }
-        db.sortedSetAdd("processMe", scores, values, done);
+        db.sortedSetAdd('processMe', scores, values, done);
     });
 
-    it("should process sorted set with callbacks", (done) => {
+    it('should process sorted set with callbacks', done => {
         let total = 0;
         batch.processSortedSet(
-            "processMe",
+            'processMe',
             (items, next) => {
-                items.forEach((item) => {
+                items.forEach(item => {
                     total += item.score;
                 });
 
@@ -34,72 +34,72 @@ describe("batch", () => {
                 interval: 50,
                 batch: 10,
             },
-            (err) => {
+            err => {
                 assert.ifError(err);
                 assert.strictEqual(total, 4950);
                 done();
-            },
+            }
         );
     });
 
-    it("should process sorted set with callbacks", (done) => {
+    it('should process sorted set with callbacks', done => {
         let total = 0;
         batch.processSortedSet(
-            "processMe",
+            'processMe',
             (values, next) => {
-                values.forEach((val) => {
+                values.forEach(val => {
                     total += val.length;
                 });
 
                 setImmediate(next);
             },
-            (err) => {
+            err => {
                 assert.ifError(err);
                 assert.strictEqual(total, 490);
                 done();
-            },
+            }
         );
     });
 
-    it("should process sorted set with async/await", async () => {
+    it('should process sorted set with async/await', async () => {
         let total = 0;
         await batch.processSortedSet(
-            "processMe",
+            'processMe',
             (values, next) => {
-                values.forEach((val) => {
+                values.forEach(val => {
                     total += val.length;
                 });
 
                 setImmediate(next);
             },
-            {},
+            {}
         );
 
         assert.strictEqual(total, 490);
     });
 
-    it("should process sorted set with async/await", async () => {
+    it('should process sorted set with async/await', async () => {
         let total = 0;
         await batch.processSortedSet(
-            "processMe",
-            async (values) => {
-                values.forEach((val) => {
+            'processMe',
+            async values => {
+                values.forEach(val => {
                     total += val.length;
                 });
-                await db.getObject("doesnotexist");
+                await db.getObject('doesnotexist');
             },
-            {},
+            {}
         );
 
         assert.strictEqual(total, 490);
     });
 
-    it("should process array with callbacks", (done) => {
+    it('should process array with callbacks', done => {
         let total = 0;
         batch.processArray(
             scores,
             (nums, next) => {
-                nums.forEach((n) => {
+                nums.forEach(n => {
                     total += n;
                 });
 
@@ -110,20 +110,20 @@ describe("batch", () => {
                 interval: 50,
                 batch: 10,
             },
-            (err) => {
+            err => {
                 assert.ifError(err);
                 assert.strictEqual(total, 4950);
                 done();
-            },
+            }
         );
     });
 
-    it("should process array with async/await", async () => {
+    it('should process array with async/await', async () => {
         let total = 0;
         await batch.processArray(
             scores,
             (nums, next) => {
-                nums.forEach((n) => {
+                nums.forEach(n => {
                     total += n;
                 });
 
@@ -133,7 +133,7 @@ describe("batch", () => {
                 withScores: true,
                 interval: 50,
                 batch: 10,
-            },
+            }
         );
 
         assert.strictEqual(total, 4950);

@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-const db = require("../../database");
-const batch = require("../../batch");
+const db = require('../../database');
+const batch = require('../../batch');
 
 module.exports = {
-    name: "Clean up post hash data",
+    name: 'Clean up post hash data',
     timestamp: Date.UTC(2019, 9, 7),
     method: async function () {
         const { progress } = this;
@@ -15,46 +15,46 @@ module.exports = {
 
 async function cleanPost(progress) {
     await batch.processSortedSet(
-        "posts:pid",
-        async (pids) => {
+        'posts:pid',
+        async pids => {
             progress.incr(pids.length);
 
             const postData = await db.getObjects(
-                pids.map((pid) => `post:${pid}`),
+                pids.map(pid => `post:${pid}`)
             );
             await Promise.all(
-                postData.map(async (post) => {
+                postData.map(async post => {
                     if (!post) {
                         return;
                     }
                     const fieldsToDelete = [];
-                    if (post.hasOwnProperty("editor") && post.editor === "") {
-                        fieldsToDelete.push("editor");
+                    if (post.hasOwnProperty('editor') && post.editor === '') {
+                        fieldsToDelete.push('editor');
                     }
                     if (
-                        post.hasOwnProperty("deleted") &&
+                        post.hasOwnProperty('deleted') &&
                         parseInt(post.deleted, 10) === 0
                     ) {
-                        fieldsToDelete.push("deleted");
+                        fieldsToDelete.push('deleted');
                     }
                     if (
-                        post.hasOwnProperty("edited") &&
+                        post.hasOwnProperty('edited') &&
                         parseInt(post.edited, 10) === 0
                     ) {
-                        fieldsToDelete.push("edited");
+                        fieldsToDelete.push('edited');
                     }
 
                     // cleanup legacy fields, these are not used anymore
                     const legacyFields = [
-                        "show_banned",
-                        "fav_star_class",
-                        "relativeEditTime",
-                        "post_rep",
-                        "relativeTime",
-                        "fav_button_class",
-                        "edited-class",
+                        'show_banned',
+                        'fav_star_class',
+                        'relativeEditTime',
+                        'post_rep',
+                        'relativeTime',
+                        'fav_button_class',
+                        'edited-class',
                     ];
-                    legacyFields.forEach((field) => {
+                    legacyFields.forEach(field => {
                         if (post.hasOwnProperty(field)) {
                             fieldsToDelete.push(field);
                         }
@@ -63,55 +63,55 @@ async function cleanPost(progress) {
                     if (fieldsToDelete.length) {
                         await db.deleteObjectFields(
                             `post:${post.pid}`,
-                            fieldsToDelete,
+                            fieldsToDelete
                         );
                     }
-                }),
+                })
             );
         },
         {
             batch: 500,
             progress: progress,
-        },
+        }
     );
 }
 
 async function cleanTopic(progress) {
     await batch.processSortedSet(
-        "topics:tid",
-        async (tids) => {
+        'topics:tid',
+        async tids => {
             progress.incr(tids.length);
             const topicData = await db.getObjects(
-                tids.map((tid) => `topic:${tid}`),
+                tids.map(tid => `topic:${tid}`)
             );
             await Promise.all(
-                topicData.map(async (topic) => {
+                topicData.map(async topic => {
                     if (!topic) {
                         return;
                     }
                     const fieldsToDelete = [];
                     if (
-                        topic.hasOwnProperty("deleted") &&
+                        topic.hasOwnProperty('deleted') &&
                         parseInt(topic.deleted, 10) === 0
                     ) {
-                        fieldsToDelete.push("deleted");
+                        fieldsToDelete.push('deleted');
                     }
                     if (
-                        topic.hasOwnProperty("pinned") &&
+                        topic.hasOwnProperty('pinned') &&
                         parseInt(topic.pinned, 10) === 0
                     ) {
-                        fieldsToDelete.push("pinned");
+                        fieldsToDelete.push('pinned');
                     }
                     if (
-                        topic.hasOwnProperty("locked") &&
+                        topic.hasOwnProperty('locked') &&
                         parseInt(topic.locked, 10) === 0
                     ) {
-                        fieldsToDelete.push("locked");
+                        fieldsToDelete.push('locked');
                     }
 
                     // cleanup legacy fields, these are not used anymore
-                    const legacyFields = ["category_name", "category_slug"];
-                    legacyFields.forEach((field) => {
+                    const legacyFields = ['category_name', 'category_slug'];
+                    legacyFields.forEach(field => {
                         if (topic.hasOwnProperty(field)) {
                             fieldsToDelete.push(field);
                         }
@@ -120,15 +120,15 @@ async function cleanTopic(progress) {
                     if (fieldsToDelete.length) {
                         await db.deleteObjectFields(
                             `topic:${topic.tid}`,
-                            fieldsToDelete,
+                            fieldsToDelete
                         );
                     }
-                }),
+                })
             );
         },
         {
             batch: 500,
             progress: progress,
-        },
+        }
     );
 }

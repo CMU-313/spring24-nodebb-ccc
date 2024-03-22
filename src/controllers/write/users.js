@@ -1,33 +1,33 @@
-"use strict";
+'use strict';
 
-const util = require("util");
-const nconf = require("nconf");
-const path = require("path");
-const crypto = require("crypto");
-const fs = require("fs").promises;
+const util = require('util');
+const nconf = require('nconf');
+const path = require('path');
+const crypto = require('crypto');
+const fs = require('fs').promises;
 
-const db = require("../../database");
-const api = require("../../api");
-const groups = require("../../groups");
-const meta = require("../../meta");
-const privileges = require("../../privileges");
-const user = require("../../user");
-const utils = require("../../utils");
+const db = require('../../database');
+const api = require('../../api');
+const groups = require('../../groups');
+const meta = require('../../meta');
+const privileges = require('../../privileges');
+const user = require('../../user');
+const utils = require('../../utils');
 
-const helpers = require("../helpers");
+const helpers = require('../helpers');
 
 const Users = module.exports;
 
 const exportMetadata = new Map([
-    ["posts", ["csv", "text/csv"]],
-    ["uploads", ["zip", "application/zip"]],
-    ["profile", ["json", "application/json"]],
+    ['posts', ['csv', 'text/csv']],
+    ['uploads', ['zip', 'application/zip']],
+    ['profile', ['json', 'application/json']],
 ]);
 
 const hasAdminPrivilege = async (uid, privilege) => {
     const ok = await privileges.admin.can(`admin:${privilege}`, uid);
     if (!ok) {
-        throw new Error("[[error:no-privileges]]");
+        throw new Error('[[error:no-privileges]]');
     }
 };
 
@@ -35,12 +35,12 @@ Users.redirectBySlug = async (req, res) => {
     const uid = await user.getUidByUserslug(req.params.userslug);
 
     if (uid) {
-        const path = req.path.split("/").slice(3).join("/");
-        const urlObj = new URL(nconf.get("url") + req.url);
+        const path = req.path.split('/').slice(3).join('/');
+        const urlObj = new URL(nconf.get('url') + req.url);
         res.redirect(
             308,
-            nconf.get("relative_path") +
-                encodeURI(`/api/v3/users/${uid}/${path}${urlObj.search}`),
+            nconf.get('relative_path') +
+                encodeURI(`/api/v3/users/${uid}/${path}${urlObj.search}`)
         );
     } else {
         helpers.formatApiResponse(404, res);
@@ -48,7 +48,7 @@ Users.redirectBySlug = async (req, res) => {
 };
 
 Users.create = async (req, res) => {
-    await hasAdminPrivilege(req.uid, "users");
+    await hasAdminPrivilege(req.uid, 'users');
     const userObj = await api.users.create(req, req.body);
     helpers.formatApiResponse(200, res, userObj);
 };
@@ -93,7 +93,7 @@ Users.deleteAccount = async (req, res) => {
 };
 
 Users.deleteMany = async (req, res) => {
-    await hasAdminPrivilege(req.uid, "users");
+    await hasAdminPrivilege(req.uid, 'users');
     await api.users.deleteMany(req, req.body);
     helpers.formatApiResponse(200, res);
 };
@@ -147,38 +147,38 @@ Users.unmute = async (req, res) => {
 };
 
 Users.generateToken = async (req, res) => {
-    await hasAdminPrivilege(req.uid, "settings");
+    await hasAdminPrivilege(req.uid, 'settings');
     if (parseInt(req.params.uid, 10) !== parseInt(req.user.uid, 10)) {
         return helpers.formatApiResponse(401, res);
     }
 
-    const settings = await meta.settings.get("core.api");
+    const settings = await meta.settings.get('core.api');
     settings.tokens = settings.tokens || [];
 
     const newToken = {
         token: utils.generateUUID(),
         uid: req.user.uid,
-        description: req.body.description || "",
+        description: req.body.description || '',
         timestamp: Date.now(),
     };
     settings.tokens.push(newToken);
-    await meta.settings.set("core.api", settings);
+    await meta.settings.set('core.api', settings);
     helpers.formatApiResponse(200, res, newToken);
 };
 
 Users.deleteToken = async (req, res) => {
-    await hasAdminPrivilege(req.uid, "settings");
+    await hasAdminPrivilege(req.uid, 'settings');
     if (parseInt(req.params.uid, 10) !== parseInt(req.user.uid, 10)) {
         return helpers.formatApiResponse(401, res);
     }
 
-    const settings = await meta.settings.get("core.api");
+    const settings = await meta.settings.get('core.api');
     const beforeLen = settings.tokens.length;
     settings.tokens = settings.tokens.filter(
-        (tokenObj) => tokenObj.token !== req.params.token,
+        tokenObj => tokenObj.token !== req.params.token
     );
     if (beforeLen !== settings.tokens.length) {
-        await meta.settings.set("core.api", settings);
+        await meta.settings.set('core.api', settings);
         helpers.formatApiResponse(200, res);
     } else {
         helpers.formatApiResponse(404, res);
@@ -187,7 +187,7 @@ Users.deleteToken = async (req, res) => {
 
 const getSessionAsync = util.promisify((sid, callback) => {
     db.sessionStore.get(sid, (err, sessionObj) =>
-        callback(err, sessionObj || null),
+        callback(err, sessionObj || null)
     );
 });
 
@@ -203,7 +203,7 @@ Users.revokeSession = async (req, res) => {
     const sids = await db.getSortedSetRange(
         `uid:${req.params.uid}:sessions`,
         0,
-        -1,
+        -1
     );
     let _id;
     for (const sid of sids) {
@@ -220,7 +220,7 @@ Users.revokeSession = async (req, res) => {
     }
 
     if (!_id) {
-        throw new Error("[[error:no-session-found]]");
+        throw new Error('[[error:no-session-found]]');
     }
 
     await user.auth.revokeSession(_id, req.params.uid);
@@ -234,7 +234,7 @@ Users.invite = async (req, res) => {
         return helpers.formatApiResponse(
             400,
             res,
-            new Error("[[error:invalid-data]]"),
+            new Error('[[error:invalid-data]]')
         );
     }
 
@@ -243,7 +243,7 @@ Users.invite = async (req, res) => {
         return helpers.formatApiResponse(
             403,
             res,
-            new Error("[[error:no-privileges]]"),
+            new Error('[[error:no-privileges]]')
         );
     }
 
@@ -252,38 +252,38 @@ Users.invite = async (req, res) => {
         return helpers.formatApiResponse(
             403,
             res,
-            new Error("[[error:no-privileges]]"),
+            new Error('[[error:no-privileges]]')
         );
     }
 
     const { registrationType } = meta.config;
     const isAdmin = await user.isAdministrator(req.uid);
-    if (registrationType === "admin-invite-only" && !isAdmin) {
+    if (registrationType === 'admin-invite-only' && !isAdmin) {
         return helpers.formatApiResponse(
             403,
             res,
-            new Error("[[error:no-privileges]]"),
+            new Error('[[error:no-privileges]]')
         );
     }
 
     const inviteGroups = (await groups.getUserInviteGroups(req.uid)).map(
-        (group) => group.name,
+        group => group.name
     );
     const cannotInvite = groupsToJoin.some(
-        (group) => !inviteGroups.includes(group),
+        group => !inviteGroups.includes(group)
     );
     if (groupsToJoin.length > 0 && cannotInvite) {
         return helpers.formatApiResponse(
             403,
             res,
-            new Error("[[error:no-privileges]]"),
+            new Error('[[error:no-privileges]]')
         );
     }
 
     const max = meta.config.maximumInvites;
     const emailsArr = emails
-        .split(",")
-        .map((email) => email.trim())
+        .split(',')
+        .map(email => email.trim())
         .filter(Boolean);
 
     for (const email of emailsArr) {
@@ -296,7 +296,7 @@ Users.invite = async (req, res) => {
             return helpers.formatApiResponse(
                 403,
                 res,
-                new Error(`[[error:invite-maximum-met, ${invites}, ${max}]]`),
+                new Error(`[[error:invite-maximum-met, ${invites}, ${max}]]`)
             );
         }
 
@@ -315,7 +315,7 @@ Users.getInviteGroups = async function (req, res) {
     return helpers.formatApiResponse(
         200,
         res,
-        userInviteGroups.map((group) => group.displayName),
+        userInviteGroups.map(group => group.displayName)
     );
 };
 
@@ -328,11 +328,11 @@ Users.listEmails = async (req, res) => {
 
     if (isSelf || isPrivileged || showemail) {
         const emails = await db.getSortedSetRangeByScore(
-            "email:uid",
+            'email:uid',
             0,
             500,
             req.params.uid,
-            req.params.uid,
+            req.params.uid
         );
         helpers.formatApiResponse(200, res, { emails });
     } else {
@@ -344,7 +344,7 @@ Users.getEmail = async (req, res) => {
     const [isPrivileged, { showemail }, exists] = await Promise.all([
         user.isPrivileged(req.uid),
         user.getSettings(req.params.uid),
-        db.isSortedSetMember("email:uid", req.params.email.toLowerCase()),
+        db.isSortedSetMember('email:uid', req.params.email.toLowerCase()),
     ]);
     const isSelf = req.uid === parseInt(req.params.uid, 10);
 
@@ -358,8 +358,8 @@ Users.getEmail = async (req, res) => {
 Users.confirmEmail = async (req, res) => {
     const [pending, current, canManage] = await Promise.all([
         user.email.isValidationPending(req.params.uid, req.params.email),
-        user.getUserField(req.params.uid, "email"),
-        privileges.admin.can("admin:users", req.uid),
+        user.getUserField(req.params.uid, 'email'),
+        privileges.admin.can('admin:users', req.uid),
     ]);
 
     if (!canManage) {
@@ -385,13 +385,13 @@ const prepareExport = async (req, res) => {
     const filename = `${req.params.uid}_${req.params.type}.${extension}`;
     try {
         const stat = await fs.stat(
-            path.join(__dirname, "../../../build/export", filename),
+            path.join(__dirname, '../../../build/export', filename)
         );
         const modified = new Date(stat.mtimeMs);
-        res.set("Last-Modified", modified.toUTCString());
+        res.set('Last-Modified', modified.toUTCString());
         res.set(
-            "ETag",
-            `"${crypto.createHash("md5").update(String(stat.mtimeMs)).digest("hex")}"`,
+            'ETag',
+            `"${crypto.createHash('md5').update(String(stat.mtimeMs)).digest('hex')}"`
         );
         res.status(204);
         return true;
@@ -419,17 +419,17 @@ Users.getExportByType = async (req, res) => {
     res.sendFile(
         filename,
         {
-            root: path.join(__dirname, "../../../build/export"),
+            root: path.join(__dirname, '../../../build/export'),
             headers: {
-                "Content-Type": mime,
-                "Content-Disposition": `attachment; filename=${filename}`,
+                'Content-Type': mime,
+                'Content-Disposition': `attachment; filename=${filename}`,
             },
         },
-        (err) => {
+        err => {
             if (err) {
                 throw err;
             }
-        },
+        }
     );
 };
 

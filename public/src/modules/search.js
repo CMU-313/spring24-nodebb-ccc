@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-define("search", ["translator", "storage", "hooks", "alerts"], function (
+define('search', ['translator', 'storage', 'hooks', 'alerts'], function (
     translator,
     storage,
     hooks,
-    alerts,
+    alerts
 ) {
     const Search = {
         current: {},
@@ -16,33 +16,33 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
         }
 
         searchOptions = searchOptions || {
-            in: config.searchDefaultInQuick || "titles",
+            in: config.searchDefaultInQuick || 'titles',
         };
-        const searchButton = $("#search-button");
-        const searchFields = $("#search-fields");
-        const searchInput = $("#search-fields input");
-        const quickSearchContainer = $("#quick-search-container");
+        const searchButton = $('#search-button');
+        const searchFields = $('#search-fields');
+        const searchInput = $('#search-fields input');
+        const quickSearchContainer = $('#quick-search-container');
 
-        $("#search-form .advanced-search-link")
-            .off("mousedown")
-            .on("mousedown", function () {
-                ajaxify.go("/search");
+        $('#search-form .advanced-search-link')
+            .off('mousedown')
+            .on('mousedown', function () {
+                ajaxify.go('/search');
             });
 
-        $("#search-form")
-            .off("submit")
-            .on("submit", function () {
+        $('#search-form')
+            .off('submit')
+            .on('submit', function () {
                 searchInput.blur();
             });
-        searchInput.off("blur").on("blur", function dismissSearch() {
+        searchInput.off('blur').on('blur', function dismissSearch() {
             setTimeout(function () {
-                if (!searchInput.is(":focus")) {
-                    searchFields.addClass("hidden");
-                    searchButton.removeClass("hidden");
+                if (!searchInput.is(':focus')) {
+                    searchFields.addClass('hidden');
+                    searchButton.removeClass('hidden');
                 }
             }, 200);
         });
-        searchInput.off("focus");
+        searchInput.off('focus');
 
         const searchElements = {
             inputEl: searchInput,
@@ -54,13 +54,13 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
             searchElements: searchElements,
         });
 
-        searchButton.off("click").on("click", function (e) {
-            if (!config.loggedIn && !app.user.privileges["search:content"]) {
+        searchButton.off('click').on('click', function (e) {
+            if (!config.loggedIn && !app.user.privileges['search:content']) {
                 alerts.alert({
-                    message: "[[error:search-requires-login]]",
+                    message: '[[error:search-requires-login]]',
                     timeout: 3000,
                 });
-                ajaxify.go("login");
+                ajaxify.go('login');
                 return false;
             }
             e.stopPropagation();
@@ -69,19 +69,19 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
             return false;
         });
 
-        $("#search-form")
-            .off("submit")
-            .on("submit", function () {
-                const input = $(this).find("input");
+        $('#search-form')
+            .off('submit')
+            .on('submit', function () {
+                const input = $(this).find('input');
                 const data = Search.getSearchPreferences();
                 data.term = input.val();
                 data.in = searchOptions.in;
-                hooks.fire("action:search.submit", {
+                hooks.fire('action:search.submit', {
                     searchOptions: data,
                     searchElements: searchElements,
                 });
                 Search.query(data, function () {
-                    input.val("");
+                    input.val('');
                 });
 
                 return false;
@@ -89,32 +89,32 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
     };
 
     Search.enableQuickSearch = function (options) {
-        if (!config.searchEnabled || !app.user.privileges["search:content"]) {
+        if (!config.searchEnabled || !app.user.privileges['search:content']) {
             return;
         }
 
         const searchOptions = Object.assign(
-            { in: config.searchDefaultInQuick || "titles" },
-            options.searchOptions,
+            { in: config.searchDefaultInQuick || 'titles' },
+            options.searchOptions
         );
         const quickSearchResults = options.searchElements.resultEl;
         const inputEl = options.searchElements.inputEl;
         let oldValue = inputEl.val();
-        const filterCategoryEl = quickSearchResults.find(".filter-category");
+        const filterCategoryEl = quickSearchResults.find('.filter-category');
 
         function updateCategoryFilterName() {
             if (ajaxify.data.template.category && ajaxify.data.cid) {
                 translator.translate(
-                    "[[search:search-in-category, " + ajaxify.data.name + "]]",
+                    '[[search:search-in-category, ' + ajaxify.data.name + ']]',
                     function (translated) {
-                        const name = $("<div></div>").html(translated).text();
-                        filterCategoryEl.find(".name").text(name);
-                    },
+                        const name = $('<div></div>').html(translated).text();
+                        filterCategoryEl.find('.name').text(name);
+                    }
                 );
             }
             filterCategoryEl.toggleClass(
-                "hidden",
-                !(ajaxify.data.template.category && ajaxify.data.cid),
+                'hidden',
+                !(ajaxify.data.template.category && ajaxify.data.cid)
             );
         }
 
@@ -127,7 +127,7 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
                 if (
                     filterCategoryEl
                         .find('input[type="checkbox"]')
-                        .is(":checked")
+                        .is(':checked')
                 ) {
                     options.searchOptions.categories = [ajaxify.data.cid];
                     options.searchOptions.searchChildren = true;
@@ -135,83 +135,83 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
             }
 
             quickSearchResults
-                .removeClass("hidden")
-                .find(".quick-search-results-container")
-                .html("");
-            quickSearchResults.find(".loading-indicator").removeClass("hidden");
-            hooks.fire("action:search.quick.start", options);
+                .removeClass('hidden')
+                .find('.quick-search-results-container')
+                .html('');
+            quickSearchResults.find('.loading-indicator').removeClass('hidden');
+            hooks.fire('action:search.quick.start', options);
             options.searchOptions.searchOnly = 1;
             Search.api(options.searchOptions, function (data) {
                 quickSearchResults
-                    .find(".loading-indicator")
-                    .addClass("hidden");
+                    .find('.loading-indicator')
+                    .addClass('hidden');
                 if (
                     !data.posts ||
                     (options.hideOnNoMatches && !data.posts.length)
                 ) {
                     return quickSearchResults
-                        .addClass("hidden")
-                        .find(".quick-search-results-container")
-                        .html("");
+                        .addClass('hidden')
+                        .find('.quick-search-results-container')
+                        .html('');
                 }
                 data.posts.forEach(function (p) {
-                    const text = $("<div>" + p.content + "</div>").text();
+                    const text = $('<div>' + p.content + '</div>').text();
                     const query = inputEl
                         .val()
                         .toLowerCase()
-                        .replace(/^in:topic-\d+/, "");
+                        .replace(/^in:topic-\d+/, '');
                     const start = Math.max(
                         0,
-                        text.toLowerCase().indexOf(query) - 40,
+                        text.toLowerCase().indexOf(query) - 40
                     );
                     p.snippet = utils.escapeHTML(
-                        (start > 0 ? "..." : "") +
+                        (start > 0 ? '...' : '') +
                             text.slice(start, start + 80) +
-                            (text.length - start > 80 ? "..." : ""),
+                            (text.length - start > 80 ? '...' : '')
                     );
                 });
                 app.parseAndTranslate(
-                    "partials/quick-search-results",
+                    'partials/quick-search-results',
                     data,
                     function (html) {
                         if (html.length) {
-                            html.find(".timeago").timeago();
+                            html.find('.timeago').timeago();
                         }
                         quickSearchResults
                             .toggleClass(
-                                "hidden",
-                                !html.length || !inputEl.is(":focus"),
+                                'hidden',
+                                !html.length || !inputEl.is(':focus')
                             )
-                            .find(".quick-search-results-container")
-                            .html(html.length ? html : "");
+                            .find('.quick-search-results-container')
+                            .html(html.length ? html : '');
                         const highlightEls = quickSearchResults.find(
-                            ".quick-search-results .quick-search-title, .quick-search-results .snippet",
+                            '.quick-search-results .quick-search-title, .quick-search-results .snippet'
                         );
                         Search.highlightMatches(
                             options.searchOptions.term,
-                            highlightEls,
+                            highlightEls
                         );
-                        hooks.fire("action:search.quick.complete", {
+                        hooks.fire('action:search.quick.complete', {
                             data: data,
                             options: options,
                         });
-                    },
+                    }
                 );
             });
         }
 
         quickSearchResults
             .find('.filter-category input[type="checkbox"]')
-            .on("change", function () {
+            .on('change', function () {
                 inputEl.focus();
                 doSearch();
             });
 
-        inputEl.off("keyup").on(
-            "keyup",
+        inputEl.off('keyup').on(
+            'keyup',
             utils.debounce(function () {
                 if (inputEl.val().length < 3) {
-                    quickSearchResults.addClass("hidden");
+                    quickSearchResults.addClass('hidden');
                     oldValue = inputEl.val();
                     return;
                 }
@@ -219,44 +219,44 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
                     return;
                 }
                 oldValue = inputEl.val();
-                if (!inputEl.is(":focus")) {
-                    return quickSearchResults.addClass("hidden");
+                if (!inputEl.is(':focus')) {
+                    return quickSearchResults.addClass('hidden');
                 }
                 doSearch();
-            }, 500),
+            }, 500)
         );
 
         let mousedownOnResults = false;
-        quickSearchResults.on("mousedown", function () {
-            $(window).one("mouseup", function () {
-                quickSearchResults.addClass("hidden");
+        quickSearchResults.on('mousedown', function () {
+            $(window).one('mouseup', function () {
+                quickSearchResults.addClass('hidden');
             });
             mousedownOnResults = true;
         });
-        inputEl.on("blur", function () {
+        inputEl.on('blur', function () {
             if (
-                !inputEl.is(":focus") &&
+                !inputEl.is(':focus') &&
                 !mousedownOnResults &&
-                !quickSearchResults.hasClass("hidden")
+                !quickSearchResults.hasClass('hidden')
             ) {
-                quickSearchResults.addClass("hidden");
+                quickSearchResults.addClass('hidden');
             }
         });
 
         let ajaxified = false;
-        hooks.on("action:ajaxify.end", function () {
+        hooks.on('action:ajaxify.end', function () {
             if (!ajaxify.isCold()) {
                 ajaxified = true;
             }
         });
 
-        inputEl.on("focus", function () {
+        inputEl.on('focus', function () {
             mousedownOnResults = false;
             const query = inputEl.val();
             oldValue = query;
             if (
                 query &&
-                quickSearchResults.find("#quick-search-results").children()
+                quickSearchResults.find('#quick-search-results').children()
                     .length
             ) {
                 updateCategoryFilterName();
@@ -264,38 +264,38 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
                     doSearch();
                     ajaxified = false;
                 } else {
-                    quickSearchResults.removeClass("hidden");
+                    quickSearchResults.removeClass('hidden');
                 }
                 inputEl[0].setSelectionRange(
-                    query.startsWith("in:topic") ? query.indexOf(" ") + 1 : 0,
-                    query.length,
+                    query.startsWith('in:topic') ? query.indexOf(' ') + 1 : 0,
+                    query.length
                 );
             }
         });
 
-        inputEl.off("refresh").on("refresh", function () {
+        inputEl.off('refresh').on('refresh', function () {
             doSearch();
         });
     };
 
     Search.showAndFocusInput = function () {
-        $("#search-fields").removeClass("hidden");
-        $("#search-button").addClass("hidden");
-        $("#search-fields input").focus();
+        $('#search-fields').removeClass('hidden');
+        $('#search-button').addClass('hidden');
+        $('#search-fields input').focus();
     };
 
     Search.query = function (data, callback) {
         callback = callback || function () {};
-        ajaxify.go("search?" + createQueryString(data));
+        ajaxify.go('search?' + createQueryString(data));
         callback();
     };
 
     Search.api = function (data, callback) {
         const apiURL =
-            config.relative_path + "/api/search?" + createQueryString(data);
+            config.relative_path + '/api/search?' + createQueryString(data);
         data.searchOnly = undefined;
         const searchURL =
-            config.relative_path + "/search?" + createQueryString(data);
+            config.relative_path + '/search?' + createQueryString(data);
         $.get(apiURL, function (result) {
             result.url = searchURL;
             callback(result);
@@ -303,13 +303,13 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
     };
 
     function createQueryString(data) {
-        const searchIn = data.in || "titles";
-        const postedBy = data.by || "";
-        let term = data.term.replace(/^[ ?#]*/, "");
+        const searchIn = data.in || 'titles';
+        const postedBy = data.by || '';
+        let term = data.term.replace(/^[ ?#]*/, '');
         try {
             term = encodeURIComponent(term);
         } catch (e) {
-            return alerts.error("[[error:invalid-search-term]]");
+            return alerts.error('[[error:invalid-search-term]]');
         }
 
         const query = {
@@ -324,9 +324,9 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
         if (
             postedBy &&
             postedBy.length &&
-            (searchIn === "posts" ||
-                searchIn === "titles" ||
-                searchIn === "titlesposts")
+            (searchIn === 'posts' ||
+                searchIn === 'titles' ||
+                searchIn === 'titlesposts')
         ) {
             query.by = postedBy;
         }
@@ -344,12 +344,12 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
 
         if (parseInt(data.replies, 10) > 0) {
             query.replies = data.replies;
-            query.repliesFilter = data.repliesFilter || "atleast";
+            query.repliesFilter = data.repliesFilter || 'atleast';
         }
 
         if (data.timeRange) {
             query.timeRange = data.timeRange;
-            query.timeFilter = data.timeFilter || "newer";
+            query.timeFilter = data.timeFilter || 'newer';
         }
 
         if (data.sortBy) {
@@ -365,7 +365,7 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
             query.searchOnly = data.searchOnly;
         }
 
-        hooks.fire("action:search.createQueryString", {
+        hooks.fire('action:search.createQueryString', {
             query: query,
             data: data,
         });
@@ -375,7 +375,7 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
 
     Search.getSearchPreferences = function () {
         try {
-            return JSON.parse(storage.getItem("search-preferences") || "{}");
+            return JSON.parse(storage.getItem('search-preferences') || '{}');
         } catch (e) {
             return {};
         }
@@ -386,43 +386,43 @@ define("search", ["translator", "storage", "hooks", "alerts"], function (
             return;
         }
         searchQuery = utils.escapeHTML(
-            searchQuery.replace(/^"/, "").replace(/"$/, "").trim(),
+            searchQuery.replace(/^"/, '').replace(/"$/, '').trim()
         );
         const regexStr = searchQuery
-            .split(" ")
+            .split(' ')
             .map(function (word) {
                 return utils.escapeRegexChars(word);
             })
-            .join("|");
-        const regex = new RegExp("(" + regexStr + ")", "gi");
+            .join('|');
+        const regex = new RegExp('(' + regexStr + ')', 'gi');
 
         els.each(function () {
             const result = $(this);
             const nested = [];
 
-            result.find("*").each(function () {
-                $(this).after("<!-- " + nested.length + " -->");
-                nested.push($("<div></div>").append($(this)));
+            result.find('*').each(function () {
+                $(this).after('<!-- ' + nested.length + ' -->');
+                nested.push($('<div></div>').append($(this)));
             });
 
             result.html(
                 result.html().replace(regex, function (match, p1) {
-                    return '<strong class="search-match">' + p1 + "</strong>";
-                }),
+                    return '<strong class="search-match">' + p1 + '</strong>';
+                })
             );
 
             nested.forEach(function (nestedEl, i) {
                 result.html(
-                    result.html().replace("<!-- " + i + " -->", function () {
+                    result.html().replace('<!-- ' + i + ' -->', function () {
                         return nestedEl.html();
-                    }),
+                    })
                 );
             });
         });
 
-        $(".search-result-text")
-            .find("img:not(.not-responsive)")
-            .addClass("img-responsive");
+        $('.search-result-text')
+            .find('img:not(.not-responsive)')
+            .addClass('img-responsive');
     };
 
     return Search;

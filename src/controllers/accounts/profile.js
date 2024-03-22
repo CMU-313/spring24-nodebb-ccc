@@ -1,18 +1,18 @@
-"use strict";
+'use strict';
 
-const nconf = require("nconf");
-const _ = require("lodash");
+const nconf = require('nconf');
+const _ = require('lodash');
 
-const db = require("../../database");
-const user = require("../../user");
-const posts = require("../../posts");
-const categories = require("../../categories");
-const plugins = require("../../plugins");
-const meta = require("../../meta");
-const privileges = require("../../privileges");
-const accountHelpers = require("./helpers");
-const helpers = require("../helpers");
-const utils = require("../../utils");
+const db = require('../../database');
+const user = require('../../user');
+const posts = require('../../posts');
+const categories = require('../../categories');
+const plugins = require('../../plugins');
+const meta = require('../../meta');
+const privileges = require('../../privileges');
+const accountHelpers = require('./helpers');
+const helpers = require('../helpers');
+const utils = require('../../utils');
 
 const profileController = module.exports;
 
@@ -24,7 +24,7 @@ profileController.get = async function (req, res, next) {
             req.params.userslug = lowercaseSlug;
         } else {
             return res.redirect(
-                `${nconf.get("relative_path")}/user/${lowercaseSlug}`,
+                `${nconf.get('relative_path')}/user/${lowercaseSlug}`
             );
         }
     }
@@ -32,7 +32,7 @@ profileController.get = async function (req, res, next) {
     const userData = await accountHelpers.getUserDataByUserSlug(
         req.params.userslug,
         req.uid,
-        req.query,
+        req.query
     );
     if (!userData) {
         return next();
@@ -46,7 +46,7 @@ profileController.get = async function (req, res, next) {
         posts.parseSignature(userData, req.uid),
     ]);
 
-    if (meta.config["reputation:disabled"]) {
+    if (meta.config['reputation:disabled']) {
         delete userData.reputation;
     }
 
@@ -59,8 +59,8 @@ profileController.get = async function (req, res, next) {
     userData.title = userData.username;
     userData.allowCoverPicture =
         !userData.isSelf ||
-        !!meta.config["reputation:disabled"] ||
-        userData.reputation >= meta.config["min:rep:cover-picture"];
+        !!meta.config['reputation:disabled'] ||
+        userData.reputation >= meta.config['min:rep:cover-picture'];
 
     // Show email changed modal on first access after said change
     userData.emailChanged = req.session.emailChanged;
@@ -73,16 +73,14 @@ profileController.get = async function (req, res, next) {
     addMetaTags(res, userData);
 
     userData.selectedGroup = userData.groups
-        .filter(
-            (group) => group && userData.groupTitleArray.includes(group.name),
-        )
+        .filter(group => group && userData.groupTitleArray.includes(group.name))
         .sort(
             (a, b) =>
                 userData.groupTitleArray.indexOf(a.name) -
-                userData.groupTitleArray.indexOf(b.name),
+                userData.groupTitleArray.indexOf(b.name)
         );
 
-    res.render("account/profile", userData);
+    res.render('account/profile', userData);
 };
 
 async function incrementProfileViews(req, userData) {
@@ -94,27 +92,27 @@ async function incrementProfileViews(req, userData) {
             (!req.session.uids_viewed[userData.uid] ||
                 req.session.uids_viewed[userData.uid] < Date.now() - 3600000)
         ) {
-            await user.incrementUserFieldBy(userData.uid, "profileviews", 1);
+            await user.incrementUserFieldBy(userData.uid, 'profileviews', 1);
             req.session.uids_viewed[userData.uid] = Date.now();
         }
     }
 }
 
 async function getLatestPosts(callerUid, userData) {
-    return await getPosts(callerUid, userData, "pids");
+    return await getPosts(callerUid, userData, 'pids');
 }
 
 async function getBestPosts(callerUid, userData) {
-    return await getPosts(callerUid, userData, "pids:votes");
+    return await getPosts(callerUid, userData, 'pids:votes');
 }
 
 async function getPosts(callerUid, userData, setSuffix) {
     const cids = await categories.getCidsByPrivilege(
-        "categories:cid",
+        'categories:cid',
         callerUid,
-        "topics:read",
+        'topics:read'
     );
-    const keys = cids.map((c) => `cid:${c}:uid:${userData.uid}:${setSuffix}`);
+    const keys = cids.map(c => `cid:${c}:uid:${userData.uid}:${setSuffix}`);
     let hasMorePosts = true;
     let start = 0;
     const count = 10;
@@ -124,9 +122,9 @@ async function getPosts(callerUid, userData, setSuffix) {
         user.isAdministrator(callerUid),
         user.isModerator(callerUid, cids),
         privileges.categories.isUserAllowedTo(
-            "topics:schedule",
+            'topics:schedule',
             cids,
-            callerUid,
+            callerUid
         ),
     ]);
     const cidToIsMod = _.zipObject(cids, isModOfCids);
@@ -137,35 +135,35 @@ async function getPosts(callerUid, userData, setSuffix) {
         let pids = await db.getSortedSetRevRange(
             keys,
             start,
-            start + count - 1,
+            start + count - 1
         );
         if (!pids.length || pids.length < count) {
             hasMorePosts = false;
         }
         if (pids.length) {
             ({ pids } = await plugins.hooks.fire(
-                "filter:account.profile.getPids",
+                'filter:account.profile.getPids',
                 {
                     uid: callerUid,
                     userData,
                     setSuffix,
                     pids,
-                },
+                }
             ));
             const p = await posts.getPostSummaryByPids(pids, callerUid, {
                 stripTags: false,
             });
             postData.push(
                 ...p.filter(
-                    (p) =>
+                    p =>
                         p &&
                         p.topic &&
                         (isAdmin ||
                             cidToIsMod[p.topic.cid] ||
                             (p.topic.scheduled &&
                                 cidToCanSchedule[p.topic.cid]) ||
-                            (!p.deleted && !p.topic.deleted)),
-                ),
+                            (!p.deleted && !p.topic.deleted))
+                )
             );
         }
         start += count;
@@ -176,24 +174,24 @@ async function getPosts(callerUid, userData, setSuffix) {
 function addMetaTags(res, userData) {
     const plainAboutMe = userData.aboutme
         ? utils.stripHTMLTags(utils.decodeHTMLEntities(userData.aboutme))
-        : "";
+        : '';
     res.locals.metaTags = [
         {
-            name: "title",
+            name: 'title',
             content: userData.fullname || userData.username,
             noEscape: true,
         },
         {
-            name: "description",
+            name: 'description',
             content: plainAboutMe,
         },
         {
-            property: "og:title",
+            property: 'og:title',
             content: userData.fullname || userData.username,
             noEscape: true,
         },
         {
-            property: "og:description",
+            property: 'og:description',
             content: plainAboutMe,
         },
     ];
@@ -201,15 +199,15 @@ function addMetaTags(res, userData) {
     if (userData.picture) {
         res.locals.metaTags.push(
             {
-                property: "og:image",
+                property: 'og:image',
                 content: userData.picture,
                 noEscape: true,
             },
             {
-                property: "og:image:url",
+                property: 'og:image:url',
                 content: userData.picture,
                 noEscape: true,
-            },
+            }
         );
     }
 }

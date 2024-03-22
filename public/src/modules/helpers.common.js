@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
 module.exports = function (utils, Benchpress, relative_path) {
-    Benchpress.setGlobal("true", true);
-    Benchpress.setGlobal("false", false);
+    Benchpress.setGlobal('true', true);
+    Benchpress.setGlobal('false', false);
 
     const helpers = {
         displayMenuItem,
@@ -38,25 +38,25 @@ module.exports = function (utils, Benchpress, relative_path) {
         }
 
         if (
-            item.route.match("/users") &&
+            item.route.match('/users') &&
             data.user &&
-            !data.user.privileges["view:users"]
+            !data.user.privileges['view:users']
         ) {
             return false;
         }
 
         if (
-            item.route.match("/tags") &&
+            item.route.match('/tags') &&
             data.user &&
-            !data.user.privileges["view:tags"]
+            !data.user.privileges['view:tags']
         ) {
             return false;
         }
 
         if (
-            item.route.match("/groups") &&
+            item.route.match('/groups') &&
             data.user &&
-            !data.user.privileges["view:groups"]
+            !data.user.privileges['view:groups']
         ) {
             return false;
         }
@@ -65,33 +65,33 @@ module.exports = function (utils, Benchpress, relative_path) {
     }
 
     function buildMetaTag(tag) {
-        const name = tag.name ? 'name="' + tag.name + '" ' : "";
-        const property = tag.property ? 'property="' + tag.property + '" ' : "";
+        const name = tag.name ? 'name="' + tag.name + '" ' : '';
+        const property = tag.property ? 'property="' + tag.property + '" ' : '';
         const content = tag.content
-            ? 'content="' + tag.content.replace(/\n/g, " ") + '" '
-            : "";
+            ? 'content="' + tag.content.replace(/\n/g, ' ') + '" '
+            : '';
 
-        return "<meta " + name + property + content + "/>\n\t";
+        return '<meta ' + name + property + content + '/>\n\t';
     }
 
     function buildLinkTag(tag) {
         const attributes = [
-            "link",
-            "rel",
-            "as",
-            "type",
-            "href",
-            "sizes",
-            "title",
-            "crossorigin",
+            'link',
+            'rel',
+            'as',
+            'type',
+            'href',
+            'sizes',
+            'title',
+            'crossorigin',
         ];
         const [link, rel, as, type, href, sizes, title, crossorigin] =
-            attributes.map((attr) =>
-                tag[attr] ? `${attr}="${tag[attr]}" ` : "",
+            attributes.map(attr =>
+                tag[attr] ? `${attr}="${tag[attr]}" ` : ''
             );
 
         return (
-            "<link " +
+            '<link ' +
             link +
             rel +
             as +
@@ -100,17 +100,17 @@ module.exports = function (utils, Benchpress, relative_path) {
             title +
             href +
             crossorigin +
-            "/>\n\t"
+            '/>\n\t'
         );
     }
 
     function stringify(obj) {
         // Turns the incoming object into a JSON string
         return JSON.stringify(obj)
-            .replace(/&/gm, "&amp;")
-            .replace(/</gm, "&lt;")
-            .replace(/>/gm, "&gt;")
-            .replace(/"/g, "&quot;");
+            .replace(/&/gm, '&amp;')
+            .replace(/</gm, '&lt;')
+            .replace(/>/gm, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
     function escape(str) {
@@ -123,32 +123,32 @@ module.exports = function (utils, Benchpress, relative_path) {
 
     function generateCategoryBackground(category) {
         if (!category) {
-            return "";
+            return '';
         }
         const style = [];
 
         if (category.bgColor) {
-            style.push("background-color: " + category.bgColor);
+            style.push('background-color: ' + category.bgColor);
         }
 
         if (category.color) {
-            style.push("color: " + category.color);
+            style.push('color: ' + category.color);
         }
 
         if (category.backgroundImage) {
             style.push(
-                "background-image: url(" + category.backgroundImage + ")",
+                'background-image: url(' + category.backgroundImage + ')'
             );
             if (category.imageClass) {
-                style.push("background-size: " + category.imageClass);
+                style.push('background-size: ' + category.imageClass);
             }
         }
 
-        return style.join("; ") + ";";
+        return style.join('; ') + ';';
     }
 
     function generateChildrenCategories(category) {
-        let html = "";
+        let html = '';
         if (!category || !category.children || !category.children.length) {
             return html;
         }
@@ -156,7 +156,7 @@ module.exports = function (utils, Benchpress, relative_path) {
             if (child && !child.isSection) {
                 const link = child.link
                     ? child.link
-                    : relative_path + "/category/" + child.slug;
+                    : relative_path + '/category/' + child.slug;
                 html +=
                     '<span class="category-children-item pull-left">' +
                     '<div role="presentation" class="icon pull-left" style="' +
@@ -165,38 +165,38 @@ module.exports = function (utils, Benchpress, relative_path) {
                     '<i class="fa fa-fw ' +
                     child.icon +
                     '"></i>' +
-                    "</div>" +
+                    '</div>' +
                     '<a href="' +
                     link +
                     '"><small>' +
                     child.name +
-                    "</small></a></span>";
+                    '</small></a></span>';
             }
         });
         html = html
-            ? '<span class="category-children">' + html + "</span>"
+            ? '<span class="category-children">' + html + '</span>'
             : html;
         return html;
     }
 
     function generateTopicClass(topic) {
-        const fields = ["locked", "pinned", "deleted", "unread", "scheduled"];
-        return fields.filter((field) => !!topic[field]).join(" ");
+        const fields = ['locked', 'pinned', 'deleted', 'unread', 'scheduled'];
+        return fields.filter(field => !!topic[field]).join(' ');
     }
 
     // Groups helpers
     function membershipBtn(groupObj) {
-        if (groupObj.isMember && groupObj.name !== "administrators") {
+        if (groupObj.isMember && groupObj.name !== 'administrators') {
             return (
                 '<button class="btn btn-danger" data-action="leave" data-group="' +
                 groupObj.displayName +
                 '"' +
-                (groupObj.disableLeave ? " disabled" : "") +
+                (groupObj.disableLeave ? ' disabled' : '') +
                 '><i class="fa fa-times"></i> [[groups:membership.leave-group]]</button>'
             );
         }
 
-        if (groupObj.isPending && groupObj.name !== "administrators") {
+        if (groupObj.isPending && groupObj.name !== 'administrators') {
             return '<button class="btn btn-warning disabled"><i class="fa fa-clock-o"></i> [[groups:membership.invitation-pending]]</button>';
         } else if (groupObj.isInvited) {
             return (
@@ -208,7 +208,7 @@ module.exports = function (utils, Benchpress, relative_path) {
             );
         } else if (
             !groupObj.disableJoinRequests &&
-            groupObj.name !== "administrators"
+            groupObj.name !== 'administrators'
         ) {
             return (
                 '<button class="btn btn-success" data-action="join" data-group="' +
@@ -216,7 +216,7 @@ module.exports = function (utils, Benchpress, relative_path) {
                 '"><i class="fa fa-plus"></i> [[groups:membership.join-group]]</button>'
             );
         }
-        return "";
+        return '';
     }
 
     function spawnPrivilegeStates(member, privileges) {
@@ -232,29 +232,29 @@ module.exports = function (utils, Benchpress, relative_path) {
         return states
             .map(function (priv) {
                 const guestDisabled = [
-                    "groups:moderate",
-                    "groups:posts:upvote",
-                    "groups:posts:downvote",
-                    "groups:local:login",
-                    "groups:group:create",
-                    "groups:group:react",
+                    'groups:moderate',
+                    'groups:posts:upvote',
+                    'groups:posts:downvote',
+                    'groups:local:login',
+                    'groups:group:create',
+                    'groups:group:react',
                 ];
                 const spidersEnabled = [
-                    "groups:find",
-                    "groups:read",
-                    "groups:topics:read",
-                    "groups:view:users",
-                    "groups:view:tags",
-                    "groups:view:groups",
+                    'groups:find',
+                    'groups:read',
+                    'groups:topics:read',
+                    'groups:view:users',
+                    'groups:view:tags',
+                    'groups:view:groups',
                 ];
-                const globalModDisabled = ["groups:moderate"];
+                const globalModDisabled = ['groups:moderate'];
                 const disabled =
-                    (member === "guests" &&
+                    (member === 'guests' &&
                         (guestDisabled.includes(priv.name) ||
-                            priv.name.startsWith("groups:admin:"))) ||
-                    (member === "spiders" &&
+                            priv.name.startsWith('groups:admin:'))) ||
+                    (member === 'spiders' &&
                         !spidersEnabled.includes(priv.name)) ||
-                    (member === "Global Moderators" &&
+                    (member === 'Global Moderators' &&
                         globalModDisabled.includes(priv.name));
 
                 return (
@@ -263,17 +263,17 @@ module.exports = function (utils, Benchpress, relative_path) {
                     '" data-value="' +
                     priv.state +
                     '"><input autocomplete="off" type="checkbox"' +
-                    (priv.state ? " checked" : "") +
-                    (disabled ? ' disabled="disabled"' : "") +
-                    " /></td>"
+                    (priv.state ? ' checked' : '') +
+                    (disabled ? ' disabled="disabled"' : '') +
+                    ' /></td>'
                 );
             })
-            .join("");
+            .join('');
     }
 
     function localeToHTML(locale, fallback) {
-        locale = locale || fallback || "en-GB";
-        return locale.replace("_", "-");
+        locale = locale || fallback || 'en-GB';
+        return locale.replace('_', '-');
     }
 
     function renderTopicImage(topicObj) {
@@ -298,16 +298,16 @@ module.exports = function (utils, Benchpress, relative_path) {
     }
 
     function renderTopicEvents(index, sort) {
-        if (sort === "most_votes") {
-            return "";
+        if (sort === 'most_votes') {
+            return '';
         }
         const start = this.posts[index].eventStart;
         const end = this.posts[index].eventEnd;
         const events = this.events.filter(
-            (event) => event.timestamp >= start && event.timestamp < end,
+            event => event.timestamp >= start && event.timestamp < end
         );
         if (!events.length) {
-            return "";
+            return '';
         }
 
         return renderEvents.call(this, events);
@@ -317,7 +317,7 @@ module.exports = function (utils, Benchpress, relative_path) {
         return events.reduce((html, event) => {
             html += `<li component="topic/event" class="timeline-event" data-topic-event-id="${event.id}" data-topic-event-type="${event.type}">
                 <div class="timeline-badge">
-                    <i class="fa ${event.icon || "fa-circle"}"></i>
+                    <i class="fa ${event.icon || 'fa-circle'}"></i>
                 </div>
                 <span class="timeline-text">
                     ${event.href ? `<a href="${relative_path}${event.href}">${event.text}</a>` : event.text}&nbsp;
@@ -326,7 +326,7 @@ module.exports = function (utils, Benchpress, relative_path) {
 
             if (event.user) {
                 if (!event.user.system) {
-                    html += `<span><a href="${relative_path}/user/${event.user.userslug}">${buildAvatar(event.user, "xs", true)}&nbsp;${event.user.username}</a></span>&nbsp;`;
+                    html += `<span><a href="${relative_path}/user/${event.user.userslug}">${buildAvatar(event.user, 'xs', true)}&nbsp;${event.user.username}</a></span>&nbsp;`;
                 } else {
                     html += `<span class="timeline-text">[[global:system-user]]</span>&nbsp;`;
                 }
@@ -339,7 +339,7 @@ module.exports = function (utils, Benchpress, relative_path) {
             }
 
             return html;
-        }, "");
+        }, '');
     }
 
     function renderDigestAvatar(block) {
@@ -355,10 +355,10 @@ module.exports = function (utils, Benchpress, relative_path) {
             }
             return (
                 '<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ' +
-                block.teaser.user["icon:bgColor"] +
+                block.teaser.user['icon:bgColor'] +
                 '; color: white; text-align: center; display: inline-block; border-radius: 50%;">' +
-                block.teaser.user["icon:text"] +
-                "</div>"
+                block.teaser.user['icon:text'] +
+                '</div>'
             );
         }
         if (block.user.picture) {
@@ -372,34 +372,34 @@ module.exports = function (utils, Benchpress, relative_path) {
         }
         return (
             '<div style="vertical-align: middle; width: 32px; height: 32px; line-height: 32px; font-size: 16px; background-color: ' +
-            block.user["icon:bgColor"] +
+            block.user['icon:bgColor'] +
             '; color: white; text-align: center; display: inline-block; border-radius: 50%;">' +
-            block.user["icon:text"] +
-            "</div>"
+            block.user['icon:text'] +
+            '</div>'
         );
     }
 
     function userAgentIcons(data) {
-        let icons = "";
+        let icons = '';
 
         switch (data.platform) {
-            case "Linux":
+            case 'Linux':
                 icons += '<i class="fa fa-fw fa-linux"></i>';
                 break;
-            case "Microsoft Windows":
+            case 'Microsoft Windows':
                 icons += '<i class="fa fa-fw fa-windows"></i>';
                 break;
-            case "Apple Mac":
+            case 'Apple Mac':
                 icons += '<i class="fa fa-fw fa-apple"></i>';
                 break;
-            case "Android":
+            case 'Android':
                 icons += '<i class="fa fa-fw fa-android"></i>';
                 break;
-            case "iPad":
+            case 'iPad':
                 icons += '<i class="fa fa-fw fa-tablet"></i>';
                 break;
-            case "iPod": // intentional fall-through
-            case "iPhone":
+            case 'iPod': // intentional fall-through
+            case 'iPhone':
                 icons += '<i class="fa fa-fw fa-mobile"></i>';
                 break;
             default:
@@ -408,19 +408,19 @@ module.exports = function (utils, Benchpress, relative_path) {
         }
 
         switch (data.browser) {
-            case "Chrome":
+            case 'Chrome':
                 icons += '<i class="fa fa-fw fa-chrome"></i>';
                 break;
-            case "Firefox":
+            case 'Firefox':
                 icons += '<i class="fa fa-fw fa-firefox"></i>';
                 break;
-            case "Safari":
+            case 'Safari':
                 icons += '<i class="fa fa-fw fa-safari"></i>';
                 break;
-            case "IE":
+            case 'IE':
                 icons += '<i class="fa fa-fw fa-internet-explorer"></i>';
                 break;
-            case "Edge":
+            case 'Edge':
                 icons += '<i class="fa fa-fw fa-edge"></i>';
                 break;
             default:
@@ -453,26 +453,26 @@ module.exports = function (utils, Benchpress, relative_path) {
             'loading="lazy"',
         ];
         const styles = [];
-        classNames = classNames || "";
+        classNames = classNames || '';
 
         // Validate sizes, handle integers, otherwise fall back to `avatar-sm`
-        if (["xs", "sm", "sm2x", "md", "lg", "xl"].includes(size)) {
-            classNames += " avatar-" + size;
+        if (['xs', 'sm', 'sm2x', 'md', 'lg', 'xl'].includes(size)) {
+            classNames += ' avatar-' + size;
         } else if (!isNaN(parseInt(size, 10))) {
             styles.push(
-                "width: " + size + "px;",
-                "height: " + size + "px;",
-                "line-height: " + size + "px;",
-                "font-size: " + parseInt(size, 10) / 16 + "rem;",
+                'width: ' + size + 'px;',
+                'height: ' + size + 'px;',
+                'line-height: ' + size + 'px;',
+                'font-size: ' + parseInt(size, 10) / 16 + 'rem;'
             );
         } else {
-            classNames += " avatar-sm";
+            classNames += ' avatar-sm';
         }
         attributes.unshift(
             'class="avatar ' +
                 classNames +
-                (rounded ? " avatar-rounded" : "") +
-                '"',
+                (rounded ? ' avatar-rounded' : '') +
+                '"'
         );
 
         // Component override
@@ -481,32 +481,32 @@ module.exports = function (utils, Benchpress, relative_path) {
         } else {
             attributes.push(
                 'component="avatar/' +
-                    (userObj.picture ? "picture" : "icon") +
-                    '"',
+                    (userObj.picture ? 'picture' : 'icon') +
+                    '"'
             );
         }
 
         if (userObj.picture) {
             return (
-                "<img " +
-                attributes.join(" ") +
+                '<img ' +
+                attributes.join(' ') +
                 ' src="' +
                 userObj.picture +
                 '" style="' +
-                styles.join(" ") +
+                styles.join(' ') +
                 '" />'
             );
         }
 
-        styles.push("background-color: " + userObj["icon:bgColor"] + ";");
+        styles.push('background-color: ' + userObj['icon:bgColor'] + ';');
         return (
-            "<span " +
-            attributes.join(" ") +
+            '<span ' +
+            attributes.join(' ') +
             ' style="' +
-            styles.join(" ") +
+            styles.join(' ') +
             '">' +
-            userObj["icon:text"] +
-            "</span>"
+            userObj['icon:text'] +
+            '</span>'
         );
     }
 

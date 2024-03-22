@@ -1,31 +1,31 @@
-"use strict";
+'use strict';
 
-const validator = require("validator");
-const nconf = require("nconf");
+const validator = require('validator');
+const nconf = require('nconf');
 
-const meta = require("../meta");
-const groups = require("../groups");
-const user = require("../user");
-const helpers = require("./helpers");
-const pagination = require("../pagination");
-const privileges = require("../privileges");
+const meta = require('../meta');
+const groups = require('../groups');
+const user = require('../user');
+const helpers = require('./helpers');
+const pagination = require('../pagination');
+const privileges = require('../privileges');
 
 const groupsController = module.exports;
 
 groupsController.list = async function (req, res) {
-    const sort = req.query.sort || "alpha";
+    const sort = req.query.sort || 'alpha';
 
     const [groupData, allowGroupCreation] = await Promise.all([
         groups.getGroupsBySort(sort, 0, 14),
-        privileges.global.can("group:create", req.uid),
+        privileges.global.can('group:create', req.uid),
     ]);
 
-    res.render("groups/list", {
+    res.render('groups/list', {
         groups: groupData,
         allowGroupCreation: allowGroupCreation,
         nextStart: 15,
-        title: "[[pages:groups]]",
-        breadcrumbs: helpers.buildBreadcrumbs([{ text: "[[pages:groups]]" }]),
+        title: '[[pages:groups]]',
+        breadcrumbs: helpers.buildBreadcrumbs([{ text: '[[pages:groups]]' }]),
     });
 };
 
@@ -36,7 +36,7 @@ groupsController.details = async function (req, res, next) {
             req.params.slug = lowercaseSlug;
         } else {
             return res.redirect(
-                `${nconf.get("relative_path")}/groups/${lowercaseSlug}`,
+                `${nconf.get('relative_path')}/groups/${lowercaseSlug}`
             );
         }
     }
@@ -76,7 +76,7 @@ groupsController.details = async function (req, res, next) {
     groupData.isOwner =
         groupData.isOwner || isAdmin || (isGlobalMod && !groupData.system);
 
-    res.render("groups/details", {
+    res.render('groups/details', {
         title: `[[pages:group, ${groupData.displayName}]]`,
         group: groupData,
         posts: posts,
@@ -84,7 +84,7 @@ groupsController.details = async function (req, res, next) {
         isGlobalMod: isGlobalMod,
         allowPrivateGroups: meta.config.allowPrivateGroups,
         breadcrumbs: helpers.buildBreadcrumbs([
-            { text: "[[pages:groups]]", url: "/groups" },
+            { text: '[[pages:groups]]', url: '/groups' },
             { text: groupData.displayName },
         ]),
     });
@@ -114,23 +114,23 @@ groupsController.members = async function (req, res, next) {
         `group:${groupName}:members`,
         req.uid,
         start,
-        stop,
+        stop
     );
 
     const breadcrumbs = helpers.buildBreadcrumbs([
-        { text: "[[pages:groups]]", url: "/groups" },
+        { text: '[[pages:groups]]', url: '/groups' },
         {
             text: validator.escape(String(groupName)),
             url: `/groups/${req.params.slug}`,
         },
-        { text: "[[groups:details.members]]" },
+        { text: '[[groups:details.members]]' },
     ]);
 
     const pageCount = Math.max(
         1,
-        Math.ceil(groupData.memberCount / usersPerPage),
+        Math.ceil(groupData.memberCount / usersPerPage)
     );
-    res.render("groups/members", {
+    res.render('groups/members', {
         users: users,
         pagination: pagination.create(page, pageCount, req.query),
         breadcrumbs: breadcrumbs,

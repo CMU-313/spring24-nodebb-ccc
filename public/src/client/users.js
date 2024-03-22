@@ -1,42 +1,42 @@
-"use strict";
+'use strict';
 
-define("forum/users", [
-    "translator",
-    "benchpress",
-    "api",
-    "alerts",
-    "accounts/invite",
+define('forum/users', [
+    'translator',
+    'benchpress',
+    'api',
+    'alerts',
+    'accounts/invite',
 ], function (translator, Benchpress, api, alerts, AccountInvite) {
     const Users = {};
 
     let searchResultCount = 0;
 
     Users.init = function () {
-        app.enterRoom("user_list");
+        app.enterRoom('user_list');
 
-        const section = utils.param("section")
-            ? "?section=" + utils.param("section")
-            : "";
-        $(".nav-pills li")
-            .removeClass("active")
+        const section = utils.param('section')
+            ? '?section=' + utils.param('section')
+            : '';
+        $('.nav-pills li')
+            .removeClass('active')
             .find('a[href="' + window.location.pathname + section + '"]')
             .parent()
-            .addClass("active");
+            .addClass('active');
 
         Users.handleSearch();
 
         AccountInvite.handle();
 
-        socket.removeListener("event:user_status_change", onUserStatusChange);
-        socket.on("event:user_status_change", onUserStatusChange);
+        socket.removeListener('event:user_status_change', onUserStatusChange);
+        socket.on('event:user_status_change', onUserStatusChange);
     };
 
     Users.handleSearch = function (params) {
         searchResultCount = params && params.resultCount;
-        $("#search-user").on("keyup", utils.debounce(doSearch, 250));
+        $('#search-user').on('keyup', utils.debounce(doSearch, 250));
         $('.search select, .search input[type="checkbox"]').on(
-            "change",
-            doSearch,
+            'change',
+            doSearch
         );
     };
 
@@ -45,9 +45,9 @@ define("forum/users", [
             return;
         }
         $('[component="user/search/icon"]')
-            .removeClass("fa-search")
-            .addClass("fa-spinner fa-spin");
-        const username = $("#search-user").val();
+            .removeClass('fa-search')
+            .addClass('fa-spinner fa-spin');
+        const username = $('#search-user').val();
         const activeSection = getActiveSection();
 
         const query = {
@@ -63,16 +63,16 @@ define("forum/users", [
         query.sortBy = getSortBy();
         const filters = [];
         if (
-            $(".search .online-only").is(":checked") ||
-            activeSection === "online"
+            $('.search .online-only').is(':checked') ||
+            activeSection === 'online'
         ) {
-            filters.push("online");
+            filters.push('online');
         }
-        if (activeSection === "banned") {
-            filters.push("banned");
+        if (activeSection === 'banned') {
+            filters.push('banned');
         }
-        if (activeSection === "flagged") {
-            filters.push("flagged");
+        if (activeSection === 'flagged') {
+            filters.push('flagged');
         }
         if (filters.length) {
             query.filters = filters;
@@ -84,27 +84,27 @@ define("forum/users", [
     function getSortBy() {
         let sortBy;
         const activeSection = getActiveSection();
-        if (activeSection === "sort-posts") {
-            sortBy = "postcount";
-        } else if (activeSection === "sort-reputation") {
-            sortBy = "reputation";
-        } else if (activeSection === "users") {
-            sortBy = "joindate";
+        if (activeSection === 'sort-posts') {
+            sortBy = 'postcount';
+        } else if (activeSection === 'sort-reputation') {
+            sortBy = 'reputation';
+        } else if (activeSection === 'users') {
+            sortBy = 'joindate';
         }
         return sortBy;
     }
 
     function loadPage(query) {
-        api.get("/api/users", query)
+        api.get('/api/users', query)
             .then(renderSearchResults)
             .catch(alerts.error);
     }
 
     function renderSearchResults(data) {
-        Benchpress.render("partials/paginator", {
+        Benchpress.render('partials/paginator', {
             pagination: data.pagination,
         }).then(function (html) {
-            $(".pagination-container").replaceWith(html);
+            $('.pagination-container').replaceWith(html);
         });
 
         if (searchResultCount) {
@@ -112,19 +112,19 @@ define("forum/users", [
         }
 
         data.isAdminOrGlobalMod = app.user.isAdmin || app.user.isGlobalMod;
-        app.parseAndTranslate("users", "users", data, function (html) {
-            $("#users-container").html(html);
-            html.find("span.timeago").timeago();
+        app.parseAndTranslate('users', 'users', data, function (html) {
+            $('#users-container').html(html);
+            html.find('span.timeago').timeago();
             $('[component="user/search/icon"]')
-                .addClass("fa-search")
-                .removeClass("fa-spinner fa-spin");
+                .addClass('fa-search')
+                .removeClass('fa-spinner fa-spin');
         });
     }
 
     function onUserStatusChange(data) {
         const section = getActiveSection();
 
-        if (section.startsWith("online") || section.startsWith("users")) {
+        if (section.startsWith('online') || section.startsWith('users')) {
             updateUser(data);
         }
     }
@@ -134,14 +134,14 @@ define("forum/users", [
             $(
                 '#users-container [data-uid="' +
                     data.uid +
-                    '"] [component="user/status"]',
+                    '"] [component="user/status"]'
             ),
-            data.status,
+            data.status
         );
     }
 
     function getActiveSection() {
-        return utils.param("section") || "";
+        return utils.param('section') || '';
     }
 
     return Users;

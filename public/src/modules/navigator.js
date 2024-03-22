@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-define("navigator", [
-    "forum/pagination",
-    "components",
-    "hooks",
-    "alerts",
+define('navigator', [
+    'forum/pagination',
+    'components',
+    'hooks',
+    'alerts',
 ], function (pagination, components, hooks, alerts) {
     const navigator = {};
     let index = 0;
@@ -20,18 +20,18 @@ define("navigator", [
 
     navigator.scrollActive = false;
 
-    let paginationBlockEl = $(".pagination-block");
-    let paginationTextEl = paginationBlockEl.find(".pagination-text");
-    let paginationBlockMeterEl = paginationBlockEl.find("meter");
-    let paginationBlockProgressEl = paginationBlockEl.find(".progress-bar");
+    let paginationBlockEl = $('.pagination-block');
+    let paginationTextEl = paginationBlockEl.find('.pagination-text');
+    let paginationBlockMeterEl = paginationBlockEl.find('meter');
+    let paginationBlockProgressEl = paginationBlockEl.find('.progress-bar');
     let thumb;
     let thumbText;
     let thumbIcon;
     let thumbIconHeight;
     let thumbIconHalfHeight;
 
-    $(window).on("action:ajaxify.start", function () {
-        $(window).off("keydown", onKeyDown);
+    $(window).on('action:ajaxify.start', function () {
+        $(window).off('keydown', onKeyDown);
     });
 
     navigator.init = function (selector, count, toTop, toBottom, callback) {
@@ -41,79 +41,79 @@ define("navigator", [
         navigator.toTop = toTop || function () {};
         navigator.toBottom = toBottom || function () {};
 
-        paginationBlockEl = $(".pagination-block");
-        paginationTextEl = paginationBlockEl.find(".pagination-text");
-        paginationBlockMeterEl = paginationBlockEl.find("meter");
-        paginationBlockProgressEl = paginationBlockEl.find(".progress-bar");
+        paginationBlockEl = $('.pagination-block');
+        paginationTextEl = paginationBlockEl.find('.pagination-text');
+        paginationBlockMeterEl = paginationBlockEl.find('meter');
+        paginationBlockProgressEl = paginationBlockEl.find('.progress-bar');
 
-        thumbIcon = $(".scroller-thumb-icon");
+        thumbIcon = $('.scroller-thumb-icon');
         thumbIconHeight = thumbIcon.height();
         thumbIconHalfHeight = thumbIconHeight / 2;
-        thumb = $(".scroller-thumb");
-        thumbText = thumb.find(".thumb-text");
+        thumb = $('.scroller-thumb');
+        thumbText = thumb.find('.thumb-text');
 
         $(window)
-            .off("scroll", navigator.delayedUpdate)
-            .on("scroll", navigator.delayedUpdate);
+            .off('scroll', navigator.delayedUpdate)
+            .on('scroll', navigator.delayedUpdate);
 
         paginationBlockEl
-            .find(".dropdown-menu")
-            .off("click")
-            .on("click", function (e) {
+            .find('.dropdown-menu')
+            .off('click')
+            .on('click', function (e) {
                 e.stopPropagation();
             });
 
         paginationBlockEl
-            .off("shown.bs.dropdown", ".wrapper")
-            .on("shown.bs.dropdown", ".wrapper", function () {
+            .off('shown.bs.dropdown', '.wrapper')
+            .on('shown.bs.dropdown', '.wrapper', function () {
                 setTimeout(async function () {
-                    if (utils.findBootstrapEnvironment() === "lg") {
-                        $(".pagination-block input").focus();
+                    if (utils.findBootstrapEnvironment() === 'lg') {
+                        $('.pagination-block input').focus();
                     }
                     const postCountInTopic = await socket.emit(
-                        "topics.getPostCountInTopic",
-                        ajaxify.data.tid,
+                        'topics.getPostCountInTopic',
+                        ajaxify.data.tid
                     );
                     if (postCountInTopic > 0) {
                         paginationBlockEl
-                            .find("#myNextPostBtn")
-                            .removeAttr("disabled");
+                            .find('#myNextPostBtn')
+                            .removeAttr('disabled');
                     }
                 }, 100);
             });
         paginationBlockEl
-            .find(".pageup")
-            .off("click")
-            .on("click", navigator.scrollUp);
+            .find('.pageup')
+            .off('click')
+            .on('click', navigator.scrollUp);
         paginationBlockEl
-            .find(".pagedown")
-            .off("click")
-            .on("click", navigator.scrollDown);
+            .find('.pagedown')
+            .off('click')
+            .on('click', navigator.scrollDown);
         paginationBlockEl
-            .find(".pagetop")
-            .off("click")
-            .on("click", navigator.toTop);
+            .find('.pagetop')
+            .off('click')
+            .on('click', navigator.toTop);
         paginationBlockEl
-            .find(".pagebottom")
-            .off("click")
-            .on("click", navigator.toBottom);
+            .find('.pagebottom')
+            .off('click')
+            .on('click', navigator.toBottom);
         paginationBlockEl
-            .find("#myNextPostBtn")
-            .off("click")
-            .on("click", gotoMyNextPost);
+            .find('#myNextPostBtn')
+            .off('click')
+            .on('click', gotoMyNextPost);
 
-        paginationBlockEl.find("input").on("keydown", function (e) {
+        paginationBlockEl.find('input').on('keydown', function (e) {
             if (e.which === 13) {
                 const input = $(this);
                 if (!utils.isNumber(input.val())) {
-                    input.val("");
+                    input.val('');
                     return;
                 }
 
                 const index = parseInt(input.val(), 10);
                 const url = generateUrl(index);
-                input.val("");
-                $(".pagination-block .dropdown-toggle").trigger("click");
+                input.val('');
+                $('.pagination-block .dropdown-toggle').trigger('click');
                 ajaxify.go(url);
             }
         });
@@ -131,7 +131,7 @@ define("navigator", [
     let lastNextIndex = 0;
     async function gotoMyNextPost() {
         async function getNext(startIndex) {
-            return await socket.emit("topics.getMyNextPostIndex", {
+            return await socket.emit('topics.getMyNextPostIndex', {
                 tid: ajaxify.data.tid,
                 index: Math.max(1, startIndex),
                 sort: config.topicPostSort,
@@ -145,20 +145,20 @@ define("navigator", [
             }
             if (nextIndex && index !== nextIndex + 1) {
                 lastNextIndex = nextIndex;
-                $(window).one("action:ajaxify.end", function () {
+                $(window).one('action:ajaxify.end', function () {
                     if (
-                        paginationBlockEl.find(".dropdown-menu").is(":hidden")
+                        paginationBlockEl.find('.dropdown-menu').is(':hidden')
                     ) {
                         paginationBlockEl
-                            .find(".dropdown-toggle")
-                            .dropdown("toggle");
+                            .find('.dropdown-toggle')
+                            .dropdown('toggle');
                     }
                 });
                 navigator.scrollToIndex(nextIndex, true, 0);
             } else {
                 alerts.alert({
-                    message: "[[topic:no-more-next-post]]",
-                    type: "info",
+                    message: '[[topic:no-more-next-post]]',
+                    type: 'info',
                 });
 
                 lastNextIndex = 1;
@@ -181,7 +181,7 @@ define("navigator", [
     }
 
     function setThumbToIndex(index) {
-        if (!thumb.length || thumb.is(":hidden")) {
+        if (!thumb.length || thumb.is(':hidden')) {
             return;
         }
         const parent = thumb.parent();
@@ -191,12 +191,12 @@ define("navigator", [
             percent = 1;
         }
         const newTop = clampTop(
-            parentOffset.top + (parent.height() - thumbIconHeight) * percent,
+            parentOffset.top + (parent.height() - thumbIconHeight) * percent
         );
 
         const offset = { top: newTop, left: thumb.offset().left };
         thumb.offset(offset);
-        thumbText.text(index + "/" + ajaxify.data.postcount);
+        thumbText.text(index + '/' + ajaxify.data.postcount);
         renderPost(index);
     }
 
@@ -206,8 +206,8 @@ define("navigator", [
         }
 
         const parent = thumb.parent();
-        parent.on("click", function (ev) {
-            if ($(ev.target).hasClass("scroller-container")) {
+        parent.on('click', function (ev) {
+            if ($(ev.target).hasClass('scroller-container')) {
                 const index = calculateIndexFromY(ev.pageY);
                 navigator.scrollToIndex(index - 1, true, 0);
                 return false;
@@ -225,28 +225,28 @@ define("navigator", [
         }
 
         let mouseDragging = false;
-        hooks.on("action:ajaxify.end", function () {
+        hooks.on('action:ajaxify.end', function () {
             renderPostIndex = null;
         });
-        $(".pagination-block .dropdown-menu")
+        $('.pagination-block .dropdown-menu')
             .parent()
-            .on("shown.bs.dropdown", function () {
+            .on('shown.bs.dropdown', function () {
                 setThumbToIndex(index);
             });
 
-        thumb.on("mousedown", function () {
+        thumb.on('mousedown', function () {
             mouseDragging = true;
-            $(window).on("mousemove", mousemove);
+            $(window).on('mousemove', mousemove);
             firstMove = true;
         });
 
         function mouseup() {
-            $(window).off("mousemove", mousemove);
+            $(window).off('mousemove', mousemove);
             if (mouseDragging) {
                 navigator.scrollToIndex(index - 1, true, 0);
                 paginationBlockEl
                     .find('[data-toggle="dropdown"]')
-                    .trigger("click");
+                    .trigger('click');
             }
             clearRenderInterval();
             mouseDragging = false;
@@ -258,7 +258,7 @@ define("navigator", [
             thumb.offset({ top: newTop, left: thumb.offset().left });
             const index = calculateIndexFromY(ev.pageY);
             navigator.updateTextAndProgressBar();
-            thumbText.text(index + "/" + ajaxify.data.postcount);
+            thumbText.text(index + '/' + ajaxify.data.postcount);
             if (firstMove) {
                 delayedRenderPost();
             }
@@ -274,32 +274,32 @@ define("navigator", [
             }, 250);
         }
 
-        $(window).off("mousemove", mousemove);
-        $(window).off("mouseup", mouseup).on("mouseup", mouseup);
+        $(window).off('mousemove', mousemove);
+        $(window).off('mouseup', mouseup).on('mouseup', mouseup);
 
-        thumb.on("touchstart", function (ev) {
+        thumb.on('touchstart', function (ev) {
             isNavigating = true;
             touchX = Math.min(
                 $(window).width(),
-                Math.max(0, ev.touches[0].clientX),
+                Math.max(0, ev.touches[0].clientX)
             );
             touchY = Math.min(
                 $(window).height(),
-                Math.max(0, ev.touches[0].clientY),
+                Math.max(0, ev.touches[0].clientY)
             );
             firstMove = true;
         });
 
-        thumb.on("touchmove", function (ev) {
+        thumb.on('touchmove', function (ev) {
             const windowWidth = $(window).width();
             const windowHeight = $(window).height();
             const deltaX = Math.abs(
                 touchX -
-                    Math.min(windowWidth, Math.max(0, ev.touches[0].clientX)),
+                    Math.min(windowWidth, Math.max(0, ev.touches[0].clientX))
             );
             const deltaY = Math.abs(
                 touchY -
-                    Math.min(windowHeight, Math.max(0, ev.touches[0].clientY)),
+                    Math.min(windowHeight, Math.max(0, ev.touches[0].clientY))
             );
             touchX = Math.min(windowWidth, Math.max(0, ev.touches[0].clientX));
             touchY = Math.min(windowHeight, Math.max(0, ev.touches[0].clientY));
@@ -313,14 +313,14 @@ define("navigator", [
                 ev.preventDefault();
                 ev.stopPropagation();
                 const newTop = clampTop(
-                    touchY + $(window).scrollTop() - thumbIconHalfHeight,
+                    touchY + $(window).scrollTop() - thumbIconHalfHeight
                 );
                 thumb.offset({ top: newTop, left: thumb.offset().left });
                 const index = calculateIndexFromY(
-                    touchY + $(window).scrollTop(),
+                    touchY + $(window).scrollTop()
                 );
                 navigator.updateTextAndProgressBar();
-                thumbText.text(index + "/" + ajaxify.data.postcount);
+                thumbText.text(index + '/' + ajaxify.data.postcount);
                 if (firstMove) {
                     renderPost(index);
                 }
@@ -328,14 +328,14 @@ define("navigator", [
             firstMove = false;
         });
 
-        thumb.on("touchend", function () {
+        thumb.on('touchend', function () {
             clearRenderInterval();
             if (isNavigating) {
                 navigator.scrollToIndex(index - 1, true, 0);
                 isNavigating = false;
                 paginationBlockEl
                     .find('[data-toggle="dropdown"]')
-                    .trigger("click");
+                    .trigger('click');
             }
         });
     }
@@ -351,44 +351,44 @@ define("navigator", [
         callback = callback || function () {};
         if (
             renderPostIndex === index ||
-            paginationBlockEl.find(".post-content").is(":hidden")
+            paginationBlockEl.find('.post-content').is(':hidden')
         ) {
             return;
         }
         renderPostIndex = index;
 
         socket.emit(
-            "posts.getPostSummaryByIndex",
+            'posts.getPostSummaryByIndex',
             { tid: ajaxify.data.tid, index: index - 1 },
             function (err, postData) {
                 if (err) {
                     return alerts.error(err);
                 }
                 app.parseAndTranslate(
-                    "partials/topic/navigation-post",
+                    'partials/topic/navigation-post',
                     { post: postData },
                     function (html) {
                         paginationBlockEl
-                            .find(".post-content")
+                            .find('.post-content')
                             .html(html)
-                            .find(".timeago")
+                            .find('.timeago')
                             .timeago();
-                    },
+                    }
                 );
 
                 callback();
-            },
+            }
         );
     }
 
     function handleKeys() {
         if (!config.usePagination) {
-            $(window).off("keydown", onKeyDown).on("keydown", onKeyDown);
+            $(window).off('keydown', onKeyDown).on('keydown', onKeyDown);
         }
     }
 
     function onKeyDown(ev) {
-        if (ev.target.nodeName === "BODY") {
+        if (ev.target.nodeName === 'BODY') {
             if (ev.shiftKey || ev.ctrlKey || ev.altKey) {
                 return;
             }
@@ -407,16 +407,16 @@ define("navigator", [
     function generateUrl(index) {
         const pathname = window.location.pathname.replace(
             config.relative_path,
-            "",
+            ''
         );
-        const parts = pathname.split("/");
+        const parts = pathname.split('/');
         return (
             parts[1] +
-            "/" +
+            '/' +
             parts[2] +
-            "/" +
+            '/' +
             parts[3] +
-            (index ? "/" + index : "")
+            (index ? '/' + index : '')
         );
     }
 
@@ -440,20 +440,20 @@ define("navigator", [
         index = 1;
         navigator.callback = null;
         navigator.selector = null;
-        $(window).off("scroll", navigator.delayedUpdate);
+        $(window).off('scroll', navigator.delayedUpdate);
 
         toggle(false);
     };
 
     function toggle(flag) {
         const path = ajaxify.removeRelativePath(
-            window.location.pathname.slice(1),
+            window.location.pathname.slice(1)
         );
-        if (flag && !path.startsWith("topic") && !path.startsWith("category")) {
+        if (flag && !path.startsWith('topic') && !path.startsWith('category')) {
             return;
         }
 
-        paginationBlockEl.toggleClass("ready", flag);
+        paginationBlockEl.toggleClass('ready', flag);
     }
 
     navigator.delayedUpdate = function () {
@@ -470,11 +470,11 @@ define("navigator", [
             The "threshold" is defined as the distance from the top of the page to
             a spot where a user is expecting to begin reading.
         */
-        threshold = typeof threshold === "number" ? threshold : undefined;
+        threshold = typeof threshold === 'number' ? threshold : undefined;
         let newIndex = index;
         const els = $(navigator.selector);
         if (els.length) {
-            newIndex = parseInt(els.first().attr("data-index"), 10) + 1;
+            newIndex = parseInt(els.first().attr('data-index'), 10) + 1;
         }
 
         const scrollTop = $(window).scrollTop();
@@ -484,11 +484,11 @@ define("navigator", [
         let previousDistance = Number.MAX_VALUE;
         els.each(function () {
             const $this = $(this);
-            const elIndex = parseInt($this.attr("data-index"), 10);
+            const elIndex = parseInt($this.attr('data-index'), 10);
             if (elIndex >= 0) {
                 const distanceToMiddle = Math.abs(
                     middleOfViewport -
-                        ($this.offset().top + $this.outerHeight(true) / 2),
+                        ($this.offset().top + $this.outerHeight(true) / 2)
                 );
 
                 if (distanceToMiddle > previousDistance) {
@@ -504,10 +504,10 @@ define("navigator", [
 
         const atTop =
             scrollTop === 0 &&
-            parseInt(els.first().attr("data-index"), 10) === 0;
+            parseInt(els.first().attr('data-index'), 10) === 0;
         const nearBottom =
             scrollTop + windowHeight > documentHeight - 100 &&
-            parseInt(els.last().attr("data-index"), 10) === count - 1;
+            parseInt(els.last().attr('data-index'), 10) === count - 1;
 
         if (atTop) {
             newIndex = 1;
@@ -520,7 +520,7 @@ define("navigator", [
             if (atTop) {
                 threshold = 0;
             } else {
-                const anchorEl = components.get("post/anchor", index - 1);
+                const anchorEl = components.get('post/anchor', index - 1);
                 if (anchorEl.length) {
                     const anchorRect = anchorEl.get(0).getBoundingClientRect();
                     threshold = anchorRect.top;
@@ -528,7 +528,7 @@ define("navigator", [
             }
         }
 
-        if (typeof navigator.callback === "function") {
+        if (typeof navigator.callback === 'function') {
             navigator.callback(newIndex, count, threshold);
         }
 
@@ -543,7 +543,7 @@ define("navigator", [
 
     navigator.getIndex = () => index;
 
-    navigator.setIndex = (newIndex) => {
+    navigator.setIndex = newIndex => {
         index = newIndex + 1;
         navigator.updateTextAndProgressBar();
         setThumbToIndex(index);
@@ -555,11 +555,11 @@ define("navigator", [
         }
         index = index > count ? count : index;
         paginationTextEl.translateHtml(
-            "[[global:pagination.out_of, " + index + ", " + count + "]]",
+            '[[global:pagination.out_of, ' + index + ', ' + count + ']]'
         );
         const fraction = (index - 1) / (count - 1 || 1);
         paginationBlockMeterEl.val(fraction);
-        paginationBlockProgressEl.width(fraction * 100 + "%");
+        paginationBlockProgressEl.width(fraction * 100 + '%');
     };
 
     navigator.scrollUp = function () {
@@ -569,13 +569,13 @@ define("navigator", [
             const atTop = $window.scrollTop() <= 0;
             if (atTop) {
                 return pagination.previousPage(function () {
-                    $("body,html").scrollTop(
-                        $(document).height() - $window.height(),
+                    $('body,html').scrollTop(
+                        $(document).height() - $window.height()
                     );
                 });
             }
         }
-        $("body,html").animate({
+        $('body,html').animate({
             scrollTop: $window.scrollTop() - $window.height(),
         });
     };
@@ -590,7 +590,7 @@ define("navigator", [
                 return pagination.nextPage();
             }
         }
-        $("body,html").animate({
+        $('body,html').animate({
             scrollTop: $window.scrollTop() + $window.height(),
         });
     };
@@ -617,8 +617,8 @@ define("navigator", [
     };
 
     navigator.scrollToIndex = function (index, highlight, duration) {
-        const inTopic = !!components.get("topic").length;
-        const inCategory = !!components.get("category").length;
+        const inTopic = !!components.get('topic').length;
+        const inCategory = !!components.get('category').length;
 
         if (!utils.isNumber(index) || (!inTopic && !inCategory)) {
             return;
@@ -628,7 +628,7 @@ define("navigator", [
         navigator.scrollActive = true;
 
         // if in topic and item already on page
-        if (inTopic && components.get("post/anchor", index).length) {
+        if (inTopic && components.get('post/anchor', index).length) {
             return navigator.scrollToPostIndex(index, highlight, duration);
         }
 
@@ -662,13 +662,13 @@ define("navigator", [
     };
 
     navigator.scrollToPostIndex = function (postIndex, highlight, duration) {
-        const scrollTo = components.get("post", "index", postIndex);
+        const scrollTo = components.get('post', 'index', postIndex);
         navigator.scrollToElement(scrollTo, highlight, duration, postIndex);
     };
 
     navigator.scrollToTopicIndex = function (topicIndex, highlight, duration) {
         const scrollTo = $(
-            '[component="category/topic"][data-index="' + topicIndex + '"]',
+            '[component="category/topic"][data-index="' + topicIndex + '"]'
         );
         navigator.scrollToElement(scrollTo, highlight, duration, topicIndex);
     };
@@ -677,14 +677,14 @@ define("navigator", [
         scrollTo,
         highlight,
         duration,
-        newIndex = null,
+        newIndex = null
     ) => {
         if (!scrollTo.length) {
             navigator.scrollActive = false;
             return;
         }
 
-        await hooks.fire("filter:navigator.scroll", {
+        await hooks.fire('filter:navigator.scroll', {
             scrollTo,
             highlight,
             duration,
@@ -692,12 +692,12 @@ define("navigator", [
         });
 
         const postHeight = scrollTo.outerHeight(true);
-        const navbarHeight = components.get("navbar").outerHeight(true) || 0;
-        const topicHeaderHeight = $(".topic-header").outerHeight(true) || 0;
+        const navbarHeight = components.get('navbar').outerHeight(true) || 0;
+        const topicHeaderHeight = $('.topic-header').outerHeight(true) || 0;
         const viewportHeight = $(window).height();
 
         // Temporarily disable navigator update on scroll
-        $(window).off("scroll", navigator.delayedUpdate);
+        $(window).off('scroll', navigator.delayedUpdate);
 
         duration = duration !== undefined ? duration : 400;
         navigator.scrollActive = true;
@@ -708,9 +708,9 @@ define("navigator", [
                 // Re-enable onScroll behaviour
                 setTimeout(() => {
                     // fixes race condition from jQuery — onAnimateComplete called too quickly
-                    $(window).on("scroll", navigator.delayedUpdate);
+                    $(window).on('scroll', navigator.delayedUpdate);
 
-                    hooks.fire("action:navigator.scrolled", {
+                    hooks.fire('action:navigator.scrolled', {
                         scrollTo,
                         highlight,
                         duration,
@@ -754,23 +754,23 @@ define("navigator", [
                 reenableScroll();
                 return;
             }
-            $("html, body").animate(
+            $('html, body').animate(
                 {
-                    scrollTop: scrollTop + "px",
+                    scrollTop: scrollTop + 'px',
                 },
                 duration,
-                onAnimateComplete,
+                onAnimateComplete
             );
         }
 
         function highlightPost() {
             if (highlight) {
                 $(
-                    '[component="post"],[component="category/topic"]',
-                ).removeClass("highlight");
-                scrollTo.addClass("highlight");
+                    '[component="post"],[component="category/topic"]'
+                ).removeClass('highlight');
+                scrollTo.addClass('highlight');
                 setTimeout(function () {
-                    scrollTo.removeClass("highlight");
+                    scrollTo.removeClass('highlight');
                 }, 10000);
             }
         }

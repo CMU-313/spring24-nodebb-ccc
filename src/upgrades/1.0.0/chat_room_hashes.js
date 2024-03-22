@@ -1,22 +1,22 @@
-"use strict";
+'use strict';
 
-const async = require("async");
-const db = require("../../database");
+const async = require('async');
+const db = require('../../database');
 
 module.exports = {
-    name: "Chat room hashes",
+    name: 'Chat room hashes',
     timestamp: Date.UTC(2015, 11, 23),
     method: function (callback) {
-        db.getObjectField("global", "nextChatRoomId", (err, nextChatRoomId) => {
+        db.getObjectField('global', 'nextChatRoomId', (err, nextChatRoomId) => {
             if (err) {
                 return callback(err);
             }
             let currentChatRoomId = 1;
             async.whilst(
-                (next) => {
+                next => {
                     next(null, currentChatRoomId <= nextChatRoomId);
                 },
-                (next) => {
+                next => {
                     db.getSortedSetRange(
                         `chat:room:${currentChatRoomId}:uids`,
                         0,
@@ -37,18 +37,18 @@ module.exports = {
                             db.setObject(
                                 `chat:room:${currentChatRoomId}`,
                                 { owner: uids[0], roomId: currentChatRoomId },
-                                (err) => {
+                                err => {
                                     if (err) {
                                         return next(err);
                                     }
                                     currentChatRoomId += 1;
                                     next();
-                                },
+                                }
                             );
-                        },
+                        }
                     );
                 },
-                callback,
+                callback
             );
         });
     },

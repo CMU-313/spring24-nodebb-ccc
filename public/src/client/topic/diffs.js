@@ -1,18 +1,18 @@
-"use strict";
+'use strict';
 
-define("forum/topic/diffs", [
-    "api",
-    "bootbox",
-    "alerts",
-    "forum/topic/images",
+define('forum/topic/diffs', [
+    'api',
+    'bootbox',
+    'alerts',
+    'forum/topic/images',
 ], function (api, bootbox, alerts) {
     const Diffs = {};
     const localeStringOpts = {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
     };
 
     Diffs.open = function (pid) {
@@ -21,59 +21,59 @@ define("forum/topic/diffs", [
         }
 
         api.get(`/posts/${pid}/diffs`, {})
-            .then((data) => {
-                parsePostHistory(data).then(($html) => {
+            .then(data => {
+                parsePostHistory(data).then($html => {
                     const $modal = bootbox.dialog({
-                        title: "[[topic:diffs.title]]",
+                        title: '[[topic:diffs.title]]',
                         message: $html,
-                        size: "large",
+                        size: 'large',
                     });
 
                     if (!data.timestamps.length) {
                         return;
                     }
 
-                    const $selectEl = $modal.find("select");
+                    const $selectEl = $modal.find('select');
                     const $revertEl = $modal.find(
-                        'button[data-action="restore"]',
+                        'button[data-action="restore"]'
                     );
                     const $deleteEl = $modal.find(
-                        'button[data-action="delete"]',
+                        'button[data-action="delete"]'
                     );
-                    const $postContainer = $modal.find("ul.posts-list");
+                    const $postContainer = $modal.find('ul.posts-list');
                     const $numberOfDiffCon = $modal.find(
-                        ".number-of-diffs strong",
+                        '.number-of-diffs strong'
                     );
 
-                    $selectEl.on("change", function () {
+                    $selectEl.on('change', function () {
                         Diffs.load(pid, this.value, $postContainer);
                         $revertEl.prop(
-                            "disabled",
-                            data.timestamps.indexOf(this.value) === 0,
+                            'disabled',
+                            data.timestamps.indexOf(this.value) === 0
                         );
                         $deleteEl.prop(
-                            "disabled",
-                            data.timestamps.indexOf(this.value) === 0,
+                            'disabled',
+                            data.timestamps.indexOf(this.value) === 0
                         );
                     });
 
-                    $revertEl.on("click", function () {
+                    $revertEl.on('click', function () {
                         Diffs.restore(pid, $selectEl.val(), $modal);
                     });
 
-                    $deleteEl.on("click", function () {
+                    $deleteEl.on('click', function () {
                         Diffs.delete(
                             pid,
                             $selectEl.val(),
                             $selectEl,
-                            $numberOfDiffCon,
+                            $numberOfDiffCon
                         );
                     });
 
-                    $modal.on("shown.bs.modal", function () {
+                    $modal.on('shown.bs.modal', function () {
                         Diffs.load(pid, $selectEl.val(), $postContainer);
-                        $revertEl.prop("disabled", true);
-                        $deleteEl.prop("disabled", true);
+                        $revertEl.prop('disabled', true);
+                        $deleteEl.prop('disabled', true);
                     });
                 });
             })
@@ -86,19 +86,19 @@ define("forum/topic/diffs", [
         }
 
         api.get(`/posts/${pid}/diffs/${since}`, {})
-            .then((data) => {
+            .then(data => {
                 data.deleted = !!parseInt(data.deleted, 10);
 
                 app.parseAndTranslate(
-                    "partials/posts_list",
-                    "posts",
+                    'partials/posts_list',
+                    'posts',
                     {
                         posts: [data],
                     },
                     function ($html) {
                         $postContainer.empty().append($html);
-                        $postContainer.find(".timeago").timeago();
-                    },
+                        $postContainer.find('.timeago').timeago();
+                    }
                 );
             })
             .catch(alerts.error);
@@ -111,28 +111,28 @@ define("forum/topic/diffs", [
 
         api.put(`/posts/${pid}/diffs/${since}`, {})
             .then(() => {
-                $modal.modal("hide");
-                alerts.success("[[topic:diffs.post-restored]]");
+                $modal.modal('hide');
+                alerts.success('[[topic:diffs.post-restored]]');
             })
             .catch(alerts.error);
     };
 
     Diffs.delete = function (pid, timestamp, $selectEl, $numberOfDiffCon) {
         api.del(`/posts/${pid}/diffs/${timestamp}`)
-            .then((data) => {
-                parsePostHistory(data, "diffs").then(($html) => {
+            .then(data => {
+                parsePostHistory(data, 'diffs').then($html => {
                     $selectEl.empty().append($html);
-                    $selectEl.trigger("change");
-                    const numberOfDiffs = $selectEl.find("option").length;
+                    $selectEl.trigger('change');
+                    const numberOfDiffs = $selectEl.find('option').length;
                     $numberOfDiffCon.text(numberOfDiffs);
-                    alerts.success("[[topic:diffs.deleted]]");
+                    alerts.success('[[topic:diffs.deleted]]');
                 });
             })
             .catch(alerts.error);
     };
 
     function parsePostHistory(data, blockName) {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             const params = [
                 {
                     diffs: data.revisions.map(function (revision) {
@@ -142,8 +142,8 @@ define("forum/topic/diffs", [
                             username: revision.username,
                             timestamp: timestamp,
                             pretty: new Date(timestamp).toLocaleString(
-                                config.userLang.replace("_", "-"),
-                                localeStringOpts,
+                                config.userLang.replace('_', '-'),
+                                localeStringOpts
                             ),
                         };
                     }),
@@ -160,7 +160,7 @@ define("forum/topic/diffs", [
                 params.unshift(blockName);
             }
 
-            app.parseAndTranslate("partials/modals/post_history", ...params);
+            app.parseAndTranslate('partials/modals/post_history', ...params);
         });
     }
 

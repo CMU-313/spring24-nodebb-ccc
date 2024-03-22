@@ -1,45 +1,45 @@
-"use strict";
+'use strict';
 
-const express = require("express");
-const winston = require("winston");
+const express = require('express');
+const winston = require('winston');
 
-const uploadsController = require("../controllers/uploads");
-const helpers = require("./helpers");
+const uploadsController = require('../controllers/uploads');
+const helpers = require('./helpers');
 
 module.exports = function (app, middleware, controllers) {
     const middlewares = [middleware.authenticateRequest];
     const router = express.Router();
-    app.use("/api", router);
+    app.use('/api', router);
 
     router.get(
-        "/config",
+        '/config',
         [...middlewares, middleware.applyCSRF],
-        helpers.tryRoute(controllers.api.getConfig),
+        helpers.tryRoute(controllers.api.getConfig)
     );
 
     router.get(
-        "/self",
+        '/self',
         [...middlewares],
-        helpers.tryRoute(controllers.user.getCurrentUser),
+        helpers.tryRoute(controllers.user.getCurrentUser)
     );
     router.get(
-        "/user/uid/:uid",
+        '/user/uid/:uid',
         [...middlewares, middleware.canViewUsers],
-        helpers.tryRoute(controllers.user.getUserByUID),
+        helpers.tryRoute(controllers.user.getUserByUID)
     );
     router.get(
-        "/user/username/:username",
+        '/user/username/:username',
         [...middlewares, middleware.canViewUsers],
-        helpers.tryRoute(controllers.user.getUserByUsername),
+        helpers.tryRoute(controllers.user.getUserByUsername)
     );
     router.get(
-        "/user/email/:email",
+        '/user/email/:email',
         [...middlewares, middleware.canViewUsers],
-        helpers.tryRoute(controllers.user.getUserByEmail),
+        helpers.tryRoute(controllers.user.getUserByEmail)
     );
 
     router.get(
-        "/user/:userslug/export/posts",
+        '/user/:userslug/export/posts',
         [
             ...middlewares,
             middleware.authenticateRequest,
@@ -47,10 +47,10 @@ module.exports = function (app, middleware, controllers) {
             middleware.checkAccountPermissions,
             middleware.exposeUid,
         ],
-        helpers.tryRoute(controllers.user.exportPosts),
+        helpers.tryRoute(controllers.user.exportPosts)
     );
     router.get(
-        "/user/:userslug/export/uploads",
+        '/user/:userslug/export/uploads',
         [
             ...middlewares,
             middleware.authenticateRequest,
@@ -58,10 +58,10 @@ module.exports = function (app, middleware, controllers) {
             middleware.checkAccountPermissions,
             middleware.exposeUid,
         ],
-        helpers.tryRoute(controllers.user.exportUploads),
+        helpers.tryRoute(controllers.user.exportUploads)
     );
     router.get(
-        "/user/:userslug/export/profile",
+        '/user/:userslug/export/profile',
         [
             ...middlewares,
             middleware.authenticateRequest,
@@ -69,46 +69,46 @@ module.exports = function (app, middleware, controllers) {
             middleware.checkAccountPermissions,
             middleware.exposeUid,
         ],
-        helpers.tryRoute(controllers.user.exportProfile),
+        helpers.tryRoute(controllers.user.exportProfile)
     );
 
     // Deprecated, remove in v1.20.0
-    router.get("/user/uid/:userslug/export/:type", (req, res) => {
+    router.get('/user/uid/:userslug/export/:type', (req, res) => {
         winston.warn(
-            `[router] \`/api/user/uid/${req.params.userslug}/export/${req.params.type}\` is deprecated, call it \`/api/user/${req.params.userslug}/export/${req.params.type}\`instead.`,
+            `[router] \`/api/user/uid/${req.params.userslug}/export/${req.params.type}\` is deprecated, call it \`/api/user/${req.params.userslug}/export/${req.params.type}\`instead.`
         );
         res.redirect(
-            `/api/user/${req.params.userslug}/export/${req.params.type}`,
+            `/api/user/${req.params.userslug}/export/${req.params.type}`
         );
     });
 
     router.get(
-        "/categories/:cid/moderators",
+        '/categories/:cid/moderators',
         [...middlewares],
-        helpers.tryRoute(controllers.api.getModerators),
+        helpers.tryRoute(controllers.api.getModerators)
     );
     router.get(
-        "/recent/posts/:term?",
+        '/recent/posts/:term?',
         [...middlewares],
-        helpers.tryRoute(controllers.posts.getRecentPosts),
+        helpers.tryRoute(controllers.posts.getRecentPosts)
     );
     router.get(
-        "/unread/total",
+        '/unread/total',
         [...middlewares, middleware.ensureLoggedIn],
-        helpers.tryRoute(controllers.unread.unreadTotal),
+        helpers.tryRoute(controllers.unread.unreadTotal)
     );
     router.get(
-        "/topic/teaser/:topic_id",
+        '/topic/teaser/:topic_id',
         [...middlewares],
-        helpers.tryRoute(controllers.topics.teaser),
+        helpers.tryRoute(controllers.topics.teaser)
     );
     router.get(
-        "/topic/pagination/:topic_id",
+        '/topic/pagination/:topic_id',
         [...middlewares],
-        helpers.tryRoute(controllers.topics.pagination),
+        helpers.tryRoute(controllers.topics.pagination)
     );
 
-    const multipart = require("connect-multiparty");
+    const multipart = require('connect-multiparty');
     const multipartMiddleware = multipart();
     const postMiddlewares = [
         middleware.maintenanceMode,
@@ -119,12 +119,12 @@ module.exports = function (app, middleware, controllers) {
     ];
 
     router.post(
-        "/post/upload",
+        '/post/upload',
         postMiddlewares,
-        helpers.tryRoute(uploadsController.uploadPost),
+        helpers.tryRoute(uploadsController.uploadPost)
     );
     router.post(
-        "/user/:userslug/uploadpicture",
+        '/user/:userslug/uploadpicture',
         [
             ...middlewares,
             ...postMiddlewares,
@@ -133,6 +133,6 @@ module.exports = function (app, middleware, controllers) {
             middleware.canViewUsers,
             middleware.checkAccountPermissions,
         ],
-        helpers.tryRoute(controllers.accounts.edit.uploadPicture),
+        helpers.tryRoute(controllers.accounts.edit.uploadPicture)
     );
 };

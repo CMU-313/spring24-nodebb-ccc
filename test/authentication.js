@@ -1,130 +1,130 @@
-"use strict";
+'use strict';
 
-const assert = require("assert");
-const url = require("url");
-const async = require("async");
-const nconf = require("nconf");
-const request = require("request");
-const util = require("util");
+const assert = require('assert');
+const url = require('url');
+const async = require('async');
+const nconf = require('nconf');
+const request = require('request');
+const util = require('util');
 
-const db = require("./mocks/databasemock");
-const user = require("../src/user");
-const utils = require("../src/utils");
-const meta = require("../src/meta");
-const privileges = require("../src/privileges");
-const helpers = require("./helpers");
+const db = require('./mocks/databasemock');
+const user = require('../src/user');
+const utils = require('../src/utils');
+const meta = require('../src/meta');
+const privileges = require('../src/privileges');
+const helpers = require('./helpers');
 
-describe("authentication", () => {
+describe('authentication', () => {
     const jar = request.jar();
     let regularUid;
-    before((done) => {
+    before(done => {
         user.create(
             {
-                username: "regular",
-                password: "regularpwd",
-                email: "regular@nodebb.org",
+                username: 'regular',
+                password: 'regularpwd',
+                email: 'regular@nodebb.org',
             },
             (err, uid) => {
                 assert.ifError(err);
                 regularUid = uid;
                 assert.strictEqual(uid, 1);
                 done();
-            },
+            }
         );
     });
 
-    it("should allow login with email for uid 1", async () => {
+    it('should allow login with email for uid 1', async () => {
         const oldValue = meta.config.allowLoginWith;
-        meta.config.allowLoginWith = "username-email";
+        meta.config.allowLoginWith = 'username-email';
         const { res } = await helpers.loginUser(
-            "regular@nodebb.org",
-            "regularpwd",
+            'regular@nodebb.org',
+            'regularpwd'
         );
         assert.strictEqual(res.statusCode, 200);
         meta.config.allowLoginWith = oldValue;
     });
 
-    it("second user should fail to login with email since email is not confirmed", async () => {
+    it('second user should fail to login with email since email is not confirmed', async () => {
         const oldValue = meta.config.allowLoginWith;
-        meta.config.allowLoginWith = "username-email";
+        meta.config.allowLoginWith = 'username-email';
         const uid = await user.create({
-            username: "2nduser",
-            password: "2ndpassword",
-            email: "2nduser@nodebb.org",
+            username: '2nduser',
+            password: '2ndpassword',
+            email: '2nduser@nodebb.org',
         });
         const { res, body } = await helpers.loginUser(
-            "2nduser@nodebb.org",
-            "2ndpassword",
+            '2nduser@nodebb.org',
+            '2ndpassword'
         );
         assert.strictEqual(res.statusCode, 403);
-        assert.strictEqual(body, "[[error:invalid-login-credentials]]");
+        assert.strictEqual(body, '[[error:invalid-login-credentials]]');
         meta.config.allowLoginWith = oldValue;
     });
 
-    it("should fail to create user if username is too short", (done) => {
+    it('should fail to create user if username is too short', done => {
         helpers.registerUser(
             {
-                username: "a",
-                password: "123456",
+                username: 'a',
+                password: '123456',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "[[error:username-too-short]]");
+                assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
-    it("should fail to create user if userslug is too short", (done) => {
+    it('should fail to create user if userslug is too short', done => {
         helpers.registerUser(
             {
-                username: "----a-----",
-                password: "123456",
+                username: '----a-----',
+                password: '123456',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "[[error:username-too-short]]");
+                assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
-    it("should fail to create user if userslug is too short", (done) => {
+    it('should fail to create user if userslug is too short', done => {
         helpers.registerUser(
             {
-                username: "     a",
-                password: "123456",
+                username: '     a',
+                password: '123456',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "[[error:username-too-short]]");
+                assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
-    it("should fail to create user if userslug is too short", (done) => {
+    it('should fail to create user if userslug is too short', done => {
         helpers.registerUser(
             {
-                username: "a      ",
-                password: "123456",
+                username: 'a      ',
+                password: '123456',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "[[error:username-too-short]]");
+                assert.equal(body, '[[error:username-too-short]]');
                 done();
-            },
+            }
         );
     });
 
-    it("should register and login a user", (done) => {
+    it('should register and login a user', done => {
         request(
             {
-                url: `${nconf.get("url")}/api/config`,
+                url: `${nconf.get('url')}/api/config`,
                 json: true,
                 jar: jar,
             },
@@ -132,92 +132,92 @@ describe("authentication", () => {
                 assert.ifError(err);
 
                 request.post(
-                    `${nconf.get("url")}/register`,
+                    `${nconf.get('url')}/register`,
                     {
                         form: {
-                            email: "admin@nodebb.org",
-                            username: "admin",
-                            password: "adminpwd",
-                            "password-confirm": "adminpwd",
-                            "account-type": "instructor",
-                            userLang: "it",
+                            email: 'admin@nodebb.org',
+                            username: 'admin',
+                            password: 'adminpwd',
+                            'password-confirm': 'adminpwd',
+                            'account-type': 'instructor',
+                            userLang: 'it',
                             gdpr_consent: true,
                         },
                         json: true,
                         jar: jar,
                         headers: {
-                            "x-csrf-token": body.csrf_token,
+                            'x-csrf-token': body.csrf_token,
                         },
                     },
                     async (err, response, body) => {
                         const validationPending =
                             await user.email.isValidationPending(
                                 body.uid,
-                                "admin@nodebb.org",
+                                'admin@nodebb.org'
                             );
                         assert.strictEqual(validationPending, true);
                         assert.ifError(err);
                         assert(body);
-                        assert(body.hasOwnProperty("uid") && body.uid > 0);
+                        assert(body.hasOwnProperty('uid') && body.uid > 0);
                         const newUid = body.uid;
                         request(
                             {
-                                url: `${nconf.get("url")}/api/self`,
+                                url: `${nconf.get('url')}/api/self`,
                                 json: true,
                                 jar: jar,
                             },
                             (err, response, body) => {
                                 assert.ifError(err);
                                 assert(body);
-                                assert.equal(body.username, "admin");
+                                assert.equal(body.username, 'admin');
                                 assert.equal(body.uid, newUid);
                                 user.getSettings(body.uid, (err, settings) => {
                                     assert.ifError(err);
-                                    assert.equal(settings.userLang, "it");
+                                    assert.equal(settings.userLang, 'it');
                                     done();
                                 });
-                            },
+                            }
                         );
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
-    it("should logout a user", (done) => {
-        helpers.logoutUser(jar, (err) => {
+    it('should logout a user', done => {
+        helpers.logoutUser(jar, err => {
             assert.ifError(err);
             request(
                 {
-                    url: `${nconf.get("url")}/api/me`,
+                    url: `${nconf.get('url')}/api/me`,
                     json: true,
                     jar: jar,
                 },
                 (err, res, body) => {
                     assert.ifError(err);
                     assert.equal(res.statusCode, 401);
-                    assert.strictEqual(body.status.code, "not-authorised");
+                    assert.strictEqual(body.status.code, 'not-authorised');
                     done();
-                },
+                }
             );
         });
     });
 
-    it("should login a user", (done) => {
-        helpers.loginUser("regular", "regularpwd", (err, data) => {
+    it('should login a user', done => {
+        helpers.loginUser('regular', 'regularpwd', (err, data) => {
             assert.ifError(err);
             assert(data.body);
             request(
                 {
-                    url: `${nconf.get("url")}/api/self`,
+                    url: `${nconf.get('url')}/api/self`,
                     json: true,
                     jar: data.jar,
                 },
                 (err, response, body) => {
                     assert.ifError(err);
                     assert(body);
-                    assert.equal(body.username, "regular");
-                    assert.equal(body.email, "regular@nodebb.org");
+                    assert.equal(body.username, 'regular');
+                    assert.equal(body.email, 'regular@nodebb.org');
                     db.getObject(
                         `uid:${regularUid}:sessionUUID:sessionId`,
                         (err, sessions) => {
@@ -225,35 +225,35 @@ describe("authentication", () => {
                             assert(sessions);
                             assert(Object.keys(sessions).length > 0);
                             done();
-                        },
+                        }
                     );
-                },
+                }
             );
         });
     });
 
-    it("should regenerate the session identifier on successful login", async () => {
+    it('should regenerate the session identifier on successful login', async () => {
         const matchRegexp = /express\.sid=s%3A(.+?);/;
-        const { hostname, path } = url.parse(nconf.get("url"));
+        const { hostname, path } = url.parse(nconf.get('url'));
 
         const sid = String(
-            jar._jar.store.idx[hostname][path]["express.sid"],
+            jar._jar.store.idx[hostname][path]['express.sid']
         ).match(matchRegexp)[1];
         await helpers.logoutUser(jar);
-        const newJar = (await helpers.loginUser("regular", "regularpwd")).jar;
+        const newJar = (await helpers.loginUser('regular', 'regularpwd')).jar;
         const newSid = String(
-            newJar._jar.store.idx[hostname][path]["express.sid"],
+            newJar._jar.store.idx[hostname][path]['express.sid']
         ).match(matchRegexp)[1];
 
         assert.notStrictEqual(newSid, sid);
     });
 
-    it("should revoke all sessions", (done) => {
-        const socketAdmin = require("../src/socket.io/admin");
+    it('should revoke all sessions', done => {
+        const socketAdmin = require('../src/socket.io/admin');
         db.sortedSetCard(`uid:${regularUid}:sessions`, (err, count) => {
             assert.ifError(err);
             assert(count);
-            socketAdmin.deleteAllSessions({ uid: 1 }, {}, (err) => {
+            socketAdmin.deleteAllSessions({ uid: 1 }, {}, err => {
                 assert.ifError(err);
                 db.sortedSetCard(`uid:${regularUid}:sessions`, (err, count) => {
                     assert.ifError(err);
@@ -264,11 +264,11 @@ describe("authentication", () => {
         });
     });
 
-    it("should fail to login if ip address is invalid", (done) => {
+    it('should fail to login if ip address is invalid', done => {
         const jar = request.jar();
         request(
             {
-                url: `${nconf.get("url")}/api/config`,
+                url: `${nconf.get('url')}/api/config`,
                 json: true,
                 jar: jar,
             },
@@ -278,267 +278,267 @@ describe("authentication", () => {
                 }
 
                 request.post(
-                    `${nconf.get("url")}/login`,
+                    `${nconf.get('url')}/login`,
                     {
                         form: {
-                            username: "regular",
-                            password: "regularpwd",
+                            username: 'regular',
+                            password: 'regularpwd',
                         },
                         json: true,
                         jar: jar,
                         headers: {
-                            "x-csrf-token": body.csrf_token,
-                            "x-forwarded-for": '<script>alert("xss")</script>',
+                            'x-csrf-token': body.csrf_token,
+                            'x-forwarded-for': '<script>alert("xss")</script>',
                         },
                     },
                     (err, response, body) => {
                         assert.ifError(err);
                         assert.equal(response.statusCode, 500);
                         done();
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
-    it("should fail to login if user does not exist", (done) => {
-        helpers.loginUser("doesnotexist", "nopassword", (err, data) => {
+    it('should fail to login if user does not exist', done => {
+        helpers.loginUser('doesnotexist', 'nopassword', (err, data) => {
             assert.ifError(err);
             assert.equal(data.res.statusCode, 403);
-            assert.equal(data.body, "[[error:invalid-login-credentials]]");
+            assert.equal(data.body, '[[error:invalid-login-credentials]]');
             done();
         });
     });
 
-    it("should fail to login if username is empty", (done) => {
-        helpers.loginUser("", "some password", (err, data) => {
+    it('should fail to login if username is empty', done => {
+        helpers.loginUser('', 'some password', (err, data) => {
             assert.ifError(err);
             assert.equal(data.res.statusCode, 403);
-            assert.equal(data.body, "[[error:invalid-username-or-password]]");
+            assert.equal(data.body, '[[error:invalid-username-or-password]]');
             done();
         });
     });
 
-    it("should fail to login if password is empty", (done) => {
-        helpers.loginUser("someuser", "", (err, data) => {
+    it('should fail to login if password is empty', done => {
+        helpers.loginUser('someuser', '', (err, data) => {
             assert.ifError(err);
             assert.equal(data.res.statusCode, 403);
-            assert.equal(data.body, "[[error:invalid-username-or-password]]");
+            assert.equal(data.body, '[[error:invalid-username-or-password]]');
             done();
         });
     });
 
-    it("should fail to login if username and password are empty", (done) => {
-        helpers.loginUser("", "", (err, data) => {
+    it('should fail to login if username and password are empty', done => {
+        helpers.loginUser('', '', (err, data) => {
             assert.ifError(err);
             assert.equal(data.res.statusCode, 403);
-            assert.equal(data.body, "[[error:invalid-username-or-password]]");
+            assert.equal(data.body, '[[error:invalid-username-or-password]]');
             done();
         });
     });
 
-    it("should fail to login if user does not have password field in db", (done) => {
+    it('should fail to login if user does not have password field in db', done => {
         user.create(
-            { username: "hasnopassword", email: "no@pass.org" },
+            { username: 'hasnopassword', email: 'no@pass.org' },
             (err, uid) => {
                 assert.ifError(err);
                 helpers.loginUser(
-                    "hasnopassword",
-                    "doesntmatter",
+                    'hasnopassword',
+                    'doesntmatter',
                     (err, data) => {
                         assert.ifError(err);
                         assert.equal(data.res.statusCode, 403);
                         assert.equal(
                             data.body,
-                            "[[error:invalid-login-credentials]]",
+                            '[[error:invalid-login-credentials]]'
                         );
                         done();
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
-    it("should fail to login if password is longer than 4096", (done) => {
+    it('should fail to login if password is longer than 4096', done => {
         let longPassword;
         for (let i = 0; i < 5000; i++) {
-            longPassword += "a";
+            longPassword += 'a';
         }
-        helpers.loginUser("someuser", longPassword, (err, data) => {
+        helpers.loginUser('someuser', longPassword, (err, data) => {
             assert.ifError(err);
             assert.equal(data.res.statusCode, 403);
-            assert.equal(data.body, "[[error:password-too-long]]");
+            assert.equal(data.body, '[[error:password-too-long]]');
             done();
         });
     });
 
-    it("should fail to login if local login is disabled", (done) => {
+    it('should fail to login if local login is disabled', done => {
         privileges.global.rescind(
-            ["groups:local:login"],
-            "registered-users",
-            (err) => {
+            ['groups:local:login'],
+            'registered-users',
+            err => {
                 assert.ifError(err);
-                helpers.loginUser("regular", "regularpwd", (err, data) => {
+                helpers.loginUser('regular', 'regularpwd', (err, data) => {
                     assert.ifError(err);
                     assert.equal(data.res.statusCode, 403);
-                    assert.equal(data.body, "[[error:local-login-disabled]]");
+                    assert.equal(data.body, '[[error:local-login-disabled]]');
                     privileges.global.give(
-                        ["groups:local:login"],
-                        "registered-users",
-                        done,
+                        ['groups:local:login'],
+                        'registered-users',
+                        done
                     );
                 });
-            },
+            }
         );
     });
 
-    it("should fail to register if registraton is disabled", (done) => {
-        meta.config.registrationType = "disabled";
+    it('should fail to register if registraton is disabled', done => {
+        meta.config.registrationType = 'disabled';
         helpers.registerUser(
             {
-                username: "someuser",
-                password: "somepassword",
-                "account-type": "student",
+                username: 'someuser',
+                password: 'somepassword',
+                'account-type': 'student',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 403);
-                assert.equal(body, "Forbidden");
+                assert.equal(body, 'Forbidden');
                 done();
-            },
+            }
         );
     });
 
-    it("should return error if invitation is not valid", (done) => {
-        meta.config.registrationType = "invite-only";
+    it('should return error if invitation is not valid', done => {
+        meta.config.registrationType = 'invite-only';
         helpers.registerUser(
             {
-                username: "someuser",
-                password: "somepassword",
-                "account-type": "student",
+                username: 'someuser',
+                password: 'somepassword',
+                'account-type': 'student',
             },
             (err, jar, response, body) => {
-                meta.config.registrationType = "normal";
+                meta.config.registrationType = 'normal';
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "[[register:invite.error-invite-only]]");
+                assert.equal(body, '[[register:invite.error-invite-only]]');
                 done();
-            },
+            }
         );
     });
 
-    it("should fail to register if username is falsy or too short", (done) => {
+    it('should fail to register if username is falsy or too short', done => {
         helpers.registerUser(
             {
-                username: "",
-                password: "somepassword",
-                "account-type": "student",
+                username: '',
+                password: 'somepassword',
+                'account-type': 'student',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "[[error:username-too-short]]");
+                assert.equal(body, '[[error:username-too-short]]');
                 helpers.registerUser(
                     {
-                        username: "a",
-                        password: "somepassword",
-                        "account-type": "student",
+                        username: 'a',
+                        password: 'somepassword',
+                        'account-type': 'student',
                     },
                     (err, jar, response, body) => {
                         assert.ifError(err);
                         assert.equal(response.statusCode, 400);
-                        assert.equal(body, "[[error:username-too-short]]");
+                        assert.equal(body, '[[error:username-too-short]]');
                         done();
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
-    it("should fail to register if username is too long", (done) => {
+    it('should fail to register if username is too long', done => {
         helpers.registerUser(
             {
-                username: "thisisareallylongusername",
-                password: "123456",
-                "account-type": "student",
+                username: 'thisisareallylongusername',
+                password: '123456',
+                'account-type': 'student',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "[[error:username-too-long]]");
+                assert.equal(body, '[[error:username-too-long]]');
                 done();
-            },
+            }
         );
     });
 
-    it("should fail to register if account type is invalid", (done) => {
+    it('should fail to register if account type is invalid', done => {
         helpers.registerUser(
             {
-                username: "someuser",
-                password: "123456",
-                "account-type": "invalidtype",
+                username: 'someuser',
+                password: '123456',
+                'account-type': 'invalidtype',
             },
             (err, jar, response, body) => {
                 assert.ifError(err);
                 assert.equal(response.statusCode, 400);
-                assert.equal(body, "Invalid account type");
+                assert.equal(body, 'Invalid account type');
                 done();
-            },
+            }
         );
     });
 
-    it("should queue user if ip is used before", (done) => {
-        meta.config.registrationApprovalType = "admin-approval-ip";
+    it('should queue user if ip is used before', done => {
+        meta.config.registrationApprovalType = 'admin-approval-ip';
         helpers.registerUser(
             {
-                email: "another@user.com",
-                username: "anotheruser",
-                password: "anotherpwd",
-                "account-type": "student",
+                email: 'another@user.com',
+                username: 'anotheruser',
+                password: 'anotherpwd',
+                'account-type': 'student',
                 gdpr_consent: 1,
             },
             (err, jar, response, body) => {
-                meta.config.registrationApprovalType = "normal";
+                meta.config.registrationApprovalType = 'normal';
                 assert.ifError(err);
                 assert.equal(response.statusCode, 200);
                 assert.equal(
                     body.message,
-                    "[[register:registration-added-to-queue]]",
+                    '[[register:registration-added-to-queue]]'
                 );
                 done();
-            },
+            }
         );
     });
 
-    it("should be able to login with email", async () => {
-        const email = "ginger@nodebb.org";
+    it('should be able to login with email', async () => {
+        const email = 'ginger@nodebb.org';
         const uid = await user.create({
-            username: "ginger",
-            password: "123456",
+            username: 'ginger',
+            password: '123456',
             email,
         });
-        await user.setUserField(uid, "email", email);
+        await user.setUserField(uid, 'email', email);
         await user.email.confirmByUid(uid);
-        const { res } = await helpers.loginUser("ginger@nodebb.org", "123456");
+        const { res } = await helpers.loginUser('ginger@nodebb.org', '123456');
         assert.equal(res.statusCode, 200);
     });
 
-    it("should fail to login if login type is username and an email is sent", (done) => {
-        meta.config.allowLoginWith = "username";
-        helpers.loginUser("ginger@nodebb.org", "123456", (err, data) => {
-            meta.config.allowLoginWith = "username-email";
+    it('should fail to login if login type is username and an email is sent', done => {
+        meta.config.allowLoginWith = 'username';
+        helpers.loginUser('ginger@nodebb.org', '123456', (err, data) => {
+            meta.config.allowLoginWith = 'username-email';
             assert.ifError(err);
             assert.equal(data.res.statusCode, 400);
-            assert.equal(data.body, "[[error:wrong-login-type-username]]");
+            assert.equal(data.body, '[[error:wrong-login-type-username]]');
             done();
         });
     });
 
-    it("should send 200 if not logged in", (done) => {
+    it('should send 200 if not logged in', done => {
         const jar = request.jar();
         request(
             {
-                url: `${nconf.get("url")}/api/config`,
+                url: `${nconf.get('url')}/api/config`,
                 json: true,
                 jar: jar,
             },
@@ -546,43 +546,43 @@ describe("authentication", () => {
                 assert.ifError(err);
 
                 request.post(
-                    `${nconf.get("url")}/logout`,
+                    `${nconf.get('url')}/logout`,
                     {
                         form: {},
                         json: true,
                         jar: jar,
                         headers: {
-                            "x-csrf-token": body.csrf_token,
+                            'x-csrf-token': body.csrf_token,
                         },
                     },
                     (err, res, body) => {
                         assert.ifError(err);
                         assert.equal(res.statusCode, 200);
-                        assert.equal(body, "not-logged-in");
+                        assert.equal(body, 'not-logged-in');
                         done();
-                    },
+                    }
                 );
-            },
+            }
         );
     });
 
-    describe("banned user authentication", () => {
+    describe('banned user authentication', () => {
         const bannedUser = {
-            username: "banme",
-            pw: "123456",
+            username: 'banme',
+            pw: '123456',
             uid: null,
         };
 
         before(async () => {
             bannedUser.uid = await user.create({
-                username: "banme",
-                password: "123456",
-                email: "ban@me.com",
+                username: 'banme',
+                password: '123456',
+                email: 'ban@me.com',
             });
         });
 
-        it("should prevent banned user from logging in", (done) => {
-            user.bans.ban(bannedUser.uid, 0, "spammer", (err) => {
+        it('should prevent banned user from logging in', done => {
+            user.bans.ban(bannedUser.uid, 0, 'spammer', err => {
                 assert.ifError(err);
                 helpers.loginUser(
                     bannedUser.username,
@@ -593,16 +593,16 @@ describe("authentication", () => {
                         delete data.body.timestamp;
                         assert.deepStrictEqual(data.body, {
                             banned_until: 0,
-                            banned_until_readable: "",
+                            banned_until_readable: '',
                             expiry: 0,
-                            expiry_readable: "",
-                            reason: "spammer",
+                            expiry_readable: '',
+                            reason: 'spammer',
                             uid: bannedUser.uid,
                         });
-                        user.bans.unban(bannedUser.uid, (err) => {
+                        user.bans.unban(bannedUser.uid, err => {
                             assert.ifError(err);
                             const expiry = Date.now() + 10000;
-                            user.bans.ban(bannedUser.uid, expiry, "", (err) => {
+                            user.bans.ban(bannedUser.uid, expiry, '', err => {
                                 assert.ifError(err);
                                 helpers.loginUser(
                                     bannedUser.username,
@@ -613,81 +613,81 @@ describe("authentication", () => {
                                         assert(data.body.banned_until);
                                         assert(
                                             data.body.reason,
-                                            "[[user:info.banned-no-reason]]",
+                                            '[[user:info.banned-no-reason]]'
                                         );
                                         done();
-                                    },
+                                    }
                                 );
                             });
                         });
-                    },
+                    }
                 );
             });
         });
 
         it('should allow banned user to log in if the "banned-users" group has "local-login" privilege', async () => {
             await privileges.global.give(
-                ["groups:local:login"],
-                "banned-users",
+                ['groups:local:login'],
+                'banned-users'
             );
             const { res } = await helpers.loginUser(
                 bannedUser.username,
-                bannedUser.pw,
+                bannedUser.pw
             );
             assert.strictEqual(res.statusCode, 200);
         });
 
         it('should allow banned user to log in if the user herself has "local-login" privilege', async () => {
             await privileges.global.rescind(
-                ["groups:local:login"],
-                "banned-users",
+                ['groups:local:login'],
+                'banned-users'
             );
             await privileges.categories.give(
-                ["local:login"],
+                ['local:login'],
                 0,
-                bannedUser.uid,
+                bannedUser.uid
             );
             const { res } = await helpers.loginUser(
                 bannedUser.username,
-                bannedUser.pw,
+                bannedUser.pw
             );
             assert.strictEqual(res.statusCode, 200);
         });
     });
 
-    it("should lockout account on 3 failed login attempts", (done) => {
+    it('should lockout account on 3 failed login attempts', done => {
         meta.config.loginAttempts = 3;
         let uid;
         async.waterfall(
             [
                 function (next) {
                     user.create(
-                        { username: "lockme", password: "123456" },
-                        next,
+                        { username: 'lockme', password: '123456' },
+                        next
                     );
                 },
                 function (_uid, next) {
                     uid = _uid;
-                    helpers.loginUser("lockme", "abcdef", next);
+                    helpers.loginUser('lockme', 'abcdef', next);
                 },
                 function (data, next) {
-                    helpers.loginUser("lockme", "abcdef", next);
+                    helpers.loginUser('lockme', 'abcdef', next);
                 },
                 function (data, next) {
-                    helpers.loginUser("lockme", "abcdef", next);
+                    helpers.loginUser('lockme', 'abcdef', next);
                 },
                 function (data, next) {
-                    helpers.loginUser("lockme", "abcdef", next);
+                    helpers.loginUser('lockme', 'abcdef', next);
                 },
                 function (data, next) {
                     meta.config.loginAttempts = 5;
                     assert.equal(data.res.statusCode, 403);
-                    assert.equal(data.body, "[[error:account-locked]]");
-                    helpers.loginUser("lockme", "abcdef", next);
+                    assert.equal(data.body, '[[error:account-locked]]');
+                    helpers.loginUser('lockme', 'abcdef', next);
                 },
                 function (data, next) {
                     assert.equal(data.res.statusCode, 403);
-                    assert.equal(data.body, "[[error:account-locked]]");
+                    assert.equal(data.body, '[[error:account-locked]]');
                     db.exists(`lockout:${uid}`, next);
                 },
                 function (locked, next) {
@@ -695,24 +695,24 @@ describe("authentication", () => {
                     next();
                 },
             ],
-            done,
+            done
         );
     });
 
-    it("should clear all reset tokens upon successful login", async () => {
+    it('should clear all reset tokens upon successful login', async () => {
         const code = await user.reset.generate(regularUid);
-        await helpers.loginUser("regular", "regularpwd");
+        await helpers.loginUser('regular', 'regularpwd');
         const valid = await user.reset.validate(code);
         assert.strictEqual(valid, false);
     });
 
-    describe("api tokens", () => {
+    describe('api tokens', () => {
         let newUid;
         let userToken;
         let masterToken;
         before(async () => {
-            newUid = await user.create({ username: "apiUserTarget" });
-            const settings = await meta.settings.get("core.api");
+            newUid = await user.create({ username: 'apiUserTarget' });
+            const settings = await meta.settings.get('core.api');
             settings.tokens = settings.tokens || [];
             userToken = {
                 token: utils.generateUUID(),
@@ -724,16 +724,16 @@ describe("authentication", () => {
             masterToken = {
                 token: utils.generateUUID(),
                 uid: 0,
-                description: "api master token",
+                description: 'api master token',
                 timestamp: Date.now(),
             };
             settings.tokens.push(masterToken);
 
-            await meta.settings.set("core.api", settings);
+            await meta.settings.set('core.api', settings);
         });
 
-        it("should fail with invalid token", async () => {
-            const { res, body } = await helpers.request("get", `/api/self`, {
+        it('should fail with invalid token', async () => {
+            const { res, body } = await helpers.request('get', `/api/self`, {
                 form: {
                     _uid: newUid,
                 },
@@ -744,11 +744,11 @@ describe("authentication", () => {
                 },
             });
             assert.strictEqual(res.statusCode, 401);
-            assert.strictEqual(body, "not-authorized");
+            assert.strictEqual(body, 'not-authorized');
         });
 
-        it("should use a token tied to an uid", async () => {
-            const { res, body } = await helpers.request("get", `/api/self`, {
+        it('should use a token tied to an uid', async () => {
+            const { res, body } = await helpers.request('get', `/api/self`, {
                 json: true,
                 headers: {
                     Authorization: `Bearer ${userToken.token}`,
@@ -756,11 +756,11 @@ describe("authentication", () => {
             });
 
             assert.strictEqual(res.statusCode, 200);
-            assert.strictEqual(body.username, "apiUserTarget");
+            assert.strictEqual(body.username, 'apiUserTarget');
         });
 
-        it("should fail if _uid is not passed in with master token", async () => {
-            const { res, body } = await helpers.request("get", `/api/self`, {
+        it('should fail if _uid is not passed in with master token', async () => {
+            const { res, body } = await helpers.request('get', `/api/self`, {
                 form: {},
                 json: true,
                 headers: {
@@ -769,11 +769,11 @@ describe("authentication", () => {
             });
 
             assert.strictEqual(res.statusCode, 500);
-            assert.strictEqual(body.error, "[[error:api.master-token-no-uid]]");
+            assert.strictEqual(body.error, '[[error:api.master-token-no-uid]]');
         });
 
-        it("should use master api token and _uid", async () => {
-            const { res, body } = await helpers.request("get", `/api/self`, {
+        it('should use master api token and _uid', async () => {
+            const { res, body } = await helpers.request('get', `/api/self`, {
                 form: {
                     _uid: newUid,
                 },
@@ -784,7 +784,7 @@ describe("authentication", () => {
             });
 
             assert.strictEqual(res.statusCode, 200);
-            assert.strictEqual(body.username, "apiUserTarget");
+            assert.strictEqual(body.username, 'apiUserTarget');
         });
     });
 });

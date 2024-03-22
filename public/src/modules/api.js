@@ -1,30 +1,30 @@
-"use strict";
+'use strict';
 
-define("api", ["hooks"], (hooks) => {
+define('api', ['hooks'], hooks => {
     const api = {};
-    const baseUrl = config.relative_path + "/api/v3";
+    const baseUrl = config.relative_path + '/api/v3';
 
     function call(options, callback) {
-        options.url = options.url.startsWith("/api")
+        options.url = options.url.startsWith('/api')
             ? config.relative_path + options.url
             : baseUrl + options.url;
 
         async function doAjax(cb) {
             // Allow options to be modified by plugins, etc.
-            ({ options } = await hooks.fire("filter:api.options", { options }));
+            ({ options } = await hooks.fire('filter:api.options', { options }));
 
             $.ajax(options)
-                .done((res) => {
+                .done(res => {
                     cb(
                         null,
                         res &&
-                            res.hasOwnProperty("status") &&
-                            res.hasOwnProperty("response")
+                            res.hasOwnProperty('status') &&
+                            res.hasOwnProperty('response')
                             ? res.response
-                            : res || {},
+                            : res || {}
                     );
                 })
-                .fail((ev) => {
+                .fail(ev => {
                     let errMessage;
                     if (ev.responseJSON) {
                         errMessage =
@@ -38,7 +38,7 @@ define("api", ["hooks"], (hooks) => {
                 });
         }
 
-        if (typeof callback === "function") {
+        if (typeof callback === 'function') {
             doAjax(callback);
             return;
         }
@@ -57,10 +57,10 @@ define("api", ["hooks"], (hooks) => {
                 url:
                     route +
                     (payload && Object.keys(payload).length
-                        ? "?" + $.param(payload)
-                        : ""),
+                        ? '?' + $.param(payload)
+                        : ''),
             },
-            onSuccess,
+            onSuccess
         );
 
     api.head = (route, payload, onSuccess) =>
@@ -69,67 +69,67 @@ define("api", ["hooks"], (hooks) => {
                 url:
                     route +
                     (payload && Object.keys(payload).length
-                        ? "?" + $.param(payload)
-                        : ""),
-                method: "head",
+                        ? '?' + $.param(payload)
+                        : ''),
+                method: 'head',
             },
-            onSuccess,
+            onSuccess
         );
 
     api.post = (route, payload, onSuccess) =>
         call(
             {
                 url: route,
-                method: "post",
+                method: 'post',
                 data: JSON.stringify(payload || {}),
-                contentType: "application/json; charset=utf-8",
+                contentType: 'application/json; charset=utf-8',
                 headers: {
-                    "x-csrf-token": config.csrf_token,
+                    'x-csrf-token': config.csrf_token,
                 },
             },
-            onSuccess,
+            onSuccess
         );
 
     api.patch = (route, payload, onSuccess) =>
         call(
             {
                 url: route,
-                method: "patch",
+                method: 'patch',
                 data: JSON.stringify(payload || {}),
-                contentType: "application/json; charset=utf-8",
+                contentType: 'application/json; charset=utf-8',
                 headers: {
-                    "x-csrf-token": config.csrf_token,
+                    'x-csrf-token': config.csrf_token,
                 },
             },
-            onSuccess,
+            onSuccess
         );
 
     api.put = (route, payload, onSuccess) =>
         call(
             {
                 url: route,
-                method: "put",
+                method: 'put',
                 data: JSON.stringify(payload || {}),
-                contentType: "application/json; charset=utf-8",
+                contentType: 'application/json; charset=utf-8',
                 headers: {
-                    "x-csrf-token": config.csrf_token,
+                    'x-csrf-token': config.csrf_token,
                 },
             },
-            onSuccess,
+            onSuccess
         );
 
     api.del = (route, payload, onSuccess) =>
         call(
             {
                 url: route,
-                method: "delete",
+                method: 'delete',
                 data: JSON.stringify(payload),
-                contentType: "application/json; charset=utf-8",
+                contentType: 'application/json; charset=utf-8',
                 headers: {
-                    "x-csrf-token": config.csrf_token,
+                    'x-csrf-token': config.csrf_token,
                 },
             },
-            onSuccess,
+            onSuccess
         );
     api.delete = api.del;
 

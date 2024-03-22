@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 
-define("admin/manage/category", [
-    "uploader",
-    "iconSelect",
-    "categorySelector",
-    "benchpress",
-    "api",
-    "bootbox",
-    "alerts",
+define('admin/manage/category', [
+    'uploader',
+    'iconSelect',
+    'categorySelector',
+    'benchpress',
+    'api',
+    'bootbox',
+    'alerts',
 ], function (
     uploader,
     iconSelect,
@@ -15,20 +15,20 @@ define("admin/manage/category", [
     Benchpress,
     api,
     bootbox,
-    alerts,
+    alerts
 ) {
     const Category = {};
     let updateHash = {};
 
     Category.init = function () {
-        $("#category-settings select").each(function () {
+        $('#category-settings select').each(function () {
             const $this = $(this);
-            $this.val($this.attr("data-value"));
+            $this.val($this.attr('data-value'));
         });
 
         categorySelector.init($('[component="category-selector"]'), {
             onSelect: function (selectedCategory) {
-                ajaxify.go("admin/manage/categories/" + selectedCategory.cid);
+                ajaxify.go('admin/manage/categories/' + selectedCategory.cid);
             },
             showLinks: true,
         });
@@ -36,56 +36,56 @@ define("admin/manage/category", [
         handleTags();
 
         $(
-            "#category-settings input, #category-settings select, #category-settings textarea",
-        ).on("change", function (ev) {
+            '#category-settings input, #category-settings select, #category-settings textarea'
+        ).on('change', function (ev) {
             modified(ev.target);
         });
 
-        $('[data-name="imageClass"]').on("change", function () {
-            $(".category-preview").css("background-size", $(this).val());
+        $('[data-name="imageClass"]').on('change', function () {
+            $('.category-preview').css('background-size', $(this).val());
         });
 
         $('[data-name="bgColor"], [data-name="color"]').on(
-            "input",
+            'input',
             function () {
                 const $inputEl = $(this);
                 const previewEl = $inputEl
-                    .parents("[data-cid]")
-                    .find(".category-preview");
-                if ($inputEl.attr("data-name") === "bgColor") {
-                    previewEl.css("background-color", $inputEl.val());
-                } else if ($inputEl.attr("data-name") === "color") {
-                    previewEl.css("color", $inputEl.val());
+                    .parents('[data-cid]')
+                    .find('.category-preview');
+                if ($inputEl.attr('data-name') === 'bgColor') {
+                    previewEl.css('background-color', $inputEl.val());
+                } else if ($inputEl.attr('data-name') === 'color') {
+                    previewEl.css('color', $inputEl.val());
                 }
 
                 modified($inputEl[0]);
-            },
+            }
         );
 
-        $("#save").on("click", function () {
-            const tags = $("#tag-whitelist").val()
-                ? $("#tag-whitelist").val().split(",")
+        $('#save').on('click', function () {
+            const tags = $('#tag-whitelist').val()
+                ? $('#tag-whitelist').val().split(',')
                 : [];
             if (
                 tags.length &&
-                tags.length < parseInt($("#cid-min-tags").val(), 10)
+                tags.length < parseInt($('#cid-min-tags').val(), 10)
             ) {
                 return alerts.error(
-                    "[[admin/manage/categories:alert.not-enough-whitelisted-tags]]",
+                    '[[admin/manage/categories:alert.not-enough-whitelisted-tags]]'
                 );
             }
 
             const cid = ajaxify.data.category.cid;
-            api.put("/categories/" + cid, updateHash)
-                .then((res) => {
+            api.put('/categories/' + cid, updateHash)
+                .then(res => {
                     app.flags._unsaved = false;
                     alerts.alert({
-                        title: "Updated Categories",
+                        title: 'Updated Categories',
                         message:
                             'Category "' +
                             res.name +
                             '" was successfully updated.',
-                        type: "success",
+                        type: 'success',
                         timeout: 5000,
                     });
                     updateHash = {};
@@ -95,29 +95,29 @@ define("admin/manage/category", [
             return false;
         });
 
-        $(".purge").on("click", function (e) {
+        $('.purge').on('click', function (e) {
             e.preventDefault();
 
-            Benchpress.render("admin/partials/categories/purge", {
+            Benchpress.render('admin/partials/categories/purge', {
                 name: ajaxify.data.category.name,
                 topic_count: ajaxify.data.category.topic_count,
             }).then(function (html) {
                 const modal = bootbox.dialog({
-                    title: "[[admin/manage/categories:purge]]",
+                    title: '[[admin/manage/categories:purge]]',
                     message: html,
-                    size: "large",
+                    size: 'large',
                     buttons: {
                         save: {
-                            label: "[[modules:bootbox.confirm]]",
-                            className: "btn-primary",
+                            label: '[[modules:bootbox.confirm]]',
+                            className: 'btn-primary',
                             callback: function () {
                                 modal
-                                    .find(".modal-footer button")
-                                    .prop("disabled", true);
+                                    .find('.modal-footer button')
+                                    .prop('disabled', true);
 
                                 const intervalId = setInterval(function () {
                                     socket.emit(
-                                        "categories.getTopicCount",
+                                        'categories.getTopicCount',
                                         ajaxify.data.category.cid,
                                         function (err, count) {
                                             if (err) {
@@ -136,29 +136,29 @@ define("admin/manage/category", [
                                                             count /
                                                                 ajaxify.data
                                                                     .category
-                                                                    .topic_count,
+                                                                    .topic_count
                                                     ) * 100;
                                             }
 
                                             modal
-                                                .find(".progress-bar")
-                                                .css({ width: percent + "%" });
-                                        },
+                                                .find('.progress-bar')
+                                                .css({ width: percent + '%' });
+                                        }
                                     );
                                 }, 1000);
 
                                 api.del(
-                                    "/categories/" + ajaxify.data.category.cid,
+                                    '/categories/' + ajaxify.data.category.cid
                                 )
                                     .then(() => {
                                         if (intervalId) {
                                             clearInterval(intervalId);
                                         }
-                                        modal.modal("hide");
+                                        modal.modal('hide');
                                         alerts.success(
-                                            "[[admin/manage/categories:alert.purge-success]]",
+                                            '[[admin/manage/categories:alert.purge-success]]'
                                         );
-                                        ajaxify.go("admin/manage/categories");
+                                        ajaxify.go('admin/manage/categories');
                                     })
                                     .catch(alerts.error);
 
@@ -170,19 +170,19 @@ define("admin/manage/category", [
             });
         });
 
-        $(".copy-settings").on("click", function () {
+        $('.copy-settings').on('click', function () {
             Benchpress.render(
-                "admin/partials/categories/copy-settings",
-                {},
+                'admin/partials/categories/copy-settings',
+                {}
             ).then(function (html) {
                 let selectedCid;
                 const modal = bootbox.dialog({
-                    title: "[[modules:composer.select_category]]",
+                    title: '[[modules:composer.select_category]]',
                     message: html,
                     buttons: {
                         save: {
-                            label: "[[modules:bootbox.confirm]]",
-                            className: "btn-primary",
+                            label: '[[modules:bootbox.confirm]]',
+                            className: 'btn-primary',
                             callback: function () {
                                 if (
                                     !selectedCid ||
@@ -193,32 +193,32 @@ define("admin/manage/category", [
                                 }
 
                                 socket.emit(
-                                    "admin.categories.copySettingsFrom",
+                                    'admin.categories.copySettingsFrom',
                                     {
                                         fromCid: selectedCid,
                                         toCid: ajaxify.data.category.cid,
                                         copyParent: modal
-                                            .find("#copyParent")
-                                            .prop("checked"),
+                                            .find('#copyParent')
+                                            .prop('checked'),
                                     },
                                     function (err) {
                                         if (err) {
                                             return alerts.error(err);
                                         }
 
-                                        modal.modal("hide");
+                                        modal.modal('hide');
                                         alert.success(
-                                            "[[admin/manage/categories:alert.copy-success]]",
+                                            '[[admin/manage/categories:alert.copy-success]]'
                                         );
                                         ajaxify.refresh();
-                                    },
+                                    }
                                 );
                                 return false;
                             },
                         },
                     },
                 });
-                modal.find(".modal-footer button").prop("disabled", true);
+                modal.find('.modal-footer button').prop('disabled', true);
                 categorySelector.init(
                     modal.find('[component="category-selector"]'),
                     {
@@ -227,111 +227,111 @@ define("admin/manage/category", [
                                 selectedCategory && selectedCategory.cid;
                             if (selectedCid) {
                                 modal
-                                    .find(".modal-footer button")
-                                    .prop("disabled", false);
+                                    .find('.modal-footer button')
+                                    .prop('disabled', false);
                             }
                         },
                         showLinks: true,
-                    },
+                    }
                 );
             });
             return false;
         });
 
-        $(".upload-button").on("click", function () {
+        $('.upload-button').on('click', function () {
             const inputEl = $(this);
-            const cid = inputEl.attr("data-cid");
+            const cid = inputEl.attr('data-cid');
 
             uploader.show(
                 {
-                    title: "[[admin/manage/categories:alert.upload-image]]",
+                    title: '[[admin/manage/categories:alert.upload-image]]',
                     route:
                         config.relative_path +
-                        "/api/admin/category/uploadpicture",
+                        '/api/admin/category/uploadpicture',
                     params: { cid: cid },
                 },
                 function (imageUrlOnServer) {
-                    $("#category-image").val(imageUrlOnServer);
+                    $('#category-image').val(imageUrlOnServer);
                     const previewBox = inputEl
                         .parent()
                         .parent()
-                        .siblings(".category-preview");
+                        .siblings('.category-preview');
                     previewBox.css(
-                        "background",
-                        "url(" +
+                        'background',
+                        'url(' +
                             imageUrlOnServer +
-                            "?" +
+                            '?' +
                             new Date().getTime() +
-                            ")",
+                            ')'
                     );
 
-                    modified($("#category-image"));
-                },
+                    modified($('#category-image'));
+                }
             );
         });
 
-        $("#category-image").on("change", function () {
-            $(".category-preview").css(
-                "background-image",
-                $(this).val() ? 'url("' + $(this).val() + '")' : "",
+        $('#category-image').on('change', function () {
+            $('.category-preview').css(
+                'background-image',
+                $(this).val() ? 'url("' + $(this).val() + '")' : ''
             );
-            modified($("#category-image"));
+            modified($('#category-image'));
         });
 
-        $(".delete-image").on("click", function (e) {
+        $('.delete-image').on('click', function (e) {
             e.preventDefault();
 
-            const inputEl = $("#category-image");
-            const previewBox = $(".category-preview");
+            const inputEl = $('#category-image');
+            const previewBox = $('.category-preview');
 
-            inputEl.val("");
-            previewBox.css("background-image", "");
+            inputEl.val('');
+            previewBox.css('background-image', '');
             modified(inputEl[0]);
-            $(this).parent().addClass("hide").hide();
+            $(this).parent().addClass('hide').hide();
         });
 
-        $(".category-preview").on("click", function () {
-            iconSelect.init($(this).find("i"), modified);
+        $('.category-preview').on('click', function () {
+            iconSelect.init($(this).find('i'), modified);
         });
 
-        $('[type="checkbox"]').on("change", function () {
+        $('[type="checkbox"]').on('change', function () {
             modified($(this));
         });
 
         $(
-            'button[data-action="setParent"], button[data-action="changeParent"]',
-        ).on("click", Category.launchParentSelector);
-        $('button[data-action="removeParent"]').on("click", function () {
-            api.put("/categories/" + ajaxify.data.category.cid, {
+            'button[data-action="setParent"], button[data-action="changeParent"]'
+        ).on('click', Category.launchParentSelector);
+        $('button[data-action="removeParent"]').on('click', function () {
+            api.put('/categories/' + ajaxify.data.category.cid, {
                 parentCid: 0,
             })
                 .then(() => {
                     $('button[data-action="removeParent"]')
                         .parent()
-                        .addClass("hide");
+                        .addClass('hide');
                     $('button[data-action="changeParent"]')
                         .parent()
-                        .addClass("hide");
-                    $('button[data-action="setParent"]').removeClass("hide");
+                        .addClass('hide');
+                    $('button[data-action="setParent"]').removeClass('hide');
                 })
                 .catch(alerts.error);
         });
-        $('button[data-action="toggle"]').on("click", function () {
+        $('button[data-action="toggle"]').on('click', function () {
             const $this = $(this);
-            const disabled = $this.attr("data-disabled") === "1";
-            api.put("/categories/" + ajaxify.data.category.cid, {
+            const disabled = $this.attr('data-disabled') === '1';
+            api.put('/categories/' + ajaxify.data.category.cid, {
                 disabled: disabled ? 0 : 1,
             })
                 .then(() => {
                     $this.translateText(
                         !disabled
-                            ? "[[admin/manage/categories:enable]]"
-                            : "[[admin/manage/categories:disable]]",
+                            ? '[[admin/manage/categories:enable]]'
+                            : '[[admin/manage/categories:disable]]'
                     );
                     $this
-                        .toggleClass("btn-primary", !disabled)
-                        .toggleClass("btn-danger", disabled);
-                    $this.attr("data-disabled", disabled ? 0 : 1);
+                        .toggleClass('btn-primary', !disabled)
+                        .toggleClass('btn-danger', disabled);
+                    $this.attr('data-disabled', disabled ? 0 : 1);
                 })
                 .catch(alerts.error);
         });
@@ -339,12 +339,12 @@ define("admin/manage/category", [
 
     function modified(el) {
         let value;
-        if ($(el).is(":checkbox")) {
-            value = $(el).is(":checked") ? 1 : 0;
+        if ($(el).is(':checkbox')) {
+            value = $(el).is(':checked') ? 1 : 0;
         } else {
             value = $(el).val();
         }
-        const dataName = $(el).attr("data-name");
+        const dataName = $(el).attr('data-name');
         const fields = dataName.match(/[^\][.]+/g);
 
         function setNestedFields(obj, index) {
@@ -373,17 +373,17 @@ define("admin/manage/category", [
     }
 
     function handleTags() {
-        const tagEl = $("#tag-whitelist");
+        const tagEl = $('#tag-whitelist');
         tagEl.tagsinput({
             confirmKeys: [13, 44],
             trimValue: true,
         });
 
         ajaxify.data.category.tagWhitelist.forEach(function (tag) {
-            tagEl.tagsinput("add", tag);
+            tagEl.tagsinput('add', tag);
         });
 
-        tagEl.on("itemAdded itemRemoved", function () {
+        tagEl.on('itemAdded itemRemoved', function () {
             modified(tagEl);
         });
     }
@@ -395,7 +395,7 @@ define("admin/manage/category", [
                 if (!parentCid) {
                     return;
                 }
-                api.put("/categories/" + ajaxify.data.category.cid, {
+                api.put('/categories/' + ajaxify.data.category.cid, {
                     parentCid: parentCid,
                 })
                     .then(() => {
@@ -410,15 +410,15 @@ define("admin/manage/category", [
                                     $('button[data-action="changeParent"]')
                                         .html(buttonHtml)
                                         .parent()
-                                        .removeClass("hide");
+                                        .removeClass('hide');
                                 }
-                            },
+                            }
                         );
 
                         $('button[data-action="removeParent"]')
                             .parent()
-                            .removeClass("hide");
-                        $('button[data-action="setParent"]').addClass("hide");
+                            .removeClass('hide');
+                        $('button[data-action="setParent"]').addClass('hide');
                     })
                     .catch(alerts.error);
             },

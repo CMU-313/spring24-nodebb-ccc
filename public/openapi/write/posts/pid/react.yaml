@@ -12,7 +12,7 @@ put:
       description: a valid post id
       example: 2
   responses:
-    "200":
+    '200':
       description: Successfully reacted to post
       content:
         application/json:

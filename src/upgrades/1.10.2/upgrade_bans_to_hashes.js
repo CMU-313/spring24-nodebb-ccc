@@ -1,38 +1,38 @@
 /* eslint-disable no-await-in-loop */
 
-"use strict";
+'use strict';
 
-const db = require("../../database");
-const batch = require("../../batch");
+const db = require('../../database');
+const batch = require('../../batch');
 
 module.exports = {
-    name: "Upgrade bans to hashes",
+    name: 'Upgrade bans to hashes',
     timestamp: Date.UTC(2018, 8, 24),
     method: async function () {
         const { progress } = this;
 
         await batch.processSortedSet(
-            "users:joindate",
-            async (uids) => {
+            'users:joindate',
+            async uids => {
                 for (const uid of uids) {
                     progress.incr();
                     const [bans, reasons, userData] = await Promise.all([
                         db.getSortedSetRevRangeWithScores(
                             `uid:${uid}:bans`,
                             0,
-                            -1,
+                            -1
                         ),
                         db.getSortedSetRevRangeWithScores(
                             `banned:${uid}:reasons`,
                             0,
-                            -1,
+                            -1
                         ),
                         db.getObjectFields(`user:${uid}`, [
-                            "banned",
-                            "banned:expire",
-                            "joindate",
-                            "lastposttime",
-                            "lastonline",
+                            'banned',
+                            'banned:expire',
+                            'joindate',
+                            'lastposttime',
+                            'lastonline',
                         ]),
                     ]);
 
@@ -52,7 +52,7 @@ module.exports = {
                         // process ban history
                         for (const ban of bans) {
                             const reasonData = reasons.find(
-                                (reasonData) => reasonData.score === ban.score,
+                                reasonData => reasonData.score === ban.score
                             );
                             const banKey = `uid:${uid}:ban:${ban.score}`;
                             const data = {
@@ -70,7 +70,7 @@ module.exports = {
             },
             {
                 progress: this.progress,
-            },
+            }
         );
     },
 };

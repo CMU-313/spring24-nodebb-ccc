@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 
-const os = require("os");
-const nconf = require("nconf");
+const os = require('os');
+const nconf = require('nconf');
 
-const topics = require("../../topics");
-const pubsub = require("../../pubsub");
-const utils = require("../../utils");
+const topics = require('../../topics');
+const pubsub = require('../../pubsub');
+const utils = require('../../utils');
 
 const stats = {};
 const totals = {};
@@ -15,32 +15,32 @@ const SocketRooms = module.exports;
 SocketRooms.stats = stats;
 SocketRooms.totals = totals;
 
-pubsub.on("sync:stats:start", () => {
+pubsub.on('sync:stats:start', () => {
     const stats = SocketRooms.getLocalStats();
-    pubsub.publish("sync:stats:end", {
+    pubsub.publish('sync:stats:end', {
         stats: stats,
-        id: `${os.hostname()}:${nconf.get("port")}`,
+        id: `${os.hostname()}:${nconf.get('port')}`,
     });
 });
 
-pubsub.on("sync:stats:end", (data) => {
+pubsub.on('sync:stats:end', data => {
     stats[data.id] = data.stats;
 });
 
-pubsub.on("sync:stats:guests", (eventId) => {
-    const Sockets = require("../index");
-    const guestCount = Sockets.getCountInRoom("online_guests");
+pubsub.on('sync:stats:guests', eventId => {
+    const Sockets = require('../index');
+    const guestCount = Sockets.getCountInRoom('online_guests');
     pubsub.publish(eventId, guestCount);
 });
 
 SocketRooms.getTotalGuestCount = function (callback) {
     let count = 0;
     const eventId = `sync:stats:guests:end:${utils.generateUUID()}`;
-    pubsub.on(eventId, (guestCount) => {
+    pubsub.on(eventId, guestCount => {
         count += guestCount;
     });
 
-    pubsub.publish("sync:stats:guests", eventId);
+    pubsub.publish('sync:stats:guests', eventId);
 
     setTimeout(() => {
         pubsub.removeAllListeners(eventId);
@@ -49,7 +49,7 @@ SocketRooms.getTotalGuestCount = function (callback) {
 };
 
 SocketRooms.getAll = async function () {
-    pubsub.publish("sync:stats:start");
+    pubsub.publish('sync:stats:start');
 
     totals.onlineGuestCount = 0;
     totals.onlineRegisteredCount = 0;
@@ -73,7 +73,7 @@ SocketRooms.getAll = async function () {
         totals.users.topics += instance.users.topics;
         totals.users.category += instance.users.category;
 
-        instance.topics.forEach((topic) => {
+        instance.topics.forEach(topic => {
             totals.topics[topic.tid] = totals.topics[topic.tid] || {
                 count: 0,
                 tid: topic.tid,
@@ -83,15 +83,15 @@ SocketRooms.getAll = async function () {
     }
 
     let topTenTopics = [];
-    Object.keys(totals.topics).forEach((tid) => {
+    Object.keys(totals.topics).forEach(tid => {
         topTenTopics.push({ tid: tid, count: totals.topics[tid].count || 0 });
     });
 
     topTenTopics = topTenTopics.sort((a, b) => b.count - a.count).slice(0, 10);
 
-    const topTenTids = topTenTopics.map((topic) => topic.tid);
+    const topTenTids = topTenTopics.map(topic => topic.tid);
 
-    const titles = await topics.getTopicsFields(topTenTids, ["title"]);
+    const titles = await topics.getTopicsFields(topTenTids, ['title']);
     totals.topTenTopics = topTenTopics.map((topic, index) => {
         topic.title = titles[index].title;
         return topic;
@@ -104,7 +104,7 @@ SocketRooms.getOnlineUserCount = function (io) {
 
     if (io) {
         for (const [key] of io.sockets.adapter.rooms) {
-            if (key.startsWith("uid_")) {
+            if (key.startsWith('uid_')) {
                 count += 1;
             }
         }
@@ -114,7 +114,7 @@ SocketRooms.getOnlineUserCount = function (io) {
 };
 
 SocketRooms.getLocalStats = function () {
-    const Sockets = require("../index");
+    const Sockets = require('../index');
     const io = Sockets.server;
 
     const socketData = {
@@ -132,12 +132,12 @@ SocketRooms.getLocalStats = function () {
     };
 
     if (io && io.sockets) {
-        socketData.onlineGuestCount = Sockets.getCountInRoom("online_guests");
+        socketData.onlineGuestCount = Sockets.getCountInRoom('online_guests');
         socketData.onlineRegisteredCount = SocketRooms.getOnlineUserCount(io);
         socketData.socketCount = io.sockets.sockets.size;
-        socketData.users.categories = Sockets.getCountInRoom("categories");
-        socketData.users.recent = Sockets.getCountInRoom("recent_topics");
-        socketData.users.unread = Sockets.getCountInRoom("unread_topics");
+        socketData.users.categories = Sockets.getCountInRoom('categories');
+        socketData.users.recent = Sockets.getCountInRoom('recent_topics');
+        socketData.users.unread = Sockets.getCountInRoom('unread_topics');
 
         let topTenTopics = [];
         let tid;
@@ -161,4 +161,4 @@ SocketRooms.getLocalStats = function () {
     return socketData;
 };
 
-require("../../promisify")(SocketRooms);
+require('../../promisify')(SocketRooms);

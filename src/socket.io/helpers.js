@@ -1,32 +1,32 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
+const _ = require('lodash');
 
-const db = require("../database");
-const websockets = require("./index");
-const user = require("../user");
-const posts = require("../posts");
-const topics = require("../topics");
-const categories = require("../categories");
-const privileges = require("../privileges");
-const notifications = require("../notifications");
-const plugins = require("../plugins");
-const utils = require("../utils");
-const batch = require("../batch");
+const db = require('../database');
+const websockets = require('./index');
+const user = require('../user');
+const posts = require('../posts');
+const topics = require('../topics');
+const categories = require('../categories');
+const privileges = require('../privileges');
+const notifications = require('../notifications');
+const plugins = require('../plugins');
+const utils = require('../utils');
+const batch = require('../batch');
 
 const SocketHelpers = module.exports;
 
 SocketHelpers.notifyNew = async function (uid, type, result) {
-    let uids = await user.getUidsFromSet("users:online", 0, -1);
-    uids = uids.filter((toUid) => parseInt(toUid, 10) !== uid);
+    let uids = await user.getUidsFromSet('users:online', 0, -1);
+    uids = uids.filter(toUid => parseInt(toUid, 10) !== uid);
     await batch.processArray(
         uids,
-        async (uids) => {
+        async uids => {
             await notifyUids(uid, uids, type, result);
         },
         {
             interval: 1000,
-        },
+        }
     );
 };
 
@@ -34,23 +34,23 @@ async function notifyUids(uid, uids, type, result) {
     const post = result.posts[0];
     const { tid } = post.topic;
     const { cid } = post.topic;
-    uids = await privileges.topics.filterUids("topics:read", tid, uids);
+    uids = await privileges.topics.filterUids('topics:read', tid, uids);
     const watchStateUids = uids;
 
     const watchStates = await getWatchStates(watchStateUids, tid, cid);
 
     const categoryWatchStates = _.zipObject(
         watchStateUids,
-        watchStates.categoryWatchStates,
+        watchStates.categoryWatchStates
     );
     const topicFollowState = _.zipObject(
         watchStateUids,
-        watchStates.topicFollowed,
+        watchStates.topicFollowed
     );
     uids = filterTidCidIgnorers(watchStateUids, watchStates);
     uids = await user.blocks.filterUids(uid, uids);
     uids = await user.blocks.filterUids(post.topic.uid, uids);
-    const data = await plugins.hooks.fire("filter:sockets.sendNewPostToUids", {
+    const data = await plugins.hooks.fire('filter:sockets.sendNewPostToUids', {
         uidsTo: uids,
         uidFrom: uid,
         type: type,
@@ -59,12 +59,12 @@ async function notifyUids(uid, uids, type, result) {
 
     post.ip = undefined;
 
-    data.uidsTo.forEach((toUid) => {
+    data.uidsTo.forEach(toUid => {
         post.categoryWatchState = categoryWatchStates[toUid];
         post.topic.isFollowing = topicFollowState[toUid];
-        websockets.in(`uid_${toUid}`).emit("event:new_post", result);
-        if (result.topic && type === "newTopic") {
-            websockets.in(`uid_${toUid}`).emit("event:new_topic", result.topic);
+        websockets.in(`uid_${toUid}`).emit('event:new_post', result);
+        if (result.topic && type === 'newTopic') {
+            websockets.in(`uid_${toUid}`).emit('event:new_topic', result.topic);
         }
     });
 }
@@ -83,7 +83,7 @@ function filterTidCidIgnorers(uids, watchStates) {
             watchStates.topicFollowed[index] ||
             (!watchStates.topicIgnored[index] &&
                 watchStates.categoryWatchStates[index] !==
-                    categories.watchStates.ignoring),
+                    categories.watchStates.ignoring)
     );
 }
 
@@ -91,15 +91,15 @@ SocketHelpers.sendNotificationToPostOwner = async function (
     pid,
     fromuid,
     command,
-    notification,
+    notification
 ) {
     if (!pid || !fromuid || !notification) {
         return;
     }
     fromuid = parseInt(fromuid, 10);
-    const postData = await posts.getPostFields(pid, ["tid", "uid", "content"]);
+    const postData = await posts.getPostFields(pid, ['tid', 'uid', 'content']);
     const [canRead, isIgnoring] = await Promise.all([
-        privileges.posts.can("topics:read", pid, postData.uid),
+        privileges.posts.can('topics:read', pid, postData.uid),
         topics.isIgnoring([postData.tid], postData.uid),
     ]);
     if (
@@ -111,15 +111,15 @@ SocketHelpers.sendNotificationToPostOwner = async function (
         return;
     }
     const [userData, topicTitle, postObj] = await Promise.all([
-        user.getUserFields(fromuid, ["username"]),
-        topics.getTopicField(postData.tid, "title"),
+        user.getUserFields(fromuid, ['username']),
+        topics.getTopicField(postData.tid, 'title'),
         posts.parsePost(postData),
     ]);
 
     const { displayname } = userData;
 
     const title = utils.decodeHTMLEntities(topicTitle);
-    const titleEscaped = title.replace(/%/g, "&#37;").replace(/,/g, "&#44;");
+    const titleEscaped = title.replace(/%/g, '&#37;').replace(/,/g, '&#44;');
 
     const notifObj = await notifications.create({
         type: command,
@@ -141,7 +141,7 @@ SocketHelpers.sendNotificationToTopicOwner = async function (
     tid,
     fromuid,
     command,
-    notification,
+    notification
 ) {
     if (!tid || !fromuid || !notification) {
         return;
@@ -150,8 +150,8 @@ SocketHelpers.sendNotificationToTopicOwner = async function (
     fromuid = parseInt(fromuid, 10);
 
     const [userData, topicData] = await Promise.all([
-        user.getUserFields(fromuid, ["username"]),
-        topics.getTopicFields(tid, ["uid", "slug", "title"]),
+        user.getUserFields(fromuid, ['username']),
+        topics.getTopicFields(tid, ['uid', 'slug', 'title']),
     ]);
 
     if (fromuid === topicData.uid) {
@@ -162,7 +162,7 @@ SocketHelpers.sendNotificationToTopicOwner = async function (
 
     const ownerUid = topicData.uid;
     const title = utils.decodeHTMLEntities(topicData.title);
-    const titleEscaped = title.replace(/%/g, "&#37;").replace(/,/g, "&#44;");
+    const titleEscaped = title.replace(/%/g, '&#37;').replace(/,/g, '&#44;');
 
     const notifObj = await notifications.create({
         bodyShort: `[[${notification}, ${displayname}, ${titleEscaped}]]`,
@@ -223,21 +223,21 @@ SocketHelpers.upvote = async function (data, notification) {
         SocketHelpers.sendNotificationToPostOwner(
             pid,
             fromuid,
-            "upvote",
-            notification,
+            'upvote',
+            notification
         );
     }
 };
 
 SocketHelpers.rescindUpvoteNotification = async function (pid, fromuid) {
     await notifications.rescind(`upvote:post:${pid}:uid:${fromuid}`);
-    const uid = await posts.getPostField(pid, "uid");
+    const uid = await posts.getPostField(pid, 'uid');
     const count = await user.notifications.getUnreadCount(uid);
-    websockets.in(`uid_${uid}`).emit("event:notifications.updateCount", count);
+    websockets.in(`uid_${uid}`).emit('event:notifications.updateCount', count);
 };
 
 SocketHelpers.emitToUids = async function (event, data, uids) {
-    uids.forEach((toUid) => websockets.in(`uid_${toUid}`).emit(event, data));
+    uids.forEach(toUid => websockets.in(`uid_${toUid}`).emit(event, data));
 };
 
-require("../promisify")(SocketHelpers);
+require('../promisify')(SocketHelpers);
