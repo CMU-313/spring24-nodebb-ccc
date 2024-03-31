@@ -1,7 +1,8 @@
-'use strict';
+"use strict";
 
-const _ = require('lodash');
+const _ = require("lodash");
 
+<<<<<<< HEAD
 const meta = require('../meta');
 const db = require('../database');
 const plugins = require('../plugins');
@@ -11,6 +12,16 @@ const categories = require('../categories');
 const groups = require('../groups');
 const utils = require('../utils');
 const translate = require('../translate');
+=======
+const meta = require("../meta");
+const db = require("../database");
+const plugins = require("../plugins");
+const user = require("../user");
+const topics = require("../topics");
+const categories = require("../categories");
+const groups = require("../groups");
+const utils = require("../utils");
+>>>>>>> 6fde0dd19c302cb4a0f920dba0e4b58fd5cff70e
 
 module.exports = function (Posts) {
     Posts.create = async function (data) {
@@ -23,14 +34,14 @@ module.exports = function (Posts) {
         const [isEnglish, translatedContent] = await translate.translate(data)
 
         if (!uid && parseInt(uid, 10) !== 0) {
-            throw new Error('[[error:invalid-uid]]');
+            throw new Error("[[error:invalid-uid]]");
         }
 
         if (data.toPid && !utils.isNumber(data.toPid)) {
-            throw new Error('[[error:invalid-pid]]');
+            throw new Error("[[error:invalid-pid]]");
         }
 
-        const pid = await db.incrObjectField('global', 'nextPid');
+        const pid = await db.incrObjectField("global", "nextPid");
         let postData = {
             pid: pid,
             uid: uid,
@@ -51,16 +62,19 @@ module.exports = function (Posts) {
             postData.handle = data.handle;
         }
 
-        let result = await plugins.hooks.fire('filter:post.create', { post: postData, data: data });
+        let result = await plugins.hooks.fire("filter:post.create", {
+            post: postData,
+            data: data,
+        });
         postData = result.post;
         await db.setObject(`post:${postData.pid}`, postData);
 
-        const topicData = await topics.getTopicFields(tid, ['cid', 'pinned']);
+        const topicData = await topics.getTopicFields(tid, ["cid", "pinned"]);
         postData.cid = topicData.cid;
 
         await Promise.all([
-            db.sortedSetAdd('posts:pid', timestamp, postData.pid),
-            db.incrObjectField('global', 'postCount'),
+            db.sortedSetAdd("posts:pid", timestamp, postData.pid),
+            db.incrObjectField("global", "postCount"),
             user.onNewPostMade(postData),
             topics.onNewPostMade(postData),
             categories.onNewPostMade(topicData.cid, topicData.pinned, postData),
@@ -69,9 +83,12 @@ module.exports = function (Posts) {
             Posts.uploads.sync(postData.pid),
         ]);
 
-        result = await plugins.hooks.fire('filter:post.get', { post: postData, uid: data.uid });
+        result = await plugins.hooks.fire("filter:post.get", {
+            post: postData,
+            uid: data.uid,
+        });
         result.post.isMain = isMain;
-        plugins.hooks.fire('action:post.save', { post: _.clone(result.post) });
+        plugins.hooks.fire("action:post.save", { post: _.clone(result.post) });
         return result.post;
     };
 
@@ -80,8 +97,12 @@ module.exports = function (Posts) {
             return;
         }
         await Promise.all([
-            db.sortedSetAdd(`pid:${postData.toPid}:replies`, timestamp, postData.pid),
-            db.incrObjectField(`post:${postData.toPid}`, 'replies'),
+            db.sortedSetAdd(
+                `pid:${postData.toPid}:replies`,
+                timestamp,
+                postData.pid,
+            ),
+            db.incrObjectField(`post:${postData.toPid}`, "replies"),
         ]);
     }
 };
